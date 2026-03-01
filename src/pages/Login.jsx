@@ -5,7 +5,7 @@ import { Shield, Mail, Lock, User, UserPlus } from 'lucide-react';
 import './Login.css';
 
 export default function Login() {
-    const [isLogin, setIsLogin] = useState(true);
+    const [isLogin, setIsLogin] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -34,7 +34,12 @@ export default function Login() {
             }
             navigate('/dashboard');
         } catch (err) {
-            setError(err.message || 'Authentication failed. Please try again.');
+            if (isLogin && (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.message.includes('invalid-credential'))) {
+                setError('Account not found. Please sign up first.');
+                setIsLogin(false);
+            } else {
+                setError(err.message || 'Authentication failed. Please try again.');
+            }
         }
     };
 
