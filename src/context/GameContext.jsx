@@ -1,6 +1,7 @@
-import { createContext, useContext, useReducer, useEffect } from 'react';
-import { doc, setDoc } from 'firebase/firestore';
-import { db, auth } from '../firebase';
+import { createContext, useContext, useReducer, useEffect, useRef } from 'react';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import { useAuth } from './AuthContext';
 
 const GameContext = createContext(null);
 const GameDispatchContext = createContext(null);
@@ -17,26 +18,28 @@ const defaultState = {
     settings: {
         highContrast: false,
         voiceGuidance: false
-    }
+    },
+    _loaded: false
 };
 
-function loadState() {
+function loadLocalState() {
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
-            return { ...defaultState, ...JSON.parse(saved) };
+            return { ...defaultState, ...JSON.parse(saved), _loaded: true };
         }
     } catch (e) {
         console.warn('Failed to load saved state', e);
     }
-    return defaultState;
+    return { ...defaultState, _loaded: true };
 }
 
-function saveState(state) {
+function saveLocalState(state) {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        const { _loaded, ...stateToSave } = state;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
     } catch (e) {
-        console.warn('Failed to save state', e);
+        console.warn('Failed to save local state', e);
     }
 }
 
@@ -61,6 +64,10 @@ function gameReducer(state, action) {
     let newState;
 
     switch (action.type) {
+        case 'LOAD_FROM_CLOUD': {
+            newState = { ...defaultState, ...action.payload, _loaded: true };
+            break;
+        }
         case 'COMPLETE_SCENARIO': {
             const { scenarioId, category, accuracy, xpEarned } = action.payload;
             const newXp = state.xp + xpEarned;
@@ -98,25 +105,33 @@ function gameReducer(state, action) {
             break;
         }
         case 'RESET_PROGRESS': {
-            newState = { ...defaultState, settings: state.settings };
+            newState = { ...defaultState, settings: state.settings, _loaded: true };
             break;
         }
         default:
             return state;
     }
 
-    saveState(newState);
+    saveLocalState(newState);
     return newState;
 }
 
-// Sync user score to Firestore leaderboard
-async function syncLeaderboard(user, state) {
-    if (!user) return;
+// Save game state to Firestore
+async function saveToCloud(uid, state) {
     try {
-        const displayName = user.displayName || user.email?.split('@')[0] || 'Anonymous';
-        await setDoc(doc(db, 'leaderboard', user.uid), {
+        const { _loaded, settings, ...gameData } = state;
+        await setDoc(doc(db, 'users', uid), {
+            gameState: gameData,
+            settings: settings,
+            updatedAt: Date.now()
+        }, { merge: true });
+
+        // Also update leaderboard entry
+        const user = (await import('../firebase')).auth.currentUser;
+        const displayName = user?.displayName || user?.email?.split('@')[0] || 'Anonymous';
+        await setDoc(doc(db, 'leaderboard', uid), {
             displayName: displayName,
-            photoURL: user.photoURL || null,
+            photoURL: user?.photoURL || null,
             score: state.score,
             level: state.level,
             xp: state.xp,
@@ -125,13 +140,72 @@ async function syncLeaderboard(user, state) {
             updatedAt: Date.now()
         }, { merge: true });
     } catch (err) {
-        console.warn('Failed to sync leaderboard:', err);
+        console.warn('Failed to save to cloud:', err);
     }
 }
 
-export function GameProvider({ children }) {
-    const [state, dispatch] = useReducer(gameReducer, null, loadState);
+// Load game state from Firestore
+async function loadFromCloud(uid) {
+    try {
+        const docSnap = await getDoc(doc(db, 'users', uid));
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.gameState) {
+                return {
+                    ...defaultState,
+                    ...data.gameState,
+                    settings: data.settings || defaultState.settings
+                };
+            }
+        }
+    } catch (err) {
+        console.warn('Failed to load from cloud:', err);
+    }
+    return null;
+}
 
+export function GameProvider({ children }) {
+    const [state, dispatch] = useReducer(gameReducer, defaultState);
+    const { user } = useAuth();
+    const prevScoreRef = useRef(null);
+    const hasLoadedRef = useRef(false);
+
+    // Load state from Firestore when user logs in
+    useEffect(() => {
+        if (user && !hasLoadedRef.current) {
+            hasLoadedRef.current = true;
+            loadFromCloud(user.uid).then((cloudState) => {
+                if (cloudState) {
+                    dispatch({ type: 'LOAD_FROM_CLOUD', payload: cloudState });
+                    saveLocalState({ ...cloudState, _loaded: true });
+                } else {
+                    // No cloud data — load from localStorage and push to cloud
+                    const localState = loadLocalState();
+                    dispatch({ type: 'LOAD_FROM_CLOUD', payload: localState });
+                    saveToCloud(user.uid, localState);
+                }
+            });
+        }
+
+        // Reset when user logs out
+        if (!user) {
+            hasLoadedRef.current = false;
+        }
+    }, [user]);
+
+    // Save to Firestore whenever game state changes (after initial load)
+    useEffect(() => {
+        if (!user || !state._loaded) return;
+
+        // Only save if something actually changed
+        const currentKey = `${state.score}-${state.xp}-${state.level}-${state.badges.length}-${state.completedScenarios.length}`;
+        if (prevScoreRef.current === currentKey) return;
+        prevScoreRef.current = currentKey;
+
+        saveToCloud(user.uid, state);
+    }, [user, state]);
+
+    // Apply high contrast setting
     useEffect(() => {
         if (state.settings.highContrast) {
             document.documentElement.setAttribute('data-theme', 'high-contrast');
@@ -139,14 +213,6 @@ export function GameProvider({ children }) {
             document.documentElement.removeAttribute('data-theme');
         }
     }, [state.settings.highContrast]);
-
-    // Sync score to Firestore whenever it changes
-    useEffect(() => {
-        const user = auth.currentUser;
-        if (user) {
-            syncLeaderboard(user, state);
-        }
-    }, [state.score, state.level, state.xp, state.badges.length, state.completedScenarios.length]);
 
     return (
         <GameContext.Provider value={state}>
