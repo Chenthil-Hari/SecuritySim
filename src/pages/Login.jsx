@@ -30,17 +30,19 @@ export default function Login() {
         try {
             if (isLogin) {
                 await login(email, password);
+                navigate('/dashboard');
             } else {
                 await signup(email, password);
+                navigate('/verify-email');
             }
-            navigate('/dashboard');
         } catch (err) {
-            if (isLogin && (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.message.includes('invalid-credential'))) {
+            console.error("Auth Exception:", err);
+            if (isLogin && (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.message.includes('invalid-credential') || err.message.includes('user-not-found'))) {
                 setShowSignupModal(true);
-            } else if (!isLogin && err.code === 'auth/email-already-in-use') {
+            } else if (!isLogin && (err.code === 'auth/email-already-in-use' || err.message.includes('email-already-in-use'))) {
                 setError('An account with this email already exists. Please log in instead.');
             } else {
-                setError(err.message || 'Authentication failed. Please try again.');
+                setError('Authentication failed. Please check your credentials and try again.');
             }
         }
     };
@@ -171,10 +173,15 @@ export default function Login() {
                                 onClick={async () => {
                                     try {
                                         await signup(email, password);
-                                        navigate('/dashboard');
+                                        navigate('/verify-email');
                                     } catch (err) {
                                         setShowSignupModal(false);
-                                        setError(err.message || 'Signup failed.');
+                                        if (err.code === 'auth/email-already-in-use' || err.message.includes('email-already-in-use')) {
+                                            setError('An account with this email already exists. Please log in instead.');
+                                            setIsLogin(true);
+                                        } else {
+                                            setError('Signup failed. Please try again.');
+                                        }
                                     }
                                 }}
                             >
