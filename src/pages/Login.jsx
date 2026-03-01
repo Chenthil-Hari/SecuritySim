@@ -12,7 +12,7 @@ export default function Login() {
     const { login, signup, loginWithGoogle } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
@@ -28,22 +28,22 @@ export default function Login() {
 
         try {
             if (isLogin) {
-                login(email, password);
+                await login(email, password);
             } else {
-                signup(email, password);
+                await signup(email, password);
             }
             navigate('/dashboard');
         } catch (err) {
-            setError('Authentication failed. Please try again.');
+            setError(err.message || 'Authentication failed. Please try again.');
         }
     };
 
-    const handleGoogleLogin = () => {
+    const handleGoogleLogin = async () => {
         try {
-            loginWithGoogle();
+            await loginWithGoogle();
             navigate('/dashboard');
         } catch (err) {
-            setError('Google login failed.');
+            setError(err.message || 'Google login failed.');
         }
     };
 
