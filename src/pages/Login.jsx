@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Shield, Mail, Lock, User, UserPlus } from 'lucide-react';
+import { Shield, Mail, Lock, User, UserPlus, AlertCircle } from 'lucide-react';
 import './Login.css';
 
 export default function Login() {
-    const [isLogin, setIsLogin] = useState(false);
+    const [isLogin, setIsLogin] = useState(true);
+    const [showSignupModal, setShowSignupModal] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -35,8 +36,7 @@ export default function Login() {
             navigate('/dashboard');
         } catch (err) {
             if (isLogin && (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.message.includes('invalid-credential'))) {
-                setError('Account not found. Please sign up first.');
-                setIsLogin(false);
+                setShowSignupModal(true);
             } else {
                 setError(err.message || 'Authentication failed. Please try again.');
             }
@@ -145,6 +145,44 @@ export default function Login() {
                     </p>
                 </div>
             </div>
+
+            {/* Signup Modal Popup */}
+            {showSignupModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <div className="modal-icon">
+                            <AlertCircle size={48} />
+                        </div>
+                        <h3>Account Not Found</h3>
+                        <p>We couldn't find an account matching <strong>{email}</strong>.</p>
+                        <p>Would you like to quickly create a new account using the password you just entered?</p>
+
+                        <div className="modal-actions">
+                            <button
+                                className="btn-outline"
+                                onClick={() => setShowSignupModal(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="btn-primary"
+                                onClick={async () => {
+                                    try {
+                                        await signup(email, password);
+                                        navigate('/dashboard');
+                                    } catch (err) {
+                                        setShowSignupModal(false);
+                                        setError(err.message || 'Signup failed.');
+                                    }
+                                }}
+                            >
+                                <UserPlus size={18} style={{ marginRight: '8px' }} />
+                                Yes, Sign Up
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
