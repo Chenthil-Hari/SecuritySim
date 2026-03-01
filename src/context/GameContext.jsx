@@ -1,6 +1,6 @@
 import { createContext, useContext, useReducer, useEffect } from 'react';
-import { doc, setDoc } from 'firebase/firestore';
-import { db, auth } from '../firebase';
+import { ref, set } from 'firebase/database';
+import { rtdb, auth } from '../firebase';
 
 const GameContext = createContext(null);
 const GameDispatchContext = createContext(null);
@@ -109,12 +109,12 @@ function gameReducer(state, action) {
     return newState;
 }
 
-// Sync user score to Firestore leaderboard
+// Sync user score to Realtime Database leaderboard
 async function syncLeaderboard(user, state) {
     if (!user) return;
     try {
         const displayName = user.displayName || user.email?.split('@')[0] || 'Anonymous';
-        await setDoc(doc(db, 'leaderboard', user.uid), {
+        await set(ref(rtdb, 'leaderboard/' + user.uid), {
             displayName: displayName,
             photoURL: user.photoURL || null,
             score: state.score,
@@ -123,7 +123,7 @@ async function syncLeaderboard(user, state) {
             scenariosCompleted: state.completedScenarios.length,
             badgesCount: state.badges.length,
             updatedAt: Date.now()
-        }, { merge: true });
+        });
     } catch (err) {
         console.warn('Failed to sync leaderboard:', err);
     }
