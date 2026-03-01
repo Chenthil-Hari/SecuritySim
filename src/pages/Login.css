@@ -169,8 +169,8 @@
     text-decoration: underline;
 }
 
-/* Signup Modal Styles */
-.modal-overlay {
+/* OTP Popup Styles */
+.otp-popup-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -185,58 +185,80 @@
     animation: fadeIn 0.2s ease-out;
 }
 
-.modal-content {
+.otp-popup {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 2.5rem;
     width: 90%;
-    max-width: 450px;
+    max-width: 400px;
     text-align: center;
+    position: relative;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
     animation: scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.modal-icon {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    width: 80px;
-    height: 80px;
-    border-radius: var(--radius-round);
-    background: rgba(255, 179, 0, 0.1);
-    color: #ffb300;
-    margin-bottom: 1.5rem;
+.otp-popup-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: color 0.2s;
 }
 
-.modal-content h3 {
-    font-size: 1.5rem;
+.otp-popup-close:hover {
     color: var(--text-primary);
-    margin-bottom: 0.75rem;
 }
 
-.modal-content p {
-    color: var(--text-secondary);
-    font-size: 1rem;
+.otp-popup-icon {
+    font-size: 3rem;
     margin-bottom: 1rem;
-    line-height: 1.5;
 }
 
-.modal-content strong {
+.otp-popup h3 {
+    font-size: 1.4rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.otp-popup p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.otp-popup strong {
     color: var(--primary);
-    font-weight: 500;
 }
 
-.modal-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
+.otp-code-display {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 0.75rem;
+    color: var(--primary);
+    background: rgba(0, 255, 204, 0.08);
+    border: 2px dashed rgba(0, 255, 204, 0.3);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.5rem;
+    margin: 1.25rem 0;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
 }
 
-.modal-actions button {
-    flex: 1;
+.otp-popup-hint {
+    color: var(--text-muted) !important;
+    font-size: 0.8rem !important;
+    margin-bottom: 1.25rem !important;
+}
+
+.otp-popup .btn-primary {
+    width: 100%;
     justify-content: center;
-    padding: 0.75rem;
 }
 
 @keyframes fadeIn {

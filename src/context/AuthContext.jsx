@@ -4,8 +4,7 @@ import {
     onAuthStateChanged,
     GoogleAuthProvider,
     signInWithPopup,
-    RecaptchaVerifier,
-    signInWithPhoneNumber
+    signInAnonymously
 } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -26,18 +25,13 @@ export function AuthProvider({ children }) {
         };
     }, []);
 
-    const setupRecaptcha = (phoneNumber) => {
-        // We attach the invisible recaptcha to a div with id 'recaptcha-container'
-        const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible'
-        });
-
-        return signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
-    };
-
     const loginWithGoogle = () => {
         const provider = new GoogleAuthProvider();
         return signInWithPopup(auth, provider);
+    };
+
+    const loginAnonymous = () => {
+        return signInAnonymously(auth);
     };
 
     const logout = () => {
@@ -45,7 +39,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, loginWithGoogle, logout, setupRecaptcha }}>
+        <AuthContext.Provider value={{ user, loading, loginWithGoogle, loginAnonymous, logout }}>
             {children}
         </AuthContext.Provider>
     );
