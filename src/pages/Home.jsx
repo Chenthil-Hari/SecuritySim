@@ -21,7 +21,7 @@ export default function Home() {
                     </div>
 
                     <h1 className="hero-title">
-                        Master Cyber Defense in the <span className="gradient-text">CyberVerse</span>
+                        Master Cyber Defense in <span className="gradient-text">SecuritySim:Cyber Survival</span>
                     </h1>
 
                     <p className="hero-subtitle">
@@ -47,7 +47,7 @@ export default function Home() {
             <section className="features">
                 <div className="section-header">
                     <span className="section-tag">Features</span>
-                    <h2 className="section-title">Why CyberVerse?</h2>
+                    <h2 className="section-title">Why SecuritySim:Cyber Survival?</h2>
                     <p className="section-desc">
                         A comprehensive platform designed to build your cyber defenses through immersive, hands-on experience.
                     </p>
@@ -135,7 +135,7 @@ export default function Home() {
             </section>
 
             <footer className="home-footer">
-                <p>CyberVerse — Cybersecurity Awareness Through Simulation · 2026</p>
+                <p>SecuritySim:Cyber Survival — Cybersecurity Awareness Through Simulation · 2026</p>
             </footer>
         </div>
     );

@@ -3,7 +3,7 @@ import { createContext, useContext, useReducer, useEffect } from 'react';
 const GameContext = createContext(null);
 const GameDispatchContext = createContext(null);
 
-const STORAGE_KEY = 'cyberverse_state';
+const STORAGE_KEY = 'securitysim_state';
 
 const defaultState = {
     score: 50,

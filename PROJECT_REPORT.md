@@ -1,7 +1,7 @@
-# CyberVerse — Project Design Document
+# SecuritySim:Cyber Survival — Project Design Document
 
 ## 1. Application Title
-**CyberVerse** (or *CyberGuard*, *NetSentry*)
+**SecuritySim:Cyber Survival** (or *CyberGuard*, *NetSentry*)
 
 ## 2. Problem Statement
 The application addresses the critical gap in **human-centric cybersecurity awareness**, focusing on psychological manipulation and deception tactics that technical firewalls cannot stop. It targets:
@@ -71,7 +71,7 @@ The application addresses the critical gap in **human-centric cybersecurity awar
 *   **Deployment Target:** Static Web Host (e.g., Vercel, Netlify, GitHub Pages)
 
 ## 6. Learning Outcomes
-Upon completing the training modules in **CyberVerse**, users will be able to:
+Upon completing the training modules in **SecuritySim:Cyber Survival**, users will be able to:
 
 *   **Recognize Phishing Tactics:** Identify subtle indicators of malicious emails, including spoofed domains, hidden URLs, and emotional manipulation triggers (urgency/fear).
 *   **Identify AI-Driven Threats:** Distinguish between legitimate communications and AI-generated content, such as voice cloning scams and deepfake impersonations, by verifying through secondary channels.
@@ -83,7 +83,7 @@ Upon completing the training modules in **CyberVerse**, users will be able to:
 ## 7. Uniqueness and Impact
 
 ### How We Are Different
-Unlike traditional cybersecurity training (often boring videos or static quizzes), **CyberVerse** offers:
+Unlike traditional cybersecurity training (often boring videos or static quizzes), **SecuritySim:Cyber Survival** offers:
 *   **Emotional Realism:** We simulate the *pressure* of an incident (e.g., a crying family member's voice or a flashing critical alert) to train emotional resilience, not just theoretical knowledge.
 *   **Next-Gen Threat Coverage:** While competitors focus on basic phishing, we address emerging threats like **Deepfake/AI Voice Cloning** and **QR Code Fraud (Quishing)**.
 *   **Active vs. Passive:** Users are active participants who "play" through attacks, leading to better retention than passive watching.

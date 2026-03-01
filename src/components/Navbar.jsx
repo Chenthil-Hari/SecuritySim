@@ -12,7 +12,7 @@ export default function Navbar() {
         <nav className="navbar" role="navigation" aria-label="Main navigation">
             <Link to="/" className="navbar-brand">
                 <Shield size={28} />
-                <span>CyberVerse</span>
+                <span>SecuritySim:Cyber Survival</span>
             </Link>
 
             <button

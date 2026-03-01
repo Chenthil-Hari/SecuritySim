@@ -28,7 +28,7 @@ export default function Settings() {
         <div className="settings-page">
             <div className="settings-header">
                 <h1>Settings</h1>
-                <p>Customize your CyberVerse experience</p>
+                <p>Customize your SecuritySim:Cyber Survival experience</p>
             </div>
 
             <div className="settings-section">
@@ -83,9 +83,9 @@ export default function Settings() {
             </div>
 
             <div className="settings-section about-section">
-                <h2><Info size={20} /> About CyberVerse</h2>
+                <h2><Info size={20} /> About SecuritySim:Cyber Survival</h2>
                 <p>
-                    CyberVerse is an adaptive, decision-based cybersecurity simulation platform that helps users
+                    SecuritySim:Cyber Survival is an adaptive, decision-based cybersecurity simulation platform that helps users
                     identify and respond to real-world cyber threats through gamified learning experiences.
                 </p>
                 <p>
