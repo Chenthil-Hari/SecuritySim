@@ -5,7 +5,8 @@ import {
     signOut,
     onAuthStateChanged,
     GoogleAuthProvider,
-    signInWithPopup
+    signInWithPopup,
+    updateProfile
 } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -39,12 +40,20 @@ export function AuthProvider({ children }) {
         return signInWithPopup(auth, provider);
     };
 
+    const updateUserProfile = async (profileData) => {
+        if (auth.currentUser) {
+            await updateProfile(auth.currentUser, profileData);
+            // Force a re-render by updating user state with refreshed data
+            setUser({ ...auth.currentUser });
+        }
+    };
+
     const logout = () => {
         return signOut(auth);
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, signup, loginWithGoogle, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, signup, loginWithGoogle, logout, updateUserProfile }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,12 +1,18 @@
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useGame } from '../context/GameContext';
-import { User, Mail, Shield, Award, Calendar, ChevronRight } from 'lucide-react';
+import { User, Mail, Shield, Award, Calendar, ChevronRight, Pencil, Check, X, Camera } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './Profile.css';
 
 export default function Profile() {
-    const { user } = useAuth();
+    const { user, updateUserProfile } = useAuth();
     const { score, level, xp, badges, completedScenarios } = useGame();
+    const [isEditing, setIsEditing] = useState(false);
+    const [editName, setEditName] = useState('');
+    const [editPhotoURL, setEditPhotoURL] = useState('');
+    const [saveStatus, setSaveStatus] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
     if (!user) {
         return null;
@@ -22,9 +28,39 @@ export default function Profile() {
     };
 
     const rank = getRankInfo(level);
-
-    // Create a fallback name if one isn't provided by auth provider
     const displayName = user.displayName || user.name || (user.email ? user.email.split('@')[0] : 'User');
+
+    const startEditing = () => {
+        setEditName(user.displayName || '');
+        setEditPhotoURL(user.photoURL || '');
+        setIsEditing(true);
+        setSaveStatus('');
+    };
+
+    const cancelEditing = () => {
+        setIsEditing(false);
+        setSaveStatus('');
+    };
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        setSaveStatus('');
+        try {
+            const updates = {};
+            if (editName.trim()) updates.displayName = editName.trim();
+            if (editPhotoURL.trim()) updates.photoURL = editPhotoURL.trim();
+
+            await updateUserProfile(updates);
+            setIsEditing(false);
+            setSaveStatus('Profile updated successfully!');
+            setTimeout(() => setSaveStatus(''), 3000);
+        } catch (err) {
+            console.error("Profile update error:", err);
+            setSaveStatus('Failed to update profile. Please try again.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     return (
         <div className="profile-page">
@@ -37,9 +73,60 @@ export default function Profile() {
                         ) : (
                             <User size={48} />
                         )}
+                        {isEditing && (
+                            <div className="avatar-edit-overlay">
+                                <Camera size={20} />
+                            </div>
+                        )}
                     </div>
                     <div className="profile-details">
-                        <h1>{displayName}</h1>
+                        {!isEditing ? (
+                            <>
+                                <div className="profile-name-row">
+                                    <h1>{displayName}</h1>
+                                    <button className="edit-profile-btn" onClick={startEditing} title="Edit Profile">
+                                        <Pencil size={16} />
+                                        Edit Profile
+                                    </button>
+                                </div>
+                                {saveStatus && (
+                                    <div className={`save-status ${saveStatus.includes('Failed') ? 'error' : 'success'}`}>
+                                        {saveStatus}
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="profile-edit-form">
+                                <div className="edit-field">
+                                    <label>Display Name</label>
+                                    <input
+                                        type="text"
+                                        value={editName}
+                                        onChange={(e) => setEditName(e.target.value)}
+                                        placeholder="Enter your name"
+                                    />
+                                </div>
+                                <div className="edit-field">
+                                    <label>Photo URL</label>
+                                    <input
+                                        type="url"
+                                        value={editPhotoURL}
+                                        onChange={(e) => setEditPhotoURL(e.target.value)}
+                                        placeholder="https://example.com/photo.jpg"
+                                    />
+                                </div>
+                                <div className="edit-actions">
+                                    <button className="btn-primary save-btn" onClick={handleSave} disabled={isSaving}>
+                                        <Check size={16} />
+                                        {isSaving ? 'Saving...' : 'Save'}
+                                    </button>
+                                    <button className="btn-outline cancel-btn" onClick={cancelEditing} disabled={isSaving}>
+                                        <X size={16} />
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                         <div className="profile-meta">
                             <span className="profile-email">
                                 <Mail size={14} />
