@@ -15,14 +15,13 @@ export default function Home() {
                 </div>
 
                 <div className="hero-content">
-                    <div className="hero-badge">
-                        <Shield size={14} />
-                        Cybersecurity Simulation Platform
-                    </div>
-
                     <h1 className="hero-title">
-                        Master Cyber Defense in <span className="gradient-text">SecuritySim:Cyber Survival</span>
+                        SecuritySim
                     </h1>
+
+                    <p className="hero-badge" style={{ margin: "0 auto 2rem", background: "transparent", border: "none", fontSize: "1.1rem", borderBottom: "1px solid rgba(0, 255, 204, 0.3)", borderRadius: "0", paddingBottom: "0.5rem" }}>
+                        Cybersecurity Simulation Platform
+                    </p>
 
                     <p className="hero-subtitle">
                         Experience realistic cyber threats in a safe virtual environment. Learn to identify phishing,
