@@ -1,0 +1,60 @@
+.score-ring-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.score-ring {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.score-ring svg {
+    transform: rotate(-90deg);
+    filter: drop-shadow(0 0 8px var(--primary-glow));
+}
+
+.score-ring-bg {
+    stroke: var(--border-color);
+}
+
+.score-ring-progress {
+    stroke: var(--primary);
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-ring-value {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.score-ring-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--primary);
+}
+
+.score-ring-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+}
+
+.score-ring-container.small .score-ring-number {
+    font-size: 1.4rem;
+}
+
+.score-ring-container.small .score-ring-label {
+    font-size: 0.65rem;
+}

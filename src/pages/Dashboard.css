@@ -1,0 +1,225 @@
+.dashboard {
+    padding: var(--space-2xl) var(--space-lg);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    margin-bottom: var(--space-2xl);
+    animation: fadeInUp 0.5s ease;
+}
+
+.dashboard-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: var(--space-xs);
+}
+
+.dashboard-header p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+}
+
+.dashboard-score-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+    animation: fadeInUp 0.5s ease 0.1s both;
+}
+
+.score-panel-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.level-display {
+    text-align: center;
+}
+
+.level-number {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--secondary);
+}
+
+.level-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.xp-bar-container {
+    width: 100%;
+}
+
+.xp-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.xp-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--border-color);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.xp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: var(--radius-full);
+    transition: width 1s ease;
+}
+
+.stats-column {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+    align-content: start;
+    animation: fadeInUp 0.5s ease 0.2s both;
+}
+
+/* Category Performance */
+.category-section {
+    margin-bottom: var(--space-2xl);
+    animation: fadeInUp 0.5s ease 0.3s both;
+}
+
+.category-section h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: var(--space-lg);
+}
+
+.category-bars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-md);
+}
+
+.category-bar-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+}
+
+.category-bar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+}
+
+.category-bar-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.category-bar-name svg {
+    opacity: 0.7;
+}
+
+.category-bar-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.category-progress {
+    width: 100%;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.category-progress-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width 1.5s ease;
+}
+
+.category-progress-fill.high {
+    background: var(--success);
+}
+
+.category-progress-fill.medium {
+    background: var(--warning);
+}
+
+.category-progress-fill.low {
+    background: var(--danger);
+}
+
+/* Recommended Scenarios */
+.recommended {
+    animation: fadeInUp 0.5s ease 0.4s both;
+}
+
+.recommended h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: var(--space-lg);
+}
+
+.recommended-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-md);
+}
+
+/* Empty State */
+.empty-dashboard {
+    text-align: center;
+    padding: var(--space-3xl);
+    animation: fadeInUp 0.5s ease;
+}
+
+.empty-dashboard svg {
+    color: var(--text-muted);
+    margin-bottom: var(--space-lg);
+}
+
+.empty-dashboard h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: var(--space-sm);
+}
+
+.empty-dashboard p {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xl);
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-column {
+        grid-template-columns: 1fr;
+    }
+}

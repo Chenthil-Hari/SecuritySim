@@ -1,0 +1,121 @@
+.achievements-page {
+    padding: var(--space-2xl) var(--space-lg);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.achievements-header {
+    margin-bottom: var(--space-xl);
+    animation: fadeInUp 0.5s ease;
+}
+
+.achievements-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: var(--space-xs);
+}
+
+.achievements-header p {
+    color: var(--text-secondary);
+}
+
+.achievements-summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+    padding: var(--space-xl);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    animation: fadeInUp 0.5s ease 0.1s both;
+}
+
+.achievements-progress-ring {
+    flex-shrink: 0;
+}
+
+.achievements-progress-info h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.achievements-progress-info p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.level-section {
+    margin-bottom: var(--space-2xl);
+    animation: fadeInUp 0.5s ease 0.15s both;
+}
+
+.level-section h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: var(--space-md);
+}
+
+.level-bar-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+}
+
+.level-bar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.level-bar-current {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--secondary);
+}
+
+.level-bar-xp {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.level-bar {
+    height: 12px;
+    background: var(--border-color);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.level-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--secondary-dim), var(--secondary), var(--primary));
+    border-radius: var(--radius-full);
+    transition: width 1.5s ease;
+}
+
+.badges-section h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: var(--space-lg);
+}
+
+.badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-md);
+}
+
+@media (max-width: 768px) {
+    .achievements-summary {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .badges-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+}

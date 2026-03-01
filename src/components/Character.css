@@ -1,0 +1,282 @@
+/* =======================================
+   Character Component Styles
+   ======================================= */
+
+.character-panel {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-lg);
+    padding: var(--space-lg);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--space-lg);
+    animation: slideInLeft 0.6s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.character-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--primary), var(--secondary));
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.character-avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    min-width: 120px;
+}
+
+.character-avatar-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin-bottom: var(--space-sm);
+}
+
+.character-avatar-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-bg), rgba(168, 85, 247, 0.1));
+    border: 2px solid var(--border-color);
+    transition: all var(--transition-base);
+}
+
+.character-panel.reaction-relief .character-avatar-bg,
+.character-panel.reaction-confident .character-avatar-bg {
+    border-color: var(--success);
+    box-shadow: 0 0 20px var(--success-glow);
+}
+
+.character-panel.reaction-panic .character-avatar-bg {
+    border-color: var(--danger);
+    box-shadow: 0 0 20px var(--danger-glow);
+    animation: avatarShake 0.5s ease;
+}
+
+.character-panel.reaction-confused .character-avatar-bg {
+    border-color: var(--warning);
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.2);
+}
+
+@keyframes avatarShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-3px) rotate(-2deg);
+    }
+
+    40% {
+        transform: translateX(3px) rotate(2deg);
+    }
+
+    60% {
+        transform: translateX(-2px) rotate(-1deg);
+    }
+
+    80% {
+        transform: translateX(2px) rotate(1deg);
+    }
+}
+
+.character-avatar-svg {
+    position: relative;
+    z-index: 1;
+    width: 100px;
+    height: 100px;
+}
+
+/* Character Info */
+.character-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.character-role {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.character-device-icon {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: var(--space-xs);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.character-device-icon svg {
+    opacity: 0.6;
+}
+
+/* Dialogue Bubble */
+.character-dialogue {
+    flex: 1;
+    position: relative;
+    min-height: 60px;
+}
+
+.dialogue-bubble {
+    position: relative;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-style: italic;
+    animation: dialogueFadeIn 0.5s ease;
+    transition: all var(--transition-base);
+}
+
+.dialogue-bubble::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 20px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 8px 10px 8px 0;
+    border-color: transparent var(--bg-tertiary) transparent transparent;
+}
+
+.dialogue-bubble::after {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 19px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 9px 11px 9px 0;
+    border-color: transparent var(--border-color) transparent transparent;
+    z-index: -1;
+}
+
+@keyframes dialogueFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Reaction-specific bubble styles */
+.character-panel.reaction-panic .dialogue-bubble {
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.06);
+}
+
+.character-panel.reaction-panic .dialogue-bubble::before {
+    border-color: transparent rgba(239, 68, 68, 0.06) transparent transparent;
+}
+
+.character-panel.reaction-relief .dialogue-bubble,
+.character-panel.reaction-confident .dialogue-bubble {
+    border-color: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.06);
+}
+
+.character-panel.reaction-relief .dialogue-bubble::before,
+.character-panel.reaction-confident .dialogue-bubble::before {
+    border-color: transparent rgba(16, 185, 129, 0.06) transparent transparent;
+}
+
+.character-panel.reaction-confused .dialogue-bubble {
+    border-color: rgba(245, 158, 11, 0.3);
+    background: rgba(245, 158, 11, 0.06);
+}
+
+.character-panel.reaction-confused .dialogue-bubble::before {
+    border-color: transparent rgba(245, 158, 11, 0.06) transparent transparent;
+}
+
+/* Emotion indicator */
+.emotion-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: var(--space-sm);
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-style: normal;
+}
+
+.emotion-indicator.idle {
+    background: var(--primary-bg);
+    color: var(--primary);
+}
+
+.emotion-indicator.thinking {
+    background: rgba(168, 85, 247, 0.12);
+    color: var(--secondary);
+}
+
+.emotion-indicator.confused {
+    background: var(--warning-bg);
+    color: var(--warning);
+}
+
+.emotion-indicator.panic {
+    background: var(--danger-bg);
+    color: var(--danger);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.emotion-indicator.relief {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.emotion-indicator.confident {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .character-panel {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .dialogue-bubble::before,
+    .dialogue-bubble::after {
+        display: none;
+    }
+
+    .character-avatar-section {
+        min-width: unset;
+    }
+}
