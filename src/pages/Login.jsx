@@ -1,72 +1,52 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Shield, Smartphone, KeyRound, ArrowRight } from 'lucide-react';
+import { Shield, Mail, Lock, User, UserPlus } from 'lucide-react';
 import './Login.css';
 
 export default function Login() {
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [verificationCode, setVerificationCode] = useState('');
-    const [confirmationResult, setConfirmationResult] = useState(null);
-    const [isOtpSent, setIsOtpSent] = useState(false);
+    const [isLogin, setIsLogin] = useState(true);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const { setupRecaptcha, loginWithGoogle } = useAuth();
+    const { login, signup, loginWithGoogle } = useAuth();
     const navigate = useNavigate();
 
-    const handleSendOtp = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        setSuccess('');
 
-        if (!phoneNumber || phoneNumber.length < 10) {
-            setError('Please enter a valid phone number with country code');
+        if (!email || !password) {
+            setError('Please fill in all fields');
+            return;
+        }
+
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters');
             return;
         }
 
         setIsLoading(true);
         try {
-            const result = await setupRecaptcha(phoneNumber);
-            setConfirmationResult(result);
-            setIsOtpSent(true);
-            setSuccess(`OTP sent to ${phoneNumber}! Check your messages.`);
-        } catch (err) {
-            console.error("Phone Auth Error:", err);
-            if (err.code === 'auth/invalid-phone-number') {
-                setError('Invalid phone number. Make sure to include country code (e.g. +91).');
-            } else if (err.code === 'auth/too-many-requests') {
-                setError('Too many attempts. Please wait a few minutes and try again.');
+            if (isLogin) {
+                await login(email, password);
             } else {
-                setError(err.message || 'Failed to send OTP. Please try again.');
+                await signup(email, password);
             }
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleVerifyOtp = async (e) => {
-        e.preventDefault();
-        setError('');
-        setSuccess('');
-
-        if (!verificationCode || verificationCode.length !== 6) {
-            setError('Please enter the 6-digit code');
-            return;
-        }
-
-        setIsLoading(true);
-        try {
-            await confirmationResult.confirm(verificationCode);
             navigate('/dashboard');
         } catch (err) {
-            console.error("OTP Verification Error:", err);
-            if (err.code === 'auth/invalid-verification-code') {
-                setError('Invalid verification code. Please check and try again.');
-            } else if (err.code === 'auth/code-expired') {
-                setError('Verification code has expired. Please request a new one.');
+            console.error("Auth Error:", err);
+            if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+                setError('Incorrect email or password. Please try again.');
+            } else if (err.code === 'auth/email-already-in-use') {
+                setError('An account with this email already exists. Please log in instead.');
+            } else if (err.code === 'auth/weak-password') {
+                setError('Password is too weak. Use at least 6 characters.');
+            } else if (err.code === 'auth/invalid-email') {
+                setError('Please enter a valid email address.');
             } else {
-                setError('Verification failed. Please try again.');
+                setError('Authentication failed. Please try again.');
             }
         } finally {
             setIsLoading(false);
@@ -74,11 +54,14 @@ export default function Login() {
     };
 
     const handleGoogleLogin = async () => {
+        setIsLoading(true);
         try {
             await loginWithGoogle();
             navigate('/dashboard');
         } catch (err) {
             setError(err.message || 'Google login failed.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -89,100 +72,17 @@ export default function Login() {
                     <div className="login-logo">
                         <Shield size={32} />
                     </div>
-                    <h2>Welcome to SecuritySim</h2>
+                    <h2>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
                     <p>
-                        {isOtpSent
-                            ? 'Enter the 6-digit code sent to your phone'
-                            : 'Sign in with your phone number or Google'}
+                        {isLogin
+                            ? 'Sign in to access your training'
+                            : 'Sign up to start your cybersecurity journey'}
                     </p>
                 </div>
 
                 {error && <div className="login-error">{error}</div>}
-                {success && <div className="login-success">{success}</div>}
 
-                {!isOtpSent ? (
-                    <form className="login-form" onSubmit={handleSendOtp}>
-                        <div className="form-group">
-                            <label htmlFor="phone">Phone Number</label>
-                            <div className="input-with-icon">
-                                <Smartphone size={18} />
-                                <input
-                                    type="tel"
-                                    id="phone"
-                                    value={phoneNumber}
-                                    onChange={(e) => setPhoneNumber(e.target.value)}
-                                    placeholder="+91 98765 43210"
-                                    required
-                                />
-                            </div>
-                            <small style={{ color: '#8b9bb4', marginTop: '0.5rem', display: 'block', fontSize: '0.8rem' }}>
-                                Include your country code (e.g. +1 or +91)
-                            </small>
-                        </div>
-
-                        {/* Firebase reCAPTCHA container */}
-                        <div id="recaptcha-container"></div>
-
-                        <button
-                            type="submit"
-                            className="btn-primary login-btn"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Sending OTP...' : (
-                                <>
-                                    Send OTP <ArrowRight size={18} />
-                                </>
-                            )}
-                        </button>
-                    </form>
-                ) : (
-                    <form className="login-form" onSubmit={handleVerifyOtp}>
-                        <div className="form-group">
-                            <label htmlFor="code">Verification Code</label>
-                            <div className="input-with-icon">
-                                <KeyRound size={18} />
-                                <input
-                                    type="text"
-                                    id="code"
-                                    value={verificationCode}
-                                    onChange={(e) => setVerificationCode(e.target.value)}
-                                    placeholder="Enter 6-digit OTP"
-                                    maxLength="6"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <button
-                            type="submit"
-                            className="btn-primary login-btn"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Verifying...' : 'Verify & Sign In'}
-                        </button>
-
-                        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                            <button
-                                type="button"
-                                className="toggle-btn"
-                                onClick={() => {
-                                    setIsOtpSent(false);
-                                    setVerificationCode('');
-                                    setConfirmationResult(null);
-                                    setError('');
-                                    setSuccess('');
-                                }}
-                            >
-                                Use a different phone number
-                            </button>
-                        </div>
-                    </form>
-                )}
-
-                <div className="login-divider">
-                    <span>OR</span>
-                </div>
-
+                {/* Google Sign-In Button - Always on top */}
                 <button
                     type="button"
                     className="btn-outline google-btn"
@@ -198,6 +98,75 @@ export default function Login() {
                     </svg>
                     Continue with Google
                 </button>
+
+                <div className="login-divider">
+                    <span>OR</span>
+                </div>
+
+                {/* Email/Password Form */}
+                <form className="login-form" onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label htmlFor="email">Email Address</label>
+                        <div className="input-with-icon">
+                            <Mail size={18} />
+                            <input
+                                type="email"
+                                id="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="you@example.com"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="password">Password</label>
+                        <div className="input-with-icon">
+                            <Lock size={18} />
+                            <input
+                                type="password"
+                                id="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="btn-primary login-btn"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Please wait...' : isLogin ? (
+                            <>
+                                <User size={18} /> Login
+                            </>
+                        ) : (
+                            <>
+                                <UserPlus size={18} /> Sign Up
+                            </>
+                        )}
+                    </button>
+                </form>
+
+                <div className="login-toggle">
+                    <p>
+                        {isLogin ? "Don't have an account? " : "Already have an account? "}
+                        <button
+                            type="button"
+                            className="toggle-btn"
+                            onClick={() => {
+                                setIsLogin(!isLogin);
+                                setError('');
+                            }}
+                        >
+                            {isLogin ? 'Sign up' : 'Log in'}
+                        </button>
+                    </p>
+                </div>
             </div>
         </div>
     );

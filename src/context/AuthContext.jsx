@@ -1,11 +1,11 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
     GoogleAuthProvider,
-    signInWithPopup,
-    RecaptchaVerifier,
-    signInWithPhoneNumber
+    signInWithPopup
 } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -26,22 +26,12 @@ export function AuthProvider({ children }) {
         };
     }, []);
 
-    const setupRecaptcha = (phoneNumber) => {
-        // Clear any existing recaptcha to prevent duplicate widget errors
-        if (window.recaptchaVerifier) {
-            window.recaptchaVerifier.clear();
-            window.recaptchaVerifier = null;
-        }
+    const login = (email, password) => {
+        return signInWithEmailAndPassword(auth, email, password);
+    };
 
-        const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible',
-            'callback': () => {
-                // reCAPTCHA solved
-            }
-        });
-
-        window.recaptchaVerifier = recaptchaVerifier;
-        return signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+    const signup = (email, password) => {
+        return createUserWithEmailAndPassword(auth, email, password);
     };
 
     const loginWithGoogle = () => {
@@ -54,7 +44,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, loginWithGoogle, logout, setupRecaptcha }}>
+        <AuthContext.Provider value={{ user, loading, login, signup, loginWithGoogle, logout }}>
             {children}
         </AuthContext.Provider>
     );
