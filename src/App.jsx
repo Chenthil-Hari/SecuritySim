@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
 import Scenarios from './pages/Scenarios';
 import ScenarioPlay from './pages/ScenarioPlay';
@@ -24,6 +25,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
                 <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                 <Route path="/scenarios" element={<ProtectedRoute><Scenarios /></ProtectedRoute>} />
                 <Route path="/scenarios/:id" element={<ProtectedRoute><ScenarioPlay /></ProtectedRoute>} />

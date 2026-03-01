@@ -5,7 +5,8 @@ import {
     signOut,
     onAuthStateChanged,
     GoogleAuthProvider,
-    signInWithPopup
+    signInWithPopup,
+    sendEmailVerification
 } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -30,8 +31,10 @@ export function AuthProvider({ children }) {
         return signInWithEmailAndPassword(auth, email, password);
     };
 
-    const signup = (email, password) => {
-        return createUserWithEmailAndPassword(auth, email, password);
+    const signup = async (email, password) => {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await sendEmailVerification(userCredential.user);
+        return userCredential;
     };
 
     const loginWithGoogle = () => {
@@ -43,8 +46,15 @@ export function AuthProvider({ children }) {
         return signOut(auth);
     };
 
+    const resendVerification = () => {
+        if (auth.currentUser) {
+            return sendEmailVerification(auth.currentUser);
+        }
+        return Promise.reject("No user logged in");
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, login, signup, loginWithGoogle, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, signup, loginWithGoogle, logout, resendVerification }}>
             {children}
         </AuthContext.Provider>
     );

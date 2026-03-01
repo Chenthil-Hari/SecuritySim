@@ -1,0 +1,119 @@
+.verify-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 80px);
+    padding: 2rem;
+    background: radial-gradient(circle at center, rgba(0, 255, 204, 0.05) 0%, transparent 70%);
+}
+
+.verify-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 3rem;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: var(--shadow-xl);
+    animation: fadeUp 0.4s ease-out;
+}
+
+.verify-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-round);
+    background: rgba(0, 255, 204, 0.1);
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(0, 255, 204, 0.2);
+}
+
+.verify-container h2 {
+    color: var(--text-primary);
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+}
+
+.verify-content {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.verify-content strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.verify-error {
+    background: rgba(255, 59, 48, 0.1);
+    color: #ff5252;
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 59, 48, 0.2);
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.verify-success {
+    background: rgba(52, 199, 89, 0.1);
+    color: #34c759;
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(52, 199, 89, 0.2);
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.verify-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.verify-actions button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 0.875rem;
+}
+
+.verify-footer {
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.link-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: var(--transition-colors);
+}
+
+.link-btn:hover {
+    color: var(--text-primary);
+    text-decoration: underline;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

@@ -20,5 +20,11 @@ export default function ProtectedRoute({ children }) {
         return <Navigate to="/login" replace />;
     }
 
+    // Require email verification for Email/Password users
+    const isPasswordUser = user.providerData.some(p => p.providerId === 'password');
+    if (isPasswordUser && !user.emailVerified) {
+        return <Navigate to="/verify-email" replace />;
+    }
+
     return children;
 }
