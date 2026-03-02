@@ -1,14 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut,
-    onAuthStateChanged,
-    GoogleAuthProvider,
-    signInWithPopup,
-    updateProfile
-} from 'firebase/auth';
-import { auth } from '../firebase';
+import { authAPI, setToken, removeToken, getToken } from '../api';
 
 const AuthContext = createContext(null);
 
@@ -16,40 +7,55 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // On mount, check if we have a saved token and load user
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
+        const token = getToken();
+        if (token) {
+            authAPI.getMe()
+                .then(({ user: userData }) => {
+                    setUser(userData);
+                })
+                .catch(() => {
+                    // Token is invalid/expired
+                    removeToken();
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        } else {
             setLoading(false);
-        });
-
-        return () => {
-            unsubscribe();
-        };
+        }
     }, []);
 
-    const login = (email, password) => {
-        return signInWithEmailAndPassword(auth, email, password);
+    const login = async (email, password) => {
+        const { token, user: userData } = await authAPI.login(email, password);
+        setToken(token);
+        setUser(userData);
+        return userData;
     };
 
-    const signup = (email, password) => {
-        return createUserWithEmailAndPassword(auth, email, password);
+    const signup = async (email, password) => {
+        const { token, user: userData } = await authAPI.register(email, password);
+        setToken(token);
+        setUser(userData);
+        return userData;
     };
 
-    const loginWithGoogle = () => {
-        const provider = new GoogleAuthProvider();
-        return signInWithPopup(auth, provider);
+    const loginWithGoogle = async (credential) => {
+        const { token, user: userData } = await authAPI.googleLogin(credential);
+        setToken(token);
+        setUser(userData);
+        return userData;
     };
 
     const updateUserProfile = async (profileData) => {
-        if (auth.currentUser) {
-            await updateProfile(auth.currentUser, profileData);
-            // Force a re-render by updating user state with refreshed data
-            setUser({ ...auth.currentUser });
-        }
+        const { user: updatedUser } = await authAPI.updateProfile(profileData);
+        setUser(updatedUser);
     };
 
     const logout = () => {
-        return signOut(auth);
+        removeToken();
+        setUser(null);
     };
 
     return (

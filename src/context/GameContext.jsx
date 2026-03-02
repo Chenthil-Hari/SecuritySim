@@ -1,6 +1,5 @@
 import { createContext, useContext, useReducer, useEffect, useRef } from 'react';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { gameAPI, leaderboardAPI } from '../api';
 import { useAuth } from './AuthContext';
 
 const GameContext = createContext(null);
@@ -116,47 +115,38 @@ function gameReducer(state, action) {
     return newState;
 }
 
-// Save game state to Firestore
-async function saveToCloud(uid, state) {
+// Save game state to MongoDB via API
+async function saveToCloud(user, state) {
     try {
         const { _loaded, settings, ...gameData } = state;
-        await setDoc(doc(db, 'users', uid), {
-            gameState: gameData,
-            settings: settings,
-            updatedAt: Date.now()
-        }, { merge: true });
+        await gameAPI.saveState(gameData, settings);
 
         // Also update leaderboard entry
-        const user = (await import('../firebase')).auth.currentUser;
-        const displayName = user?.displayName || user?.email?.split('@')[0] || 'Anonymous';
-        await setDoc(doc(db, 'leaderboard', uid), {
+        const displayName = user.displayName || user.email?.split('@')[0] || 'Anonymous';
+        await leaderboardAPI.upsert({
             displayName: displayName,
-            photoURL: user?.photoURL || null,
+            photoURL: user.photoURL || null,
             score: state.score,
             level: state.level,
             xp: state.xp,
             scenariosCompleted: state.completedScenarios.length,
-            badgesCount: state.badges.length,
-            updatedAt: Date.now()
-        }, { merge: true });
+            badgesCount: state.badges.length
+        });
     } catch (err) {
         console.warn('Failed to save to cloud:', err);
     }
 }
 
-// Load game state from Firestore
-async function loadFromCloud(uid) {
+// Load game state from MongoDB via API
+async function loadFromCloud() {
     try {
-        const docSnap = await getDoc(doc(db, 'users', uid));
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            if (data.gameState) {
-                return {
-                    ...defaultState,
-                    ...data.gameState,
-                    settings: data.settings || defaultState.settings
-                };
-            }
+        const data = await gameAPI.loadState();
+        if (data.gameState) {
+            return {
+                ...defaultState,
+                ...data.gameState,
+                settings: data.settings || defaultState.settings
+            };
         }
     } catch (err) {
         console.warn('Failed to load from cloud:', err);
@@ -170,11 +160,11 @@ export function GameProvider({ children }) {
     const prevScoreRef = useRef(null);
     const hasLoadedRef = useRef(false);
 
-    // Load state from Firestore when user logs in
+    // Load state from MongoDB when user logs in
     useEffect(() => {
         if (user && !hasLoadedRef.current) {
             hasLoadedRef.current = true;
-            loadFromCloud(user.uid).then((cloudState) => {
+            loadFromCloud().then((cloudState) => {
                 if (cloudState) {
                     dispatch({ type: 'LOAD_FROM_CLOUD', payload: cloudState });
                     saveLocalState({ ...cloudState, _loaded: true });
@@ -182,7 +172,7 @@ export function GameProvider({ children }) {
                     // No cloud data — load from localStorage and push to cloud
                     const localState = loadLocalState();
                     dispatch({ type: 'LOAD_FROM_CLOUD', payload: localState });
-                    saveToCloud(user.uid, localState);
+                    saveToCloud(user, localState);
                 }
             });
         }
@@ -193,7 +183,7 @@ export function GameProvider({ children }) {
         }
     }, [user]);
 
-    // Save to Firestore whenever game state changes (after initial load)
+    // Save to MongoDB whenever game state changes (after initial load)
     useEffect(() => {
         if (!user || !state._loaded) return;
 
@@ -202,7 +192,7 @@ export function GameProvider({ children }) {
         if (prevScoreRef.current === currentKey) return;
         prevScoreRef.current = currentKey;
 
-        saveToCloud(user.uid, state);
+        saveToCloud(user, state);
     }, [user, state]);
 
     // Apply high contrast setting

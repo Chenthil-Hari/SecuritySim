@@ -183,24 +183,22 @@ export default function Profile() {
                         <div className="detail-item">
                             <span className="detail-label">Provider</span>
                             <span className="detail-value" style={{ textTransform: 'capitalize' }}>
-                                {user.providerData && user.providerData.length > 0
-                                    ? user.providerData[0].providerId.replace('.com', '')
-                                    : 'Email/Password'}
+                                {user.provider === 'google' ? 'Google' : 'Email/Password'}
                             </span>
                         </div>
                         <div className="detail-item">
                             <span className="detail-label">Member Since</span>
                             <span className="detail-value">
-                                {user.metadata?.creationTime
-                                    ? new Date(user.metadata.creationTime).toLocaleDateString()
+                                {user.createdAt
+                                    ? new Date(user.createdAt).toLocaleDateString()
                                     : 'Recently'}
                             </span>
                         </div>
                         <div className="detail-item">
                             <span className="detail-label">Last Login</span>
                             <span className="detail-value">
-                                {user.metadata?.lastSignInTime
-                                    ? new Date(user.metadata.lastSignInTime).toLocaleDateString()
+                                {user.updatedAt
+                                    ? new Date(user.updatedAt).toLocaleDateString()
                                     : 'Today'}
                             </span>
                         </div>

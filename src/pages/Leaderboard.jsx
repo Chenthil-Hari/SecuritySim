@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { leaderboardAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useGame } from '../context/GameContext';
 import { Trophy, Medal, Shield, User, Crown } from 'lucide-react';
@@ -24,44 +23,28 @@ export default function Leaderboard() {
         setError('');
 
         try {
-            // Step 1: Write current user's score to Firestore
+            // Step 1: Write current user's score to the backend
             const displayName = user.displayName || user.email?.split('@')[0] || 'Anonymous';
-            await setDoc(doc(db, 'leaderboard', user.uid), {
+            await leaderboardAPI.upsert({
                 displayName: displayName,
                 photoURL: user.photoURL || null,
                 score: gameState.score,
                 level: gameState.level,
                 xp: gameState.xp,
                 scenariosCompleted: gameState.completedScenarios.length,
-                badgesCount: gameState.badges.length,
-                updatedAt: Date.now()
-            }, { merge: true });
-
-            // Step 2: Fetch all leaderboard entries (simple getDocs, sort client-side)
-            const snapshot = await getDocs(collection(db, 'leaderboard'));
-            const data = [];
-            snapshot.forEach((docSnap) => {
-                data.push({ id: docSnap.id, ...docSnap.data() });
+                badgesCount: gameState.badges.length
             });
 
-            // Sort by score descending
-            data.sort((a, b) => b.score - a.score);
-            data.forEach((player, i) => { player.rank = i + 1; });
-
+            // Step 2: Fetch all leaderboard entries
+            const { players: data } = await leaderboardAPI.getAll();
             setPlayers(data);
         } catch (err) {
             console.error('Leaderboard error:', err);
-
-            // Show specific fix instructions based on the error
-            if (err.code === 'permission-denied' || err.message?.includes('permission')) {
-                setError('Firestore rules are blocking access. Go to Firebase Console → Firestore → Rules → Replace with the rules shown below, then click Publish.');
-            } else {
-                setError(err.message || 'Failed to load leaderboard.');
-            }
+            setError(err.message || 'Failed to load leaderboard.');
 
             // Fallback: show current user from local data
             setPlayers([{
-                id: user.uid,
+                id: user._id,
                 rank: 1,
                 displayName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
                 photoURL: user.photoURL || null,
@@ -119,23 +102,6 @@ export default function Leaderboard() {
             {error && (
                 <div className="leaderboard-error">
                     <p>⚠️ {error}</p>
-                    <div className="rules-fix">
-                        <small>Go to <strong>Firebase Console → Firestore Database → Rules</strong> tab, replace with:</small>
-                        <pre>{`rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId} {
-      allow read, write: if request.auth != null
-        && request.auth.uid == userId;
-    }
-    match /leaderboard/{userId} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-  }
-}`}</pre>
-                        <small>Then click <strong>Publish</strong> and refresh this page.</small>
-                    </div>
                 </div>
             )}
 
@@ -144,7 +110,7 @@ service cloud.firestore {
                     {/* Top 3 Podium */}
                     <div className="podium">
                         {players.slice(0, 3).map((player) => (
-                            <div key={player.id} className={`podium-card ${getRankClass(player.rank)} ${player.id === user?.uid ? 'is-you' : ''}`}>
+                            <div key={player.id} className={`podium-card ${getRankClass(player.rank)} ${player.id === user?._id ? 'is-you' : ''}`}>
                                 <div className="podium-rank">{getRankIcon(player.rank)}</div>
                                 <div className="podium-avatar">
                                     {player.photoURL ? (
@@ -163,7 +129,7 @@ service cloud.firestore {
                                     <span>•</span>
                                     <span>{player.xp} XP</span>
                                 </div>
-                                {player.id === user?.uid && <div className="you-badge">You</div>}
+                                {player.id === user?._id && <div className="you-badge">You</div>}
                             </div>
                         ))}
                     </div>
@@ -184,7 +150,7 @@ service cloud.firestore {
                             </thead>
                             <tbody>
                                 {players.map((player) => (
-                                    <tr key={player.id} className={`${getRankClass(player.rank)} ${player.id === user?.uid ? 'is-you' : ''}`}>
+                                    <tr key={player.id} className={`${getRankClass(player.rank)} ${player.id === user?._id ? 'is-you' : ''}`}>
                                         <td className="rank-cell">
                                             {getRankIcon(player.rank)}
                                         </td>
@@ -198,7 +164,7 @@ service cloud.firestore {
                                                     )}
                                                 </div>
                                                 <span>{player.displayName}</span>
-                                                {player.id === user?.uid && <span className="you-tag">You</span>}
+                                                {player.id === user?._id && <span className="you-tag">You</span>}
                                             </div>
                                         </td>
                                         <td className="score-cell">{player.score}/100</td>
