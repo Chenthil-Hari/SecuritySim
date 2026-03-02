@@ -1,10 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { GameProvider } from './context/GameContext';
-import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
-import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Scenarios from './pages/Scenarios';
 import ScenarioPlay from './pages/ScenarioPlay';
@@ -16,28 +13,25 @@ import './App.css';
 
 function App() {
   return (
-    <AuthProvider>
-      <GameProvider>
-        <Router>
-          <div className="app">
-            <Navbar />
-            <main className="app-main">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/scenarios" element={<ProtectedRoute><Scenarios /></ProtectedRoute>} />
-                <Route path="/scenarios/:id" element={<ProtectedRoute><ScenarioPlay /></ProtectedRoute>} />
-                <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
-                <Route path="/settings" element={<Settings />} />
-              </Routes>
-            </main>
-          </div>
-        </Router>
-      </GameProvider>
-    </AuthProvider>
+    <GameProvider>
+      <Router>
+        <div className="app">
+          <Navbar />
+          <main className="app-main">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/scenarios" element={<Scenarios />} />
+              <Route path="/scenarios/:id" element={<ScenarioPlay />} />
+              <Route path="/achievements" element={<Achievements />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/settings" element={<Settings />} />
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    </GameProvider>
   );
 }
 

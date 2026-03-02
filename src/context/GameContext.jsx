@@ -1,6 +1,4 @@
-import { createContext, useContext, useReducer, useEffect, useRef } from 'react';
-import { gameAPI, leaderboardAPI } from '../api';
-import { useAuth } from './AuthContext';
+import { createContext, useContext, useReducer, useEffect } from 'react';
 
 const GameContext = createContext(null);
 const GameDispatchContext = createContext(null);
@@ -17,26 +15,24 @@ const defaultState = {
     settings: {
         highContrast: false,
         voiceGuidance: false
-    },
-    _loaded: false
+    }
 };
 
 function loadLocalState() {
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
-            return { ...defaultState, ...JSON.parse(saved), _loaded: true };
+            return { ...defaultState, ...JSON.parse(saved) };
         }
     } catch (e) {
         console.warn('Failed to load saved state', e);
     }
-    return { ...defaultState, _loaded: true };
+    return { ...defaultState };
 }
 
 function saveLocalState(state) {
     try {
-        const { _loaded, ...stateToSave } = state;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (e) {
         console.warn('Failed to save local state', e);
     }
@@ -63,10 +59,6 @@ function gameReducer(state, action) {
     let newState;
 
     switch (action.type) {
-        case 'LOAD_FROM_CLOUD': {
-            newState = { ...defaultState, ...action.payload, _loaded: true };
-            break;
-        }
         case 'COMPLETE_SCENARIO': {
             const { scenarioId, category, accuracy, xpEarned } = action.payload;
             const newXp = state.xp + xpEarned;
@@ -104,7 +96,7 @@ function gameReducer(state, action) {
             break;
         }
         case 'RESET_PROGRESS': {
-            newState = { ...defaultState, settings: state.settings, _loaded: true };
+            newState = { ...defaultState, settings: state.settings };
             break;
         }
         default:
@@ -115,85 +107,8 @@ function gameReducer(state, action) {
     return newState;
 }
 
-// Save game state to MongoDB via API
-async function saveToCloud(user, state) {
-    try {
-        const { _loaded, settings, ...gameData } = state;
-        await gameAPI.saveState(gameData, settings);
-
-        // Also update leaderboard entry
-        const displayName = user.displayName || user.email?.split('@')[0] || 'Anonymous';
-        await leaderboardAPI.upsert({
-            displayName: displayName,
-            photoURL: user.photoURL || null,
-            score: state.score,
-            level: state.level,
-            xp: state.xp,
-            scenariosCompleted: state.completedScenarios.length,
-            badgesCount: state.badges.length
-        });
-    } catch (err) {
-        console.warn('Failed to save to cloud:', err);
-    }
-}
-
-// Load game state from MongoDB via API
-async function loadFromCloud() {
-    try {
-        const data = await gameAPI.loadState();
-        if (data.gameState) {
-            return {
-                ...defaultState,
-                ...data.gameState,
-                settings: data.settings || defaultState.settings
-            };
-        }
-    } catch (err) {
-        console.warn('Failed to load from cloud:', err);
-    }
-    return null;
-}
-
 export function GameProvider({ children }) {
-    const [state, dispatch] = useReducer(gameReducer, defaultState);
-    const { user } = useAuth();
-    const prevScoreRef = useRef(null);
-    const hasLoadedRef = useRef(false);
-
-    // Load state from MongoDB when user logs in
-    useEffect(() => {
-        if (user && !hasLoadedRef.current) {
-            hasLoadedRef.current = true;
-            loadFromCloud().then((cloudState) => {
-                if (cloudState) {
-                    dispatch({ type: 'LOAD_FROM_CLOUD', payload: cloudState });
-                    saveLocalState({ ...cloudState, _loaded: true });
-                } else {
-                    // No cloud data — load from localStorage and push to cloud
-                    const localState = loadLocalState();
-                    dispatch({ type: 'LOAD_FROM_CLOUD', payload: localState });
-                    saveToCloud(user, localState);
-                }
-            });
-        }
-
-        // Reset when user logs out
-        if (!user) {
-            hasLoadedRef.current = false;
-        }
-    }, [user]);
-
-    // Save to MongoDB whenever game state changes (after initial load)
-    useEffect(() => {
-        if (!user || !state._loaded) return;
-
-        // Only save if something actually changed
-        const currentKey = `${state.score}-${state.xp}-${state.level}-${state.badges.length}-${state.completedScenarios.length}`;
-        if (prevScoreRef.current === currentKey) return;
-        prevScoreRef.current = currentKey;
-
-        saveToCloud(user, state);
-    }, [user, state]);
+    const [state, dispatch] = useReducer(gameReducer, null, loadLocalState);
 
     // Apply high contrast setting
     useEffect(() => {
