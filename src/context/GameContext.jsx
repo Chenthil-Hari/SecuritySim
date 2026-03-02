@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { buildApiUrl } from '../utils/api';
 
 const GameContext = createContext(null);
 const GameDispatchContext = createContext(null);
@@ -45,7 +46,7 @@ function syncToDatabase(state) {
         const token = localStorage.getItem('token');
         if (!token) return; // Not logged in, skip sync
 
-        fetch('/api/profile/sync', {
+        fetch(buildApiUrl('/api/profile/sync'), {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -180,7 +181,7 @@ export function GameProvider({ children }) {
         if (user) {
             const token = localStorage.getItem('token');
             if (token) {
-                fetch('/api/profile/me', {
+                fetch(buildApiUrl('/api/profile/me'), {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
                     .then(res => res.json())

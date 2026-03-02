@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Trophy, Shield, Zap, Medal, Crown, Star, Globe, MapPin } from 'lucide-react';
+import { buildApiUrl } from '../utils/api';
 import './Leaderboard.css';
 
 const Leaderboard = () => {
@@ -21,7 +22,7 @@ const Leaderboard = () => {
                     url += `?country=${encodeURIComponent(user.country)}`;
                 }
 
-                const response = await fetch(url);
+                const response = await fetch(buildApiUrl(url));
                 if (response.ok) {
                     const data = await response.json();
                     setLeaderboard(data);

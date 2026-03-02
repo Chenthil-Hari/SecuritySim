@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useGame } from '../context/GameContext';
 import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin } from 'lucide-react';
+import { buildApiUrl } from '../utils/api';
 import badges from '../data/badges';
 import './Profile.css';
 
@@ -36,7 +37,7 @@ const Profile = () => {
                     setLoading(false);
                     return;
                 }
-                const response = await fetch('/api/profile/me', {
+                const response = await fetch(buildApiUrl('/api/profile/me'), {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (response.ok) {
@@ -66,7 +67,7 @@ const Profile = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('/api/profile/edit', {
+            const response = await fetch(buildApiUrl('/api/profile/edit'), {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
