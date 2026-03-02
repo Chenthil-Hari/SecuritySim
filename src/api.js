@@ -34,7 +34,22 @@ async function apiFetch(endpoint, options = {}) {
         headers
     });
 
-    const data = await response.json();
+    // Handle non-JSON responses (e.g., Vercel error pages)
+    const contentType = response.headers.get('content-type');
+    let data;
+    if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+    } else {
+        const text = await response.text();
+        if (!response.ok) {
+            throw new Error(`Server error (${response.status}). Please try again.`);
+        }
+        try {
+            data = JSON.parse(text);
+        } catch {
+            throw new Error(`Server returned unexpected response. Please try again.`);
+        }
+    }
 
     if (!response.ok) {
         throw new Error(data.error || `Request failed with status ${response.status}`);
