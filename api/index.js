@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import profileRoutes from './routes/profile.js';
 import leaderboardRoutes from './routes/leaderboard.js';
+import aiRoutes from './routes/ai.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ if (!MONGODB_URI) {
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.get('/api', (req, res) => {
     res.json({ message: 'SecuritySim API is running' });

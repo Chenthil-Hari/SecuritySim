@@ -13,32 +13,45 @@ import Signup from './pages/Signup';
 import Profile from './pages/Profile';
 import Leaderboard from './pages/Leaderboard';
 import Contact from './pages/Contact';
+import ChatWidget from './components/ChatWidget';
 import './App.css';
+
+import { useAuth } from './context/AuthContext';
+
+function AppContent() {
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
+
+  return (
+    <Router>
+      <div className="app">
+        <Navbar />
+        <main className="app-main">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/scenarios" element={<Scenarios />} />
+            <Route path="/scenarios/:id" element={<ScenarioPlay />} />
+            <Route path="/achievements" element={<Achievements />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
+        </main>
+        <ChatWidget isLoggedIn={isLoggedIn} />
+      </div>
+    </Router>
+  );
+}
 
 function App() {
   return (
     <AuthProvider>
       <GameProvider>
-        <Router>
-          <div className="app">
-            <Navbar />
-            <main className="app-main">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/scenarios" element={<Scenarios />} />
-                <Route path="/scenarios/:id" element={<ScenarioPlay />} />
-                <Route path="/achievements" element={<Achievements />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/leaderboard" element={<Leaderboard />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/contact" element={<Contact />} />
-              </Routes>
-            </main>
-          </div>
-        </Router>
+        <AppContent />
       </GameProvider>
     </AuthProvider>
   );
