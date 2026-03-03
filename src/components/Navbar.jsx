@@ -1,9 +1,10 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Mail } from 'lucide-react';
+import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Mail, Flame } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import './Navbar.css';
+import './NavbarStreak.css';
 
 export default function Navbar() {
     const { score } = useGame();
@@ -83,6 +84,10 @@ export default function Navbar() {
                         <div className="score-pill" title="Cyber Safety Score">
                             <Shield size={14} />
                             {score}
+                        </div>
+                        <div className="streak-pill" title="Daily Streak">
+                            <Flame size={14} color="#ff9800" />
+                            {user.streakDays || 0}
                         </div>
                         <button className="logout-btn" onClick={handleLogout} title="Logout">
                             <LogOut size={16} />

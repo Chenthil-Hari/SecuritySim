@@ -1,0 +1,19 @@
+.streak-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: rgba(255, 152, 0, 0.1);
+    color: #ff9800;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: default;
+    border: 1px solid rgba(255, 152, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.streak-pill:hover {
+    background: rgba(255, 152, 0, 0.2);
+    transform: translateY(-1px);
+}

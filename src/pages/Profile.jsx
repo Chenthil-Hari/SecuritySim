@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useGame } from '../context/GameContext';
-import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin } from 'lucide-react';
+import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin, Flame } from 'lucide-react';
 import { buildApiUrl } from '../utils/api';
 import badges from '../data/badges';
 import { Link } from 'react-router-dom';
@@ -256,6 +256,11 @@ const Profile = () => {
 
             {/* Stats Grid */}
             <div className="profile-stats-grid">
+                <div className="profile-stat-card stat-streak">
+                    <Flame size={24} style={{ color: '#ff9800' }} />
+                    <div className="stat-value">{user.streakDays || 0}</div>
+                    <div className="stat-label">Daily Streak</div>
+                </div>
                 <div className="profile-stat-card stat-score">
                     <Shield size={24} />
                     <div className="stat-value">{score}</div>
