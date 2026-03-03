@@ -1,0 +1,18 @@
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    background-color: #000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+}
+
+.loader-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

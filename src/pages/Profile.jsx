@@ -5,6 +5,7 @@ import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapP
 import { buildApiUrl } from '../utils/api';
 import badges from '../data/badges';
 import { Link } from 'react-router-dom';
+import Loader from '../components/Loader';
 import './Profile.css';
 
 const avatarPresets = [
@@ -125,13 +126,7 @@ const Profile = () => {
         );
     }
 
-    if (loading) {
-        return (
-            <div className="profile-container">
-                <div className="profile-loading">Loading profile...</div>
-            </div>
-        );
-    }
+    if (loading) return <Loader />;
 
     const score = gameState.score;
     const xp = gameState.xp;

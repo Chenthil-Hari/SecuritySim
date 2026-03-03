@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import { buildApiUrl } from '../utils/api';
+import Loader from '../components/Loader';
 
 const AuthContext = createContext();
 
@@ -73,7 +74,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={{ user, loading, login, signup, logout, updateUser }}>
-            {!loading && children}
+            {loading ? <Loader /> : children}
         </AuthContext.Provider>
     );
 };

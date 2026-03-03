@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Trophy, Shield, Zap, Medal, Crown, Star, Globe, MapPin, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { buildApiUrl } from '../utils/api';
+import Loader from '../components/Loader';
 import './Leaderboard.css';
 
 const Leaderboard = () => {
@@ -47,13 +48,7 @@ const Leaderboard = () => {
         return <span className="rank-number">{rank}</span>;
     };
 
-    if (loading) {
-        return (
-            <div className="leaderboard-container">
-                <div className="leaderboard-loading">Loading leaderboard...</div>
-            </div>
-        );
-    }
+    if (loading) return <Loader />;
 
     if (!user) {
         return (
