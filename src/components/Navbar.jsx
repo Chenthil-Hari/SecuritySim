@@ -38,26 +38,30 @@ export default function Navbar() {
                         <LayoutDashboard size={16} /> Dashboard
                     </NavLink>
                 </li>
-                <li>
-                    <NavLink to="/scenarios" onClick={() => setMenuOpen(false)}>
-                        <Crosshair size={16} /> Scenarios
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink to="/achievements" onClick={() => setMenuOpen(false)}>
-                        <Award size={16} /> Achievements
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink to="/leaderboard" onClick={() => setMenuOpen(false)}>
-                        <Trophy size={16} /> Leaderboard
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink to="/profile" onClick={() => setMenuOpen(false)}>
-                        <User size={16} /> Profile
-                    </NavLink>
-                </li>
+                {user && (
+                    <>
+                        <li>
+                            <NavLink to="/scenarios" onClick={() => setMenuOpen(false)}>
+                                <Crosshair size={16} /> Scenarios
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/achievements" onClick={() => setMenuOpen(false)}>
+                                <Award size={16} /> Achievements
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/leaderboard" onClick={() => setMenuOpen(false)}>
+                                <Trophy size={16} /> Leaderboard
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/profile" onClick={() => setMenuOpen(false)}>
+                                <User size={16} /> Profile
+                            </NavLink>
+                        </li>
+                    </>
+                )}
                 <li>
                     <NavLink to="/settings" onClick={() => setMenuOpen(false)}>
                         <Settings size={16} /> Settings
