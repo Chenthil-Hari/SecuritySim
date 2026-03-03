@@ -8,7 +8,6 @@ export default function ChatWidget({ isLoggedIn }) {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isFetchingHistory, setIsFetchingHistory] = useState(false);
 
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
@@ -24,50 +23,15 @@ export default function ChatWidget({ isLoggedIn }) {
 
     // Fetch history when opened
     useEffect(() => {
-        if (isOpen && isLoggedIn && messages.length === 0) {
-            fetchHistory();
-        }
-
         // Focus input after opening
         if (isOpen && !isLoading) {
             setTimeout(() => inputRef.current?.focus(), 300);
         }
-    }, [isOpen, isLoggedIn]);
+    }, [isOpen, isLoggedIn, isLoading]);
 
-    const fetchHistory = async () => {
-        setIsFetchingHistory(true);
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) return;
-
-            const res = await fetch('/api/ai/history', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                setMessages(data.messages || []);
-            }
-        } catch (error) {
-            console.error("Failed to load chat history", error);
-        } finally {
-            setIsFetchingHistory(false);
-        }
-    };
-
-    const handleClearChat = async () => {
+    const handleClearChat = () => {
         if (!confirm('Are you sure you want to clear your current conversation history?')) return;
-
-        try {
-            const token = localStorage.getItem('token');
-            await fetch('/api/ai/clear', {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            setMessages([]);
-        } catch (error) {
-            console.error("Failed to clear chat", error);
-        }
+        setMessages([]);
     };
 
     const handleSend = async (e) => {
@@ -90,7 +54,7 @@ export default function ChatWidget({ isLoggedIn }) {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ text: userMessage.text })
+                body: JSON.stringify({ text: userMessage.text, history: messages })
             });
 
             const data = await res.json();
@@ -165,11 +129,6 @@ export default function ChatWidget({ isLoggedIn }) {
                             <div className="chat-status-message">
                                 <Shield size={32} />
                                 <p>Please Log In or Sign Up to access your personal AI Cybersecurity Specialist.</p>
-                            </div>
-                        ) : isFetchingHistory ? (
-                            <div className="chat-status-message">
-                                <Loader className="spinner" size={24} />
-                                <p>Loading context...</p>
                             </div>
                         ) : messages.length === 0 ? (
                             <div className="chat-welcome">
