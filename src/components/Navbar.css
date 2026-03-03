@@ -163,9 +163,11 @@
     background: none;
     color: var(--text-secondary);
     padding: var(--space-sm);
+    border: none;
+    z-index: calc(var(--z-sticky) + 1);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     .navbar-links {
         display: none;
     }
@@ -184,5 +186,30 @@
         background: var(--bg-secondary);
         border-bottom: 1px solid var(--border-color);
         padding: var(--space-md);
+        box-shadow: var(--shadow-md);
+    }
+
+    .user-greeting {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar {
+        padding: var(--space-sm) var(--space-md);
+    }
+
+    .navbar-brand span {
+        font-size: 1.1rem;
+    }
+
+    .auth-buttons {
+        gap: var(--space-xs);
+    }
+
+    .login-btn,
+    .signup-btn {
+        padding: 4px 10px;
+        font-size: 0.8rem;
     }
 }

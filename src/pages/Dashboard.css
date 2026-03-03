@@ -230,4 +230,27 @@
     .stats-column {
         grid-template-columns: 1fr;
     }
+
+    .category-bars {
+        grid-template-columns: 1fr;
+    }
+
+    .empty-dashboard h2 {
+        font-size: 1.3rem;
+    }
+
+    .empty-dashboard p {
+        font-size: 0.95rem;
+    }
+
+    .empty-dashboard .btn-primary,
+    .empty-dashboard .btn-secondary {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .empty-dashboard>div[style*="justifyContent"] {
+        flex-direction: column;
+        gap: 10px;
+    }
 }
