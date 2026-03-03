@@ -4,6 +4,7 @@ import { useGame } from '../context/GameContext';
 import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin } from 'lucide-react';
 import { buildApiUrl } from '../utils/api';
 import badges from '../data/badges';
+import { Link } from 'react-router-dom';
 import './Profile.css';
 
 const avatarPresets = [
@@ -104,11 +105,21 @@ const Profile = () => {
 
     if (!user) {
         return (
-            <div className="profile-container">
-                <div className="profile-empty">
-                    <Shield size={64} />
-                    <h2>Access Restricted</h2>
-                    <p>Please login to view your profile.</p>
+            <div className="profile-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', textAlign: 'center' }}>
+                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '40px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', maxWidth: '500px' }}>
+                    <Shield size={64} style={{ color: 'var(--text-muted)', marginBottom: '20px' }} />
+                    <h2 style={{ fontSize: '1.8rem', marginBottom: '10px' }}>Agent Profile Locked</h2>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '30px', fontSize: '1.1rem' }}>
+                        You must create an account to track your Cyber Safety Score, earn XP, and unlock badges.
+                    </p>
+                    <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+                        <Link to="/login" className="btn-primary" style={{ padding: '12px 24px', fontSize: '1.1rem' }}>
+                            Log In
+                        </Link>
+                        <Link to="/signup" className="btn-secondary" style={{ padding: '12px 24px', fontSize: '1.1rem', background: 'rgba(255,255,255,0.1)', color: 'white', textDecoration: 'none', borderRadius: 'var(--radius-md)' }}>
+                            Sign Up
+                        </Link>
+                    </div>
                 </div>
             </div>
         );

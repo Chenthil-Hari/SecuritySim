@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Shield, Zap, Target, CheckCircle, TrendingUp, Crosshair, Mail, Phone, Bug, Users } from 'lucide-react';
+import { Shield, Zap, Target, CheckCircle, TrendingUp, Crosshair, Mail, Phone, Bug, Users, PlayCircle, Trophy } from 'lucide-react';
 import { useGame } from '../context/GameContext';
+import { useAuth } from '../context/AuthContext';
 import ScoreRing from '../components/ScoreRing';
 import StatCard from '../components/StatCard';
 import ScenarioCard from '../components/ScenarioCard';
@@ -11,6 +12,7 @@ const categoryIcons = { 'Phishing': Mail, 'Scam Calls': Phone, 'Malware': Bug, '
 
 export default function Dashboard() {
     const { score, xp, level, completedScenarios, difficulty } = useGame();
+    const { user } = useAuth();
 
     const totalScenarios = scenarios.length;
     const completedCount = completedScenarios.length;
@@ -35,12 +37,55 @@ export default function Dashboard() {
     );
     const recommended = uncompletedScenarios.slice(0, 3);
 
+    if (!user) {
+        return (
+            <div className="dashboard">
+                <div className="dashboard-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <h1>Welcome to SecuritySim</h1>
+                    <p>Interactive Cybersecurity Training Platform</p>
+                </div>
+
+                <div className="stats-column" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+                    <div className="stat-card" style={{ background: 'rgba(255,255,255,0.05)', padding: '24px', borderRadius: '12px', textAlign: 'center' }}>
+                        <PlayCircle size={40} color="var(--primary)" style={{ margin: '0 auto 15px' }} />
+                        <h3 style={{ margin: '0 0 10px', color: 'white' }}>Learn by Playing</h3>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>Engage in realistic cyber threat scenarios and learn how to defend against phishing, malware, and social engineering.</p>
+                    </div>
+                    <div className="stat-card" style={{ background: 'rgba(255,255,255,0.05)', padding: '24px', borderRadius: '12px', textAlign: 'center' }}>
+                        <Zap size={40} color="var(--warning)" style={{ margin: '0 auto 15px' }} />
+                        <h3 style={{ margin: '0 0 10px', color: 'white' }}>Earn XP & Level Up</h3>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>Every correct decision earns you experience points. Track your cyber safety score and unlock harder difficulties.</p>
+                    </div>
+                    <div className="stat-card" style={{ background: 'rgba(255,255,255,0.05)', padding: '24px', borderRadius: '12px', textAlign: 'center' }}>
+                        <Trophy size={40} color="var(--success)" style={{ margin: '0 auto 15px' }} />
+                        <h3 style={{ margin: '0 0 10px', color: 'white' }}>Compete Globally</h3>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>Join the leaderboard and prove your cybersecurity awareness against other defenders around the world.</p>
+                    </div>
+                </div>
+
+                <div className="empty-dashboard" style={{ background: 'linear-gradient(135deg, rgba(0,240,255,0.1), rgba(0,0,0,0.5))', border: '1px solid rgba(0,240,255,0.2)' }}>
+                    <Shield size={64} style={{ color: 'var(--primary)' }} />
+                    <h2 style={{ fontSize: '1.8rem' }}>Ready to start your training?</h2>
+                    <p style={{ fontSize: '1.1rem' }}>Create a free account to track your progress, access all scenarios, and talk with Cipher, your personal AI Cyber Specialist.</p>
+                    <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', marginTop: '20px' }}>
+                        <Link to="/signup" className="btn-primary">
+                            Create Account
+                        </Link>
+                        <Link to="/login" className="btn-secondary" style={{ padding: '12px 24px', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.1)', color: 'white', textDecoration: 'none', fontWeight: 600 }}>
+                            Log In
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     if (completedCount === 0) {
         return (
             <div className="dashboard">
                 <div className="empty-dashboard">
                     <Shield size={64} />
-                    <h2>Welcome to Your Dashboard</h2>
+                    <h2>Welcome to Your Dashboard, {user.username}!</h2>
                     <p>Complete your first scenario to see your Cyber Safety Score and performance analytics.</p>
                     <Link to="/scenarios" className="btn-primary">
                         <Crosshair size={18} /> Start Your First Scenario

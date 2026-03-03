@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Trophy, Shield, Zap, Medal, Crown, Star, Globe, MapPin } from 'lucide-react';
+import { Trophy, Shield, Zap, Medal, Crown, Star, Globe, MapPin, Lock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { buildApiUrl } from '../utils/api';
 import './Leaderboard.css';
 
@@ -50,6 +51,28 @@ const Leaderboard = () => {
         return (
             <div className="leaderboard-container">
                 <div className="leaderboard-loading">Loading leaderboard...</div>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="leaderboard-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', textAlign: 'center' }}>
+                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '40px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', maxWidth: '500px' }}>
+                    <Lock size={64} style={{ color: 'var(--warning)', marginBottom: '20px' }} />
+                    <h2 style={{ fontSize: '1.8rem', marginBottom: '10px' }}>Rankings Locked</h2>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '30px', fontSize: '1.1rem' }}>
+                        You need an active account to view Top Agents and compete on the global and regional leaderboards.
+                    </p>
+                    <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+                        <Link to="/login" className="btn-primary" style={{ padding: '12px 24px', fontSize: '1.1rem' }}>
+                            Log In
+                        </Link>
+                        <Link to="/signup" className="btn-secondary" style={{ padding: '12px 24px', fontSize: '1.1rem', background: 'rgba(255,255,255,0.1)', color: 'white', textDecoration: 'none', borderRadius: 'var(--radius-md)' }}>
+                            Sign Up
+                        </Link>
+                    </div>
+                </div>
             </div>
         );
     }

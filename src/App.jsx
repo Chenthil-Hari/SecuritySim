@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { GameProvider } from './context/GameContext';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
@@ -35,11 +35,11 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/scenarios" element={isLoggedIn ? <Scenarios /> : <Navigate to="/login" />} />
-          <Route path="/scenarios/:id" element={isLoggedIn ? <ScenarioPlay /> : <Navigate to="/login" />} />
-          <Route path="/achievements" element={isLoggedIn ? <Achievements /> : <Navigate to="/login" />} />
-          <Route path="/profile" element={isLoggedIn ? <Profile /> : <Navigate to="/login" />} />
-          <Route path="/leaderboard" element={isLoggedIn ? <Leaderboard /> : <Navigate to="/login" />} />
+          <Route path="/scenarios" element={<Scenarios />} />
+          <Route path="/scenarios/:id" element={<ScenarioPlay />} />
+          <Route path="/achievements" element={<Achievements />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>
