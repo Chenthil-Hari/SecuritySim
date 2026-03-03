@@ -254,13 +254,16 @@ const Profile = () => {
                 </div>
             )}
 
+            {/* Streak Section */}
+            <div className="streak-section">
+                <div className="streak-header">
+                    <h2><Flame size={24} style={{ color: '#ff9800' }} /> Daily Streak: <span className="streak-count">{user.streakDays || 0} Days</span></h2>
+                </div>
+                <p>Keep logging in every day to build your streak and become a true Cyber Guardian!</p>
+            </div>
+
             {/* Stats Grid */}
             <div className="profile-stats-grid">
-                <div className="profile-stat-card stat-streak">
-                    <Flame size={24} style={{ color: '#ff9800' }} />
-                    <div className="stat-value">{user.streakDays || 0}</div>
-                    <div className="stat-label">Daily Streak</div>
-                </div>
                 <div className="profile-stat-card stat-score">
                     <Shield size={24} />
                     <div className="stat-value">{score}</div>

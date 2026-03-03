@@ -81,13 +81,15 @@ export default function Navbar() {
                         <div className="user-greeting">
                             <span>{user.username}</span>
                         </div>
-                        <div className="score-pill" title="Cyber Safety Score">
-                            <Shield size={14} />
-                            {score}
-                        </div>
-                        <div className="streak-pill" title="Daily Streak">
-                            <Flame size={14} color="#ff9800" />
-                            {user.streakDays || 0}
+                        <div className="nav-stats">
+                            <div className="score-pill" title="Cyber Safety Score">
+                                <Shield size={14} />
+                                {score}
+                            </div>
+                            <div className="streak-pill" title="Daily Streak">
+                                <Flame size={14} color="#ff9800" />
+                                {user.streakDays || 0}
+                            </div>
                         </div>
                         <button className="logout-btn" onClick={handleLogout} title="Logout">
                             <LogOut size={16} />
