@@ -237,6 +237,9 @@
 }
 
 @media (max-width: 768px) {
+    .leaderboard-container {
+        padding: 1rem;
+    }
 
     .col-xp,
     .col-badges {

@@ -845,3 +845,28 @@
 .chat-bubble:nth-child(4) {
     animation-delay: 2.4s;
 }
+
+@media (max-width: 768px) {
+    .scenario-play {
+        padding: var(--space-xl) var(--space-md);
+    }
+
+    .scenario-play-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .summary-stats {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .email-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-xs);
+    }
+
+    .email-subject {
+        font-size: 0.95rem;
+    }
+}

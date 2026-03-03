@@ -123,3 +123,22 @@
     position: relative;
     z-index: 1;
 }
+
+@media (max-width: 768px) {
+    .badge-item {
+        padding: var(--space-md);
+    }
+
+    .badge-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .badge-name {
+        font-size: 0.85rem;
+    }
+
+    .badge-desc {
+        font-size: 0.75rem;
+    }
+}

@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Profile from './pages/Profile';
 import Leaderboard from './pages/Leaderboard';
+import Contact from './pages/Contact';
 import './App.css';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/contact" element={<Contact />} />
               </Routes>
             </main>
           </div>

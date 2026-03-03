@@ -215,6 +215,14 @@
 }
 
 @media (max-width: 768px) {
+    .dashboard {
+        padding: var(--space-xl) var(--space-md);
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+
     .dashboard-grid {
         grid-template-columns: 1fr;
     }

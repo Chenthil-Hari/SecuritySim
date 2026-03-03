@@ -68,6 +68,10 @@
 }
 
 @media (max-width: 768px) {
+    .scenarios-page {
+        padding: var(--space-xl) var(--space-md);
+    }
+
     .scenarios-grid {
         grid-template-columns: 1fr;
     }

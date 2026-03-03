@@ -134,3 +134,22 @@
 .scenario-card-status.new {
     color: var(--text-muted);
 }
+
+@media (max-width: 768px) {
+    .scenario-card {
+        padding: var(--space-md);
+    }
+
+    .scenario-card-title {
+        font-size: 1rem;
+    }
+
+    .scenario-card-desc {
+        font-size: 0.8rem;
+    }
+
+    .scenario-card-icon {
+        width: 36px;
+        height: 36px;
+    }
+}

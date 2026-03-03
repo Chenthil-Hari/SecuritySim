@@ -155,3 +155,23 @@
 .feedback-btn.incorrect:hover {
     box-shadow: 0 4px 16px var(--primary-glow);
 }
+
+@media (max-width: 768px) {
+    .feedback-modal {
+        padding: var(--space-lg);
+        max-width: 90vw;
+    }
+
+    .feedback-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .feedback-result {
+        font-size: 1.1rem;
+    }
+
+    .feedback-text {
+        font-size: 0.85rem;
+    }
+}
