@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, Zap, Target, CheckCircle, TrendingUp, Crosshair, Mail, Phone, Bug, Users, PlayCircle, Trophy, ChevronRight } from 'lucide-react';
+import { Shield, Zap, Target, CheckCircle, TrendingUp, Crosshair, Mail, Phone, Bug, Users, PlayCircle, Trophy } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
 import ScoreRing from '../components/ScoreRing';
@@ -125,9 +125,6 @@ export default function Dashboard() {
                         <div className="xp-bar">
                             <div className="xp-bar-fill" style={{ width: `${xpInLevel}%` }} />
                         </div>
-                        <Link to="/skill-tree" className="skill-tree-link-btn">
-                            🌳 View Skill Tree <ChevronRight size={14} />
-                        </Link>
                     </div>
                 </div>
 
