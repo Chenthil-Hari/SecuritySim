@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Phone, Mail, AlertTriangle, MessageSquare, Trophy, Star, RotateCcw, ArrowRight, PhoneIncoming, PhoneOff, Wifi } from 'lucide-react';
 import { useGame, useGameDispatch } from '../context/GameContext';
 import { speakScenario, speak } from '../utils/voiceGuidance';
 import FeedbackModal from '../components/FeedbackModal';
 import { playCorrect, playIncorrect, playTimerTimeout, playScenarioComplete, startAmbient, stopAmbient, isAmbientActive } from '../utils/soundEffects';
+import { buildApiUrl } from '../utils/api';
 import Character from '../components/Character';
 import { useTypewriter, useStaggeredReveal } from '../hooks/useAnimations';
 import badgesList from '../data/badges';
@@ -235,6 +236,8 @@ function AnimatedDecision({ prompt }) {
 export default function ScenarioPlay() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const challengeId = searchParams.get('challengeId');
     const { state, dispatch } = useGame(); // Updated useGame hook destructuring
 
     const scenario = scenariosData.find(s => s.id === id);
@@ -362,33 +365,55 @@ export default function ScenarioPlay() {
             const accuracy = Math.round((correctCount / totalSteps) * 100);
             const xpEarned = Math.round(accuracy * 0.5 * scenario.difficulty);
 
-            dispatch({
-                type: 'COMPLETE_SCENARIO',
-                payload: {
-                    scenarioId: scenario.id,
-                    category: scenario.category,
-                    accuracy,
-                    xpEarned
+            if (challengeId) {
+                // Submit to PvP Challenge endpoint
+                try {
+                    const token = localStorage.getItem('token');
+                    fetch(buildApiUrl(`/api/challenges/${challengeId}/complete`), {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            receiverAccuracy: accuracy,
+                            receiverXp: xpEarned
+                        })
+                    }).then(res => res.json()).then(data => {
+                        console.log("Challenge completed:", data.message);
+                    });
+                } catch (err) {
+                    console.error("Error submitting challenge score:", err);
                 }
-            });
+            } else {
+                dispatch({
+                    type: 'COMPLETE_SCENARIO',
+                    payload: {
+                        scenarioId: scenario.id,
+                        category: scenario.category,
+                        accuracy,
+                        xpEarned
+                    }
+                });
 
-            // Check for new badges
-            const updatedState = {
-                ...state,
-                completedScenarios: [
-                    ...state.completedScenarios,
-                    { scenarioId: scenario.id, category: scenario.category, accuracy }
-                ],
-                xp: state.xp + xpEarned,
-                level: Math.floor((state.xp + xpEarned) / 100) + 1,
-                score: accuracy
-            };
+                // Check for new badges
+                const updatedState = {
+                    ...state,
+                    completedScenarios: [
+                        ...state.completedScenarios,
+                        { scenarioId: scenario.id, category: scenario.category, accuracy }
+                    ],
+                    xp: state.xp + xpEarned,
+                    level: Math.floor((state.xp + xpEarned) / 100) + 1,
+                    score: accuracy
+                };
 
-            badgesList.forEach(badge => {
-                if (!state.badges.includes(badge.id) && badge.condition(updatedState)) {
-                    dispatch({ type: 'EARN_BADGE', payload: badge.id });
-                }
-            });
+                badgesList.forEach(badge => {
+                    if (!state.badges.includes(badge.id) && badge.condition(updatedState)) {
+                        dispatch({ type: 'EARN_BADGE', payload: badge.id });
+                    }
+                });
+            }
 
             setFinished(true);
             // Set final character reaction based on accuracy
@@ -477,9 +502,15 @@ export default function ScenarioPlay() {
                     }}>
                         <RotateCcw size={16} /> Try Again
                     </button>
-                    <Link to="/scenarios" className="btn-primary">
-                        Next Scenario <ArrowRight size={16} />
-                    </Link>
+                    {challengeId ? (
+                        <Link to="/challenges" className="btn-primary">
+                            Back to Challenges <ArrowRight size={16} />
+                        </Link>
+                    ) : (
+                        <Link to="/scenarios" className="btn-primary">
+                            Next Scenario <ArrowRight size={16} />
+                        </Link>
+                    )}
                 </div>
             </div>
         );

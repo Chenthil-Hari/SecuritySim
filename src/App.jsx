@@ -7,6 +7,8 @@ import Dashboard from './pages/Dashboard';
 import Scenarios from './pages/Scenarios';
 import ScenarioPlay from './pages/ScenarioPlay';
 import Teams from './pages/Teams';
+import Challenges from './pages/Challenges';
+import ThreatMap from './pages/ThreatMap';
 import Achievements from './pages/Achievements';
 import Settings from './pages/Settings';
 import Contact from './pages/Contact';
@@ -34,6 +36,8 @@ function AppContent() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/scenarios" element={<Scenarios />} />
           <Route path="/teams" element={<Teams />} />
+          <Route path="/challenges" element={<Challenges />} />
+          <Route path="/threat-map" element={<ThreatMap />} />
           <Route path="/scenarios/:id" element={<ScenarioPlay />} />
           <Route path="/achievements" element={<Achievements />} />
           <Route path="/profile" element={<Profile />} />
