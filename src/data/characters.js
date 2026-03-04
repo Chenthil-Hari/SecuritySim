@@ -187,6 +187,78 @@ const characters = {
             relief: "Good thing I asked the barista for the real network.",
             confident: "Always verify Wi-Fi names and use a VPN on public networks."
         }
+    },
+    'browser-phish-1': {
+        name: 'Ethan',
+        role: 'College Graduate',
+        ageGroup: 'young',
+        device: 'laptop',
+        skinColor: '#f1c27d',
+        hairColor: '#2d2d2d',
+        shirtColor: '#00b894',
+        accessory: 'glasses',
+        dialogues: {
+            idle: "Got an email about unusual activity on my account...",
+            thinking: "This login page looks right, but let me check the URL...",
+            confused: "Wait, is that a zero or the letter 'O' in the URL?",
+            panic: "I almost typed my password into a fake site!",
+            relief: "Caught the typosquatting! That was close.",
+            confident: "Always check the URL bar before entering credentials."
+        }
+    },
+    'usb-explorer-1': {
+        name: 'Diane',
+        role: 'IT Intern',
+        ageGroup: 'young',
+        device: 'desktop',
+        skinColor: '#c68642',
+        hairColor: '#1a1a2e',
+        shirtColor: '#6c5ce7',
+        accessory: 'badge',
+        dialogues: {
+            idle: "My colleague just plugged in a USB they found outside...",
+            thinking: "Let me look at these files carefully...",
+            confused: "Wait, why does this PDF have a .exe extension?",
+            panic: "There's an autorun.inf file! This USB is weaponized!",
+            relief: "Good thing we caught those disguised executables.",
+            confident: "Double extensions are a classic malware trick."
+        }
+    },
+    'wifi-attack-1': {
+        name: 'Carlos',
+        role: 'Business Traveler',
+        ageGroup: 'adult',
+        device: 'laptop',
+        skinColor: '#8d5524',
+        hairColor: '#2d2d2d',
+        shirtColor: '#2d3436',
+        accessory: 'tie',
+        dialogues: {
+            idle: "At the airport, need to connect to Wi-Fi for work...",
+            thinking: "Multiple networks with similar names... suspicious.",
+            confused: "SkyHaven_Free_WiFi or SkyHaven-Airport? Which is real?",
+            panic: "What if I connected to a hacker's fake hotspot?!",
+            relief: "Asked the info desk — the secured one is official.",
+            confident: "Always verify Wi-Fi with staff and use WPA2 networks."
+        }
+    },
+    'social-eng-4': {
+        name: 'Zoe',
+        role: 'Marketing Manager',
+        ageGroup: 'adult',
+        device: 'phone',
+        skinColor: '#fdbcb4',
+        hairColor: '#d35400',
+        shirtColor: '#e17055',
+        accessory: 'earbuds',
+        dialogues: {
+            idle: "Scrolling through LinkedIn during my lunch break...",
+            thinking: "$10K/week with no experience? That seems too good...",
+            confused: "Should I scan this QR code? It's from a stranger...",
+            panic: "That job post was a money laundering scheme?!",
+            relief: "Reported both scam posts. Staying safe online!",
+            confident: "If it's too good to be true, it's always a scam."
+        }
     }
 };
 

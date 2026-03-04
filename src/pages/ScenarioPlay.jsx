@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Phone, Mail, AlertTriangle, MessageSquare, Trophy, Star, RotateCcw, ArrowRight, PhoneIncoming, PhoneOff, Wifi } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, AlertTriangle, MessageSquare, Trophy, Star, RotateCcw, ArrowRight, PhoneIncoming, PhoneOff, Wifi, Globe, Lock, Unlock, FolderOpen, FileText, FileWarning, Shield, Signal, Briefcase, Heart, MessageCircle, Share2, ChevronRight, HardDrive, File, Image, Paperclip, CheckCircle, XCircle, WifiOff } from 'lucide-react';
 import { useGame, useGameDispatch } from '../context/GameContext';
 import { speakScenario, speak } from '../utils/voiceGuidance';
 import FeedbackModal from '../components/FeedbackModal';
@@ -195,6 +195,372 @@ function AnimatedDecision({ prompt }) {
         <div className="decision-visual sim-entrance">
             <MessageSquare size={48} className="decision-icon" />
             <div className="decision-prompt-text">{prompt}</div>
+        </div>
+    );
+}
+
+/* Animated Browser — fake browser chrome with URL bar, SSL indicator, page content */
+function AnimatedBrowser({ vd }) {
+    const [phase, setPhase] = useState(0);
+    const [hoveredLink, setHoveredLink] = useState(null);
+    const { displayedText: urlText, isTyping: urlTyping } = useTypewriter(
+        vd.url || '',
+        25,
+        800
+    );
+
+    useEffect(() => {
+        const timers = [
+            setTimeout(() => setPhase(1), 400),
+            setTimeout(() => setPhase(2), 1200),
+            setTimeout(() => setPhase(3), 2500),
+            setTimeout(() => setPhase(4), 3500),
+        ];
+        return () => timers.forEach(clearTimeout);
+    }, []);
+
+    const getFileIcon = (type) => {
+        switch (type) {
+            case 'pdf': return <FileText size={16} color="#e74c3c" />;
+            case 'exe-disguised': return <FileWarning size={16} color="var(--danger)" />;
+            default: return <File size={16} />;
+        }
+    };
+
+    return (
+        <div className="browser-visual sim-entrance">
+            {/* Tab bar */}
+            <div className="browser-tab-bar">
+                <div className="browser-tab active">
+                    <Globe size={12} />
+                    <span>{vd.tabTitle || 'New Tab'}</span>
+                    <span className="browser-tab-close">×</span>
+                </div>
+                <div className="browser-tab-new">+</div>
+            </div>
+
+            {/* Address bar */}
+            <div className="browser-address-bar">
+                <div className="browser-nav-btns">
+                    <span className="nav-btn">←</span>
+                    <span className="nav-btn">→</span>
+                    <span className="nav-btn">↻</span>
+                </div>
+                <div className={`browser-url-field ${vd.isSecure ? 'secure' : 'insecure'}`}>
+                    {vd.isSecure ? (
+                        <Lock size={14} className="ssl-icon secure" />
+                    ) : (
+                        <Unlock size={14} className="ssl-icon insecure" />
+                    )}
+                    <span className="browser-url-text">
+                        {urlText}
+                        {urlTyping && <span className="sim-cursor">|</span>}
+                    </span>
+                </div>
+            </div>
+
+            {/* Page content */}
+            {phase >= 2 && (
+                <div className="browser-page-content sim-field-reveal">
+                    {phase >= 2 && (
+                        <h2 className="browser-page-title sim-field-reveal">{vd.pageTitle}</h2>
+                    )}
+                    {phase >= 2 && vd.pageSubtitle && (
+                        <p className="browser-page-subtitle sim-field-reveal">{vd.pageSubtitle}</p>
+                    )}
+                    {phase >= 3 && (
+                        <p className="browser-page-text sim-field-reveal">{vd.pageContent}</p>
+                    )}
+
+                    {/* Form fields */}
+                    {phase >= 4 && vd.formFields && vd.formFields.length > 0 && (
+                        <div className="browser-form sim-field-reveal">
+                            {vd.formFields.map((field, i) => (
+                                <div key={i} className="browser-form-field">
+                                    <input type={field === 'Password' ? 'password' : 'text'} placeholder={field} disabled />
+                                </div>
+                            ))}
+                            {vd.submitButton && (
+                                <div className="browser-submit-btn sim-btn-appear">{vd.submitButton}</div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Links with hover-to-reveal */}
+                    {phase >= 4 && vd.links && vd.links.length > 0 && (
+                        <div className="browser-links sim-field-reveal">
+                            {vd.links.map((link, i) => (
+                                <span
+                                    key={i}
+                                    className="browser-page-link"
+                                    onMouseEnter={() => setHoveredLink(i)}
+                                    onMouseLeave={() => setHoveredLink(null)}
+                                >
+                                    {link.text}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Hover tooltip showing real URL */}
+            {hoveredLink !== null && vd.links[hoveredLink] && (
+                <div className="browser-link-tooltip">
+                    <span className="tooltip-label">Actual URL:</span>
+                    <span className={`tooltip-url ${vd.links[hoveredLink].realUrl.includes('malicious') || vd.links[hoveredLink].realUrl.includes('.ru') ? 'dangerous' : 'safe'}`}>
+                        {vd.links[hoveredLink].realUrl}
+                    </span>
+                </div>
+            )}
+
+            {/* SSL Warning banner */}
+            {!vd.isSecure && phase >= 1 && (
+                <div className="browser-ssl-warning sim-field-reveal">
+                    <AlertTriangle size={14} />
+                    <span>Not Secure — Connection is not encrypted (HTTP)</span>
+                </div>
+            )}
+        </div>
+    );
+}
+
+/* Animated File Explorer — Windows-style file explorer with danger highlighting */
+function AnimatedFileExplorer({ vd }) {
+    const files = vd.files || [];
+    const { visibleCount } = useStaggeredReveal(files, 300, 800);
+    const [hoveredFile, setHoveredFile] = useState(null);
+
+    const getFileIcon = (file) => {
+        switch (file.type) {
+            case 'folder': return <FolderOpen size={20} color="#f39c12" />;
+            case 'pdf': return <FileText size={20} color="#e74c3c" />;
+            case 'exe-disguised': return <FileWarning size={20} color="var(--danger)" className="flicker" />;
+            case 'bat': return <FileWarning size={20} color="var(--warning)" />;
+            case 'sys': return <Shield size={20} color="var(--warning)" />;
+            case 'xlsx': return <FileText size={20} color="#27ae60" />;
+            case 'docx': return <FileText size={20} color="#2980b9" />;
+            case 'txt': return <FileText size={20} color="var(--text-muted)" />;
+            default: return <File size={20} />;
+        }
+    };
+
+    return (
+        <div className="file-explorer-visual sim-entrance">
+            {/* Title bar */}
+            <div className="fe-titlebar">
+                <span className="email-dot red" />
+                <span className="email-dot yellow" />
+                <span className="email-dot green" />
+                <span className="fe-titlebar-text">File Explorer — {vd.driveName}</span>
+            </div>
+
+            {/* Breadcrumb */}
+            <div className="fe-breadcrumb">
+                <HardDrive size={14} />
+                <ChevronRight size={12} />
+                <span>{vd.driveName}</span>
+                <ChevronRight size={12} />
+                <span className="fe-crumb-active">{vd.drivePath}</span>
+            </div>
+
+            {/* File list */}
+            <div className="fe-content">
+                <div className="fe-sidebar">
+                    <div className="fe-sidebar-item"><HardDrive size={14} /> OS (C:)</div>
+                    <div className="fe-sidebar-item active"><HardDrive size={14} /> {vd.driveName.split(' ')[0]}</div>
+                    <div className="fe-sidebar-item"><FolderOpen size={14} /> Documents</div>
+                    <div className="fe-sidebar-item"><Image size={14} /> Pictures</div>
+                </div>
+
+                <div className="fe-file-list">
+                    {/* Column headers */}
+                    <div className="fe-file-header">
+                        <span className="fe-col-name">Name</span>
+                        <span className="fe-col-date">Date Modified</span>
+                        <span className="fe-col-size">Size</span>
+                    </div>
+
+                    {files.slice(0, visibleCount).map((file, i) => (
+                        <div
+                            key={i}
+                            className={`fe-file-row sim-field-reveal ${!file.isSafe ? 'fe-file-danger' : ''}`}
+                            onMouseEnter={() => setHoveredFile(i)}
+                            onMouseLeave={() => setHoveredFile(null)}
+                        >
+                            <span className="fe-col-name">
+                                {getFileIcon(file)}
+                                <span className={!file.isSafe ? 'fe-name-suspicious' : ''}>{file.name}</span>
+                                {!file.isSafe && <AlertTriangle size={12} className="fe-danger-icon" />}
+                            </span>
+                            <span className="fe-col-date">{file.date}</span>
+                            <span className="fe-col-size">{file.size}</span>
+
+                            {/* Tooltip on hover */}
+                            {hoveredFile === i && file.tooltip && (
+                                <div className="fe-file-tooltip">
+                                    <AlertTriangle size={12} />
+                                    <div>
+                                        <div className="fe-tooltip-type">Type: {file.realType}</div>
+                                        <div className="fe-tooltip-warning">{file.tooltip}</div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Status bar */}
+            <div className="fe-statusbar">
+                <span>{files.length} items</span>
+                <span>{vd.driveUsed} used of {vd.driveSize}</span>
+            </div>
+        </div>
+    );
+}
+
+/* Animated Wi-Fi Selector — OS-style network list with signal bars */
+function AnimatedWifiSelector({ vd }) {
+    const networks = vd.networks || [];
+    const { visibleCount } = useStaggeredReveal(networks, 500, 600);
+    const [scanning, setScanning] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setScanning(false), 2000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    const renderSignalBars = (strength) => {
+        return (
+            <div className="wifi-signal-bars">
+                {[1, 2, 3, 4, 5].map(level => (
+                    <div
+                        key={level}
+                        className={`wifi-bar ${level <= strength ? 'active' : ''}`}
+                        style={{ height: `${4 + level * 3}px` }}
+                    />
+                ))}
+            </div>
+        );
+    };
+
+    return (
+        <div className="wifi-visual sim-entrance">
+            {/* Header */}
+            <div className="wifi-header">
+                <Wifi size={20} />
+                <div>
+                    <div className="wifi-header-title">Wi-Fi Networks</div>
+                    <div className="wifi-header-location">{vd.location}</div>
+                </div>
+            </div>
+
+            {/* Scanning indicator */}
+            {scanning && (
+                <div className="wifi-scanning">
+                    <div className="wifi-scanning-spinner" />
+                    <span>Scanning for networks...</span>
+                </div>
+            )}
+
+            {/* Network list */}
+            <div className="wifi-network-list">
+                {networks.slice(0, visibleCount).map((network, i) => (
+                    <div
+                        key={i}
+                        className={`wifi-network-item sim-field-reveal ${network.isEvil ? 'wifi-evil' : ''} ${network.connected ? 'wifi-connected' : ''}`}
+                    >
+                        <div className="wifi-network-info">
+                            <div className="wifi-network-name">
+                                {network.secured ? (
+                                    <Lock size={14} className="wifi-lock" />
+                                ) : (
+                                    <Unlock size={14} className="wifi-unlock" />
+                                )}
+                                {network.name}
+                            </div>
+                            <div className="wifi-network-hint">{network.hint}</div>
+                        </div>
+                        <div className="wifi-network-signal">
+                            {renderSignalBars(network.signal)}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Footer hint */}
+            <div className="wifi-footer">
+                <Shield size={14} />
+                <span>Tip: Networks with 🔒 are encrypted. Open networks can be intercepted.</span>
+            </div>
+        </div>
+    );
+}
+
+/* Animated Social Feed — LinkedIn-style social media posts */
+function AnimatedSocialFeed({ vd }) {
+    const posts = vd.posts || [];
+    const { visibleCount } = useStaggeredReveal(posts, 800, 500);
+
+    return (
+        <div className="social-feed-visual sim-entrance">
+            {/* Platform Header */}
+            <div className="sf-header">
+                <Briefcase size={16} />
+                <span className="sf-platform-name">{vd.platform}</span>
+            </div>
+
+            {/* Posts */}
+            <div className="sf-posts">
+                {posts.slice(0, visibleCount).map((post, i) => (
+                    <div key={i} className={`sf-post sim-field-reveal ${post.isSuspicious ? 'sf-post-suspicious' : ''}`}>
+                        {/* Author header */}
+                        <div className="sf-post-header">
+                            <div className="sf-avatar">{post.authorAvatar}</div>
+                            <div className="sf-author-info">
+                                <div className="sf-author-name">
+                                    {post.author}
+                                    {post.verified && <CheckCircle size={14} className="sf-verified" />}
+                                    {!post.verified && <span className="sf-unverified">✗</span>}
+                                </div>
+                                <div className="sf-author-title">{post.authorTitle}</div>
+                            </div>
+                            <span className="sf-time">{post.timeAgo}</span>
+                        </div>
+
+                        {/* Post content */}
+                        <div className="sf-post-content">{post.content}</div>
+
+                        {/* Attachment if present */}
+                        {post.attachment && (
+                            <div className="sf-attachment">
+                                <Paperclip size={14} />
+                                <span className={`sf-attachment-name ${post.attachment.type === 'exe' ? 'sf-attachment-danger' : ''}`}>
+                                    {post.attachment.name}
+                                </span>
+                                <span className="sf-attachment-size">{post.attachment.size}</span>
+                                {post.attachment.type === 'exe' && <AlertTriangle size={12} className="sf-attachment-warn" />}
+                            </div>
+                        )}
+
+                        {/* Engagement bar */}
+                        <div className="sf-engagement">
+                            <span><Heart size={14} /> {post.likes}</span>
+                            <span><MessageCircle size={14} /> {post.comments}</span>
+                            <span><Share2 size={14} /> {post.shares}</span>
+                        </div>
+
+                        {/* Suspicious badge */}
+                        {post.isSuspicious && post.suspiciousReasons.length > 0 && (
+                            <div className="sf-suspicious-hint">
+                                <AlertTriangle size={12} />
+                                <span>⚠ Potential red flags detected</span>
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }
@@ -432,6 +798,18 @@ export default function ScenarioPlay() {
 
             case 'popup':
                 return <AnimatedPopup vd={vd} key={`popup-${currentStep}`} />;
+
+            case 'browser':
+                return <AnimatedBrowser vd={vd} key={`browser-${currentStep}`} />;
+
+            case 'file-explorer':
+                return <AnimatedFileExplorer vd={vd} key={`file-explorer-${currentStep}`} />;
+
+            case 'wifi':
+                return <AnimatedWifiSelector vd={vd} key={`wifi-${currentStep}`} />;
+
+            case 'social-feed':
+                return <AnimatedSocialFeed vd={vd} key={`social-feed-${currentStep}`} />;
 
             case 'decision':
             default:
