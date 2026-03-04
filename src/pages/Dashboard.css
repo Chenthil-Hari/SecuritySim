@@ -280,3 +280,25 @@
         gap: 10px;
     }
 }
+.skill-tree-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: var(--space-md);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-glow);
+    background: var(--primary-bg);
+    color: var(--primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    width: 100%;
+    justify-content: center;
+}
+.skill-tree-link-btn:hover {
+    background: var(--primary);
+    color: #000;
+    transform: translateY(-1px);
+}
