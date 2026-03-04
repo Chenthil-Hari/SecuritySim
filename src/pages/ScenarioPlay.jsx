@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Phone, Mail, AlertTriangle, MessageSquare, Trophy, Star, RotateCcw, ArrowRight, PhoneIncoming, PhoneOff, Wifi } from 'lucide-react';
 import { useGame, useGameDispatch } from '../context/GameContext';
@@ -12,6 +12,7 @@ import badgesList from '../data/badges';
 import scenariosData from '../data/scenarios';
 import characters from '../data/characters';
 import Timer from '../components/Timer';
+import DesktopSim from '../components/DesktopSim';
 import './ScenarioPlay.css';
 
 /* ====================================================
@@ -152,13 +153,15 @@ function AnimatedChat({ vd }) {
                     </div>
                 </div>
             </div>
-            <div className="chat-messages">
+            <div className="chat-content">
                 {messages.slice(0, visibleCount).map((msg, i) => (
-                    <ChatBubbleAnimated text={msg} key={i} index={i} />
+                    <div key={i} className="chat-bubble recipient sim-field-reveal">
+                        {msg}
+                    </div>
                 ))}
                 {showTyping && (
-                    <div className="chat-typing-indicator">
-                        <span /><span /><span />
+                    <div className="chat-typing-indicator recipient">
+                        <span /> <span /> <span />
                     </div>
                 )}
             </div>
@@ -166,87 +169,58 @@ function AnimatedChat({ vd }) {
     );
 }
 
-/* Individual chat bubble with typewriter */
-function ChatBubbleAnimated({ text, index }) {
-    const { displayedText, isTyping } = useTypewriter(text, 25, 100);
-    return (
-        <div className="chat-bubble sim-bubble-enter" style={{ animationDelay: `${index * 0.05}s` }}>
-            {displayedText}
-            {isTyping && <span className="sim-cursor">|</span>}
-        </div>
-    );
-}
-
-/* Animated Popup — scale-in with flashing bar */
+/* Animated Popup — generic modal-style warning */
 function AnimatedPopup({ vd }) {
-    const [showBody, setShowBody] = useState(false);
-    const { displayedText: msgText, isTyping } = useTypewriter(
-        vd.message || '',
-        20,
-        1200
-    );
-
-    useEffect(() => {
-        const t = setTimeout(() => setShowBody(true), 800);
-        return () => clearTimeout(t);
-    }, []);
-
     return (
-        <div className="popup-visual sim-popup-entrance">
-            <div className="popup-top-bar popup-flash">
-                <span>{vd.title}</span>
-                <span>✕</span>
+        <div className={`popup-visual sim-entrance ${vd.isFlashing ? 'popup-flashing' : ''}`}>
+            <div className="popup-header">
+                <AlertTriangle size={18} /> {vd.title || 'Security Warning'}
             </div>
-            {showBody && (
-                <div className="popup-body sim-field-reveal">
-                    <h3>⚠️ WARNING</h3>
-                    <p>
-                        {msgText}
-                        {isTyping && <span className="sim-cursor">|</span>}
-                    </p>
-                    {!isTyping && vd.buttonText && (
-                        <div className="popup-fake-btn sim-btn-appear">{vd.buttonText}</div>
-                    )}
-                    {!isTyping && vd.phoneNumber && (
-                        <p className="popup-phone sim-btn-appear">Support: {vd.phoneNumber}</p>
-                    )}
-                </div>
-            )}
+            <div className="popup-body">
+                <p>{vd.message}</p>
+                {vd.buttonText && <div className="popup-fake-btn">{vd.buttonText}</div>}
+                {vd.phoneNumber && (
+                    <div className="popup-phone">
+                        Support: <strong>{vd.phoneNumber}</strong>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
 
-/* Animated Decision — typewriter prompt */
+/* Base Component for decisions with No Visual */
 function AnimatedDecision({ prompt }) {
-    const { displayedText, isTyping } = useTypewriter(prompt, 22, 300);
     return (
         <div className="decision-visual sim-entrance">
-            <p className="decision-prompt">
-                {displayedText}
-                {isTyping && <span className="sim-cursor">|</span>}
-            </p>
+            <MessageSquare size={48} className="decision-icon" />
+            <div className="decision-prompt-text">{prompt}</div>
         </div>
     );
 }
 
 /* ====================================================
-   MAIN COMPONENT
+   MAIN PAGE COMPONENT
    ==================================================== */
 
 export default function ScenarioPlay() {
     const { id } = useParams();
-    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const challengeId = searchParams.get('challengeId');
-    const { state, dispatch } = useGame(); // Updated useGame hook destructuring
 
+    const navigate = useNavigate();
+    const state = useGame();
+    const dispatch = useGameDispatch();
     const scenario = scenariosData.find(s => s.id === id);
+
     const [currentStep, setCurrentStep] = useState(0);
     const [selectedOption, setSelectedOption] = useState(null);
     const [showFeedback, setShowFeedback] = useState(false);
     const [stepResults, setStepResults] = useState([]);
     const [finished, setFinished] = useState(false);
     const [charReaction, setCharReaction] = useState('idle');
+
+    // Timer and performance
     const [timedOut, setTimedOut] = useState(false);
     const [stepStartTime, setStepStartTime] = useState(0);
     const [timeBonusTotal, setTimeBonusTotal] = useState(0);
@@ -275,7 +249,7 @@ export default function ScenarioPlay() {
             const timer = setTimeout(() => setCharReaction('thinking'), 1500);
             return () => clearTimeout(timer);
         }
-    }, [currentStep]);
+    }, [currentStep, showFeedback, finished]);
 
     // Reset step start time on step change
     useEffect(() => {
@@ -423,11 +397,30 @@ export default function ScenarioPlay() {
         }
     };
 
+    const handleDesktopAction = (action) => {
+        // Find matching option based on action type or payload
+        let matchedOptionIdx = -1;
+
+        if (action.type === 'delete') {
+            matchedOptionIdx = step.options.findIndex(o => o.trigger === 'delete' && o.target === action.fileName);
+        } else if (typeof action === 'string') {
+            // Close window or other named action
+            matchedOptionIdx = step.options.findIndex(o => o.trigger === action);
+        }
+
+        if (matchedOptionIdx !== -1) {
+            handleOptionSelect(step.options[matchedOptionIdx], matchedOptionIdx);
+        }
+    };
+
     // Render visual based on type
     const renderVisual = () => {
         const vd = step.visualData;
 
         switch (step.visualType) {
+            case 'desktop':
+                return <DesktopSim vd={vd} onAction={handleDesktopAction} key={`desktop-${currentStep}`} />;
+
             case 'email':
                 return <AnimatedEmail vd={vd} key={`email-${currentStep}`} />;
 

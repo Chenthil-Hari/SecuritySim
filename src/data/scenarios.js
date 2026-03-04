@@ -781,6 +781,87 @@ const scenarios = [
         ]
       }
     ]
+  },
+  {
+    id: 'master-1',
+    title: 'The Ransomware Response',
+    category: 'Malware',
+    difficulty: 3,
+    timeLimit: 60,
+    description: 'A high-stakes desktop simulation. Your system has been targeted by advanced ransomware. Use your technical skills to survive.',
+    icon: 'ShieldAlert',
+    steps: [
+      {
+        prompt: 'You notice your computer is running extremely slowly. Suddenly, several windows flash on your screen and your wallpapers changes. What is your first reaction?',
+        visualType: 'desktop',
+        visualData: {
+          windows: [
+            {
+              title: 'SYSTEM CRITICAL ALERT',
+              type: 'alert',
+              isFlashing: true,
+              content: 'WARNING: 42,981 files are currently being encrypted. Your personal keys are being sent to a C&C server in Eastern Europe.',
+              actionOnClose: 'close-alert',
+              x: '30%',
+              y: '25%'
+            },
+            {
+              title: 'Note.txt',
+              content: 'ALL YOUR FILES ARE BELONG TO US. PAY 0.5 BTC TO THE ADDRESS BELOW.',
+              x: '10%',
+              y: '10%'
+            }
+          ]
+        },
+        options: [
+          {
+            text: 'Try to close the flashing alerts immediately.',
+            isCorrect: false,
+            trigger: 'close-alert',
+            feedback: '❌ Closing the alert window doesn\'t stop the background encryption process. This is a distraction technique.',
+            defenseTip: 'Ransomware alerts are designed to cause panic. Focus on isolating the system, not clearing the UI.'
+          },
+          {
+            text: 'Pull the Ethernet cable / Disconnect Wi-Fi immediately.',
+            isCorrect: true,
+            feedback: '✅ EXCELLENT! Cutting the network connection is the most effective way to stop the encryption software from communicating with its command-and-control server.',
+            defenseTip: 'Containment is the first rule of incident response. Isolate the infected machine from the network immediately.'
+          },
+          {
+            text: 'Read the Note.txt to see how to pay.',
+            isCorrect: false,
+            feedback: '❌ Paying the ransom only encourages attackers and doesn\'t guarantee you\'ll get your files back.',
+            defenseTip: 'Never pay the ransom. It funds further criminal activity and rarely results in full data recovery.'
+          }
+        ]
+      },
+      {
+        prompt: 'You\'ve isolated the machine. Now you notice a highly suspicious file named "payload.exe" has appeared on your desktop. What should you do with it?',
+        visualType: 'desktop',
+        visualData: {
+          files: [
+            { name: 'payload.exe', type: 'malware' },
+            { name: 'budget_2024.pdf', type: 'normal' }
+          ]
+        },
+        options: [
+          {
+            text: 'Drag "payload.exe" to the Recycle Bin.',
+            isCorrect: false,
+            trigger: 'delete',
+            target: 'payload.exe',
+            feedback: '⚠️ Simply deleting the file might remove the source, but it doesn\'t address the modifications already made to your systemRegistry or hidden files.',
+            defenseTip: 'Deleting a single file is rarely enough to remove modern persistent malware. A full wipe or professional remediation is needed.'
+          },
+          {
+            text: 'Move it to a secure "Quarantine" folder for IT to analyze.',
+            isCorrect: true,
+            feedback: '✅ Smart! Preserving the sample in a secure way allows your security team to perform reverse engineering and improve the entire network\'s defenses.',
+            defenseTip: 'Malware samples are vital for forensic analysis and threat intelligence.'
+          }
+        ]
+      }
+    ]
   }
 ];
 
