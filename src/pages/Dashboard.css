@@ -274,31 +274,67 @@
         width: 100%;
         margin-bottom: 10px;
     }
+}
 
-    .empty-dashboard>div[style*="justifyContent"] {
-        flex-direction: column;
-        gap: 10px;
-    }
+.forensics-preview {
+    margin: var(--space-xl) 0 var(--space-2xl);
+    animation: fadeInUp 0.5s ease 0.25s both;
 }
-.skill-tree-link-btn {
-    display: inline-flex;
+
+.preview-content {
+    display: flex;
     align-items: center;
-    gap: 6px;
-    margin-top: var(--space-md);
-    padding: 8px 16px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-glow);
-    background: var(--primary-bg);
-    color: var(--primary);
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    width: 100%;
-    justify-content: center;
+    gap: var(--space-lg);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(0, 0, 0, 0.4));
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    transition: transform 0.3s ease, border-color 0.3s ease;
 }
-.skill-tree-link-btn:hover {
-    background: var(--primary);
-    color: #000;
-    transform: translateY(-1px);
+
+.preview-content:hover {
+    transform: translateY(-2px);
+    border-color: #ef4444;
+}
+
+.preview-icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(239, 68, 68, 0.15);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ef4444;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.1);
+}
+
+.preview-text {
+    flex: 1;
+}
+
+.preview-text h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #fff;
+}
+
+.preview-text p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+@media (max-width: 640px) {
+    .preview-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .preview-content .btn-primary {
+        width: 100%;
+        margin-top: var(--space-md);
+    }
 }

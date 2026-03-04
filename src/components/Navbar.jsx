@@ -1,5 +1,5 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Zap, Calendar, Users, Swords, Globe, ChevronDown, Gamepad2 } from 'lucide-react';
+import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Zap, Calendar, Users, Swords, Globe, ChevronDown, Gamepad2, Search } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
@@ -62,6 +62,11 @@ export default function Navbar() {
                         <li>
                             <NavLink to="/scenarios" onClick={handleNavClick}>
                                 <Crosshair size={16} /> Scenarios
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/forensics" onClick={handleNavClick}>
+                                <Search size={16} /> Forensics
                             </NavLink>
                         </li>
                         <li

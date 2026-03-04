@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, Zap, Target, CheckCircle, TrendingUp, Crosshair, Mail, Phone, Bug, Users, PlayCircle, Trophy } from 'lucide-react';
+import { Shield, Zap, Target, CheckCircle, TrendingUp, Crosshair, Mail, Phone, Bug, Users, PlayCircle, Trophy, Search } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
 import ScoreRing from '../components/ScoreRing';
@@ -133,6 +133,21 @@ export default function Dashboard() {
                     <StatCard icon={Target} label="Accuracy" value={`${accuracy}%`} sub="Average score" color="cyan" />
                     <StatCard icon={CheckCircle} label="Completed" value={completedCount} sub={`of ${totalScenarios} scenarios`} color="green" />
                     <StatCard icon={Zap} label="Total XP" value={xp} sub="Experience points" color="yellow" />
+                </div>
+            </div>
+
+            <div className="forensics-preview">
+                <div className="preview-content">
+                    <div className="preview-icon">
+                        <Search size={32} />
+                    </div>
+                    <div className="preview-text">
+                        <h3>New: File Forensics Mini-Game</h3>
+                        <p>Put on your investigator hat. Scour the file system for malware and secure the site.</p>
+                    </div>
+                    <Link to="/forensics" className="btn-primary">
+                        Play Now
+                    </Link>
                 </div>
             </div>
 

@@ -16,6 +16,7 @@ import Signup from './pages/Signup';
 import Profile from './pages/Profile';
 import Leaderboard from './pages/Leaderboard';
 import Contact from './pages/Contact';
+import ForensicsGame from './pages/ForensicsGame';
 import ChatWidget from './components/ChatWidget';
 import './App.css';
 
@@ -48,6 +49,7 @@ function AppContent() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/forensics" element={<ForensicsGame />} />
         </Routes>
       </main>
       {!isScenarioRoute && <ChatWidget isLoggedIn={isLoggedIn} />}
