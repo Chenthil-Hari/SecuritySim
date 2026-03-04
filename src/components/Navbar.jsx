@@ -1,9 +1,10 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Terminal } from 'lucide-react';
+import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { getRank } from '../utils/ranks';
+import { playClick } from '../utils/soundEffects';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -12,7 +13,19 @@ export default function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const navigate = useNavigate();
 
+    const playNavSound = () => {
+        if (state.settings?.soundEffects) {
+            playClick();
+        }
+    };
+
+    const handleNavClick = () => {
+        playNavSound();
+        setMenuOpen(false);
+    };
+
     const handleLogout = () => {
+        playNavSound();
         logout();
         navigate('/login');
         setMenuOpen(false);
@@ -20,14 +33,17 @@ export default function Navbar() {
 
     return (
         <nav className="navbar" role="navigation" aria-label="Main navigation">
-            <Link to="/" className="navbar-brand">
+            <Link to="/" className="navbar-brand" onClick={playNavSound}>
                 <Shield size={28} />
                 <span>SecuritySim:Cyber Survival</span>
             </Link>
 
             <button
                 className="mobile-menu-btn"
-                onClick={() => setMenuOpen(!menuOpen)}
+                onClick={() => {
+                    playNavSound();
+                    setMenuOpen(!menuOpen);
+                }}
                 aria-label="Toggle menu"
             >
                 {menuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -35,41 +51,36 @@ export default function Navbar() {
 
             <ul className={`navbar-links ${menuOpen ? 'open' : ''}`}>
                 <li>
-                    <NavLink to="/dashboard" onClick={() => setMenuOpen(false)}>
+                    <NavLink to="/dashboard" onClick={handleNavClick}>
                         <LayoutDashboard size={16} /> Dashboard
                     </NavLink>
                 </li>
                 {user && (
                     <>
                         <li>
-                            <NavLink to="/scenarios" onClick={() => setMenuOpen(false)}>
+                            <NavLink to="/scenarios" onClick={handleNavClick}>
                                 <Crosshair size={16} /> Scenarios
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/achievements" onClick={() => setMenuOpen(false)}>
+                            <NavLink to="/achievements" onClick={handleNavClick}>
                                 <Award size={16} /> Achievements
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/leaderboard" onClick={() => setMenuOpen(false)}>
+                            <NavLink to="/leaderboard" onClick={handleNavClick}>
                                 <Trophy size={16} /> Leaderboard
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/profile" onClick={() => setMenuOpen(false)}>
+                            <NavLink to="/profile" onClick={handleNavClick}>
                                 <User size={16} /> Profile
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink to="/terminal" onClick={() => setMenuOpen(false)}>
-                                <Terminal size={16} /> Terminal
                             </NavLink>
                         </li>
                     </>
                 )}
                 <li>
-                    <NavLink to="/settings" onClick={() => setMenuOpen(false)}>
+                    <NavLink to="/settings" onClick={handleNavClick}>
                         <Settings size={16} /> Settings
                     </NavLink>
                 </li>
@@ -92,10 +103,10 @@ export default function Navbar() {
                     </>
                 ) : (
                     <div className="auth-buttons">
-                        <Link to="/login" className="login-btn">
+                        <Link to="/login" className="login-btn" onClick={playNavSound}>
                             <LogIn size={16} /> Login
                         </Link>
-                        <Link to="/signup" className="signup-btn">
+                        <Link to="/signup" className="signup-btn" onClick={playNavSound}>
                             <UserPlus size={16} /> Signup
                         </Link>
                     </div>

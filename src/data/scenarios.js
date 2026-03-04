@@ -519,6 +519,268 @@ const scenarios = [
         ]
       }
     ]
+  },
+  {
+    id: 'branching-1',
+    title: 'The Suspicious USB Drive',
+    category: 'Physical Security',
+    difficulty: 2,
+    description: 'A branching adventure: You find a USB drive in the office parking lot. Your decisions determine the outcome.',
+    icon: 'AlertTriangle',
+    steps: [
+      {
+        prompt: 'You are walking into the office and find a sleek, unlabeled 64GB USB drive lying next to a colleague\'s car in the parking lot. What do you do?',
+        visualType: 'decision',
+        options: [
+          {
+            text: 'Leave it there. It\'s not my problem.',
+            isCorrect: false,
+            feedback: '👎 While safe for you, leaving it means someone else might pick it up and plug it in, potentially compromising the company network.',
+            defenseTip: 'Don\'t just ignore physical security risks. If you see something suspiciously out of place, report it or handle it safely.',
+            nextStep: 3 // Skip to the bad ending
+          },
+          {
+            text: 'Pick it up and plug it into my laptop to see whose it is, so I can return it.',
+            isCorrect: false,
+            feedback: '🚨 DANGER! This is a classic "USB Drop Attack". Merely plugging in a malicious USB can instantly silently install malware without you clicking anything (via HID spoofing or autorun).',
+            defenseTip: 'NEVER plug an untrusted USB drive into any computer you care about.',
+            nextStep: 1 // Go to malware infection branch
+          },
+          {
+            text: 'Pick it up and give it directly to the IT Security team.',
+            isCorrect: true,
+            feedback: '✅ Perfect! The IT team has isolated "sandbox" computers specifically designed to safely examine suspicious devices without risking the network.',
+            defenseTip: 'IT Security is equipped to handle unknown physical media safely.',
+            nextStep: 2 // Go to good ending branch
+          }
+        ]
+      },
+      {
+        // Branch 1: Plugged it in (Failure path)
+        prompt: 'You plug the USB into your laptop. Nothing pops up on the screen, but your computer\'s fan suddenly spins up loudly. A command prompt window flashes for a millisecond and disappears. What now?',
+        visualType: 'decision',
+        options: [
+          {
+            text: 'Unplug it quickly and pretend nothing happened.',
+            isCorrect: false,
+            feedback: '❌ The damage is already done. Ignoring the situation allows the malware to spread across the corporate network, making you responsible for a major breach.',
+            defenseTip: 'If you suspect you\'ve made a mistake, report it immediately! Security teams prefer fast reporting over silence.',
+            nextStep: 3 // Go to bad ending
+          },
+          {
+            text: 'Immediately disconnect from Wi-Fi/Ethernet and call IT Security.',
+            isCorrect: true,
+            feedback: '✅ Good recovery! By disconnecting from the network immediately, you prevented the malware from spreading to servers or other workstations.',
+            defenseTip: 'If a device acts suspicious, the first step in incident response is isolation: disconnect from the network immediately.',
+            nextStep: 4 // Go to neutral ending
+          }
+        ]
+      },
+      {
+        // Branch 2: Gave to IT (Success path)
+        prompt: 'You hand the drive to Sarah from IT Security. She plugs it into an air-gapped forensic machine. "Good catch," she says. "This is a Rubber Ducky — a device that pretends to be a keyboard and types malicious commands the millisecond it\'s plugged in. You just saved the company from a ransomware attack."\n\nHow do you respond?',
+        visualType: 'decision',
+        options: [
+          {
+            text: 'Ask her how you can spot these in the future.',
+            isCorrect: true,
+            feedback: '🏆 EXCELLENT! You handled the situation perfectly and sought to explicitly improve your security awareness.',
+            defenseTip: 'Curiosity is a security superpower. Always ask questions.',
+            nextStep: 5 // End scenario
+          },
+          {
+            text: 'Nod and head to your desk.',
+            isCorrect: true,
+            feedback: '✅ You did your job well and disaster was averted. The company network remains secure.',
+            defenseTip: 'Trusting experts with suspicious items is always the right call.',
+            nextStep: 5 // End scenario
+          }
+        ]
+      },
+      {
+        // Branch 3: Bad Ending
+        prompt: 'Later that afternoon, every computer in the office suddenly turns to a red screen demanding Bitcoin. The company network has been completely compromised by ransomware tracing back to your decisions. \n\nMISSION FAILED.',
+        visualType: 'decision',
+        options: [
+          {
+            text: 'Acknowledge failure and review the lesson.',
+            isCorrect: true,
+            feedback: 'Physical security is just as important as digital security. A single careless physical action can bypass millions of dollars of cybersecurity software.',
+            defenseTip: 'Always be suspicious of found physical media.',
+            nextStep: 5
+          }
+        ]
+      },
+      {
+        // Branch 4: Neutral Ending
+        prompt: 'Your laptop had to be completely wiped and reinstalled, and you lost your morning\'s work. However, because you acted quickly to isolate the machine, the network was saved. IT gives you a mild scolding but thanks you for reporting it fast.\n\nMISSION COMPLETED (Barely).',
+        visualType: 'decision',
+        options: [
+          {
+            text: 'Acknowledge the outcome.',
+            isCorrect: true,
+            feedback: 'You made an initial mistake but executed a proper incident response. Speed in reporting incidents drastically reduces their impact.',
+            defenseTip: 'Never plug in unknown USBs, but if you do, isolate the machine fast.',
+            nextStep: 5
+          }
+        ]
+      },
+      {
+        // Step 5: Dummy step to end scenario cleanly
+        prompt: 'Scenario Complete.',
+        visualType: 'decision',
+        options: [
+          {
+            text: 'Finish',
+            isCorrect: true,
+            feedback: 'Good job navigating this branching scenario.',
+            defenseTip: 'Physical security is cyber security.'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'branching-2',
+    title: 'The Late Night Deployment',
+    category: 'Incident Response',
+    difficulty: 3,
+    timeLimit: 60,
+    description: 'A branching incident response simulation. It\'s 11 PM on a Friday and the production server alerts are firing. Choose your path wisely.',
+    icon: 'Activity',
+    steps: [
+      {
+        prompt: 'You are the on-call engineer. It\'s 11:00 PM on a Friday. PagerDuty goes off: "CRITICAL: High CPU and unexpected outbound traffic on DB-SERVER-01".\n\nWhat is your very first action?',
+        visualType: 'decision',
+        options: [
+          {
+            text: 'SSH directly into the database server to see what process is consuming CPU.',
+            isCorrect: false,
+            feedback: '⚠️ While tempting, logging directly into a potentially compromised machine as an admin can tip off attackers or expose your own credentials.',
+            defenseTip: 'Follow the incident response playbook: Verify, Isolate, then Investigate from a secure jump box.',
+            nextStep: 1
+          },
+          {
+            text: 'Check the central logging dashboard (Splunk/ELK) to investigate the traffic origin without touching the server.',
+            isCorrect: true,
+            feedback: '✅ Correct! Investigating via centralized logs is safer and preserves forensic evidence on the actual machine.',
+            defenseTip: 'Centralized logging is crucial for safe incident investigation.',
+            nextStep: 2
+          },
+          {
+            text: 'Ignore it. It\'s probably just the weekly backup job running early.',
+            isCorrect: false,
+            feedback: '❌ NEVER assume an unexpected alert is benign during off-hours, especially one indicating unusual outbound traffic (a sign of data exfiltration).',
+            defenseTip: 'Alert fatigue is real, but "unexpected outbound traffic" is a massive red flag. Always verify.',
+            nextStep: 3
+          }
+        ]
+      },
+      {
+        // Branch 1: SSH direct (Bad practice)
+        prompt: 'You SSH in. You run `top` and see a process called `postgres_updater` using 99% CPU. However, your SSH connection suddenly drops, and you cannot log back in. The attacker noticed you and locked you out!\n\nWhat now?',
+        visualType: 'decision',
+        options: [
+          {
+            text: 'Use the cloud console to forcibly power off the server.',
+            isCorrect: false,
+            feedback: '❌ Powering off destroys volatile memory (RAM) which contains crucial forensic evidence of how the attacker got in and what they stole.',
+            defenseTip: 'Preserve evidence when possible. Do not reboot or power off compromised machines if you intend to investigate.',
+            nextStep: 4
+          },
+          {
+            text: 'Use the cloud console to isolate the server\'s Security Group/Firewall (block all network access).',
+            isCorrect: true,
+            feedback: '✅ Good recovery! Isolating the network stops data exfiltration while keeping the machine running so forensic teams can capture the RAM state later.',
+            defenseTip: 'Containment means network isolation, not powering down.',
+            nextStep: 5
+          }
+        ]
+      },
+      {
+        // Branch 2: Log analysis (Good practice)
+        prompt: 'Looking at the logs, you see massive amounts of DNS requests leaving the DB server heading to an unrecognized IP address in Russia. This is a classic DNS Tunneling data exfiltration attack.\n\nHow do you stop it?',
+        visualType: 'decision',
+        options: [
+          {
+            text: 'Change the database password immediately.',
+            isCorrect: false,
+            feedback: '❌ The attacker already has a shell on the server executing the DNS tunnel. Changing the DB password won\'t stop the active exfiltration script.',
+            defenseTip: 'Understand the layer of the attack. An OS-level compromise requires OS or Network-level containment.',
+            nextStep: 4
+          },
+          {
+            text: 'Block the destination IP at the edge firewall.',
+            isCorrect: false,
+            feedback: '⚠️ Better, but attackers often have multiple Command & Control IPs. They will just switch to a fallback IP and resume exfiltration.',
+            defenseTip: 'Targeted IP blocks are a temporary band-aid, not true containment.',
+            nextStep: 4
+          },
+          {
+            text: 'Quarantine the server by moving it to an isolated VPC/VLAN with zero internet access.',
+            isCorrect: true,
+            feedback: '🏆 BOOM! Perfect incident response. You fully contained the threat by physically isolating the network environment, stopping all exfiltration dead in its tracks.',
+            defenseTip: 'Full network quarantine is the gold standard for containing an active breach.',
+            nextStep: 5
+          }
+        ]
+      },
+      {
+        // Branch 3: Ignored it (Disaster)
+        prompt: 'You go back to sleep. Monday morning, the CEO calls. 50 million customer records have been dumped on the dark web. The company stock crashes 20%. The forensic report shows the exfiltration happened Friday night over 4 hours.\n\nMISSION FAILED.',
+        visualType: 'decision',
+        options: [
+          {
+            text: 'Accept the consequences.',
+            isCorrect: true,
+            feedback: 'Ignoring security alerts is how minor incidents become company-ending disasters.',
+            defenseTip: 'Always follow the escalation playbook.',
+            nextStep: 6
+          }
+        ]
+      },
+      {
+        // Branch 4: Partial success
+        prompt: 'You managed to stop the bleeding, but roughly 50,000 customer records were exfiltrated before you fully contained the server. The incident requires public disclosure, but the company will survive.\n\nMISSION COMPLETED (With Casualties).',
+        visualType: 'decision',
+        options: [
+          {
+            text: 'Review the incident.',
+            isCorrect: true,
+            feedback: 'Incident response is hard. Your hesitation or incorrect tactical choices cost valuable time, allowing a partial data breach.',
+            defenseTip: 'Drill your incident response plans so containment actions become muscle memory.',
+            nextStep: 6
+          }
+        ]
+      },
+      {
+        // Branch 5: Total success
+        prompt: 'You stopped the attack before any sensitive data left the building. The threat actor is locked out, the original vulnerability is identified via logs, and the database is securely restored to a clean state by 3 AM. You are an Incident Response hero.\n\nMISSION COMPLETED (Flawless Victory).',
+        visualType: 'decision',
+        options: [
+          {
+            text: 'Celebrate.',
+            isCorrect: true,
+            feedback: 'Your calm, methodical approach to Verification and Containment saved the company millions.',
+            defenseTip: 'Stick to the Incident Response framework: Prepare, Identify, Contain, Eradicate, Recover, Lessons Learned.',
+            nextStep: 6
+          }
+        ]
+      },
+      {
+        // Step 6: End
+        prompt: 'Incident simulation complete.',
+        visualType: 'decision',
+        options: [
+          {
+            text: 'Finish',
+            isCorrect: true,
+            feedback: 'Good work navigating the pressure of a live incident.',
+            defenseTip: 'Stay calm and contain.'
+          }
+        ]
+      }
+    ]
   }
 ];
 

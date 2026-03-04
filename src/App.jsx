@@ -13,7 +13,6 @@ import Signup from './pages/Signup';
 import Profile from './pages/Profile';
 import Leaderboard from './pages/Leaderboard';
 import Contact from './pages/Contact';
-import TerminalChallenge from './pages/TerminalChallenge';
 import ChatWidget from './components/ChatWidget';
 import './App.css';
 
@@ -42,7 +41,6 @@ function AppContent() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/terminal" element={<TerminalChallenge />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>
       </main>

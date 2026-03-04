@@ -65,6 +65,22 @@ export default function Settings() {
                         <span className="toggle-slider" />
                     </label>
                 </div>
+
+                <div className="setting-item">
+                    <div className="setting-info">
+                        <div className="setting-label">Sound Effects & Ambient Audio</div>
+                        <div className="setting-desc">Alert sounds, feedback tones, and ambient hacking atmosphere during scenarios</div>
+                    </div>
+                    <label className="toggle-switch">
+                        <input
+                            type="checkbox"
+                            checked={settings.soundEffects}
+                            onChange={e => updateSetting('soundEffects', e.target.checked)}
+                            aria-label="Toggle sound effects"
+                        />
+                        <span className="toggle-slider" />
+                    </label>
+                </div>
             </div>
 
             <div className="settings-section danger-section">
@@ -94,6 +110,6 @@ export default function Settings() {
                 </p>
                 <div className="about-version">Version 1.0.0</div>
             </div>
-        </div>
+        </div >
     );
 }

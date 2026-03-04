@@ -4,6 +4,7 @@ import { ArrowLeft, Phone, Mail, AlertTriangle, MessageSquare, Trophy, Star, Rot
 import { useGame, useGameDispatch } from '../context/GameContext';
 import { speakScenario, speak } from '../utils/voiceGuidance';
 import FeedbackModal from '../components/FeedbackModal';
+import { playCorrect, playIncorrect, playTimerTimeout, playScenarioComplete, startAmbient, stopAmbient, isAmbientActive } from '../utils/soundEffects';
 import Character from '../components/Character';
 import { useTypewriter, useStaggeredReveal } from '../hooks/useAnimations';
 import badgesList from '../data/badges';
@@ -245,20 +246,23 @@ export default function ScenarioPlay() {
     const [finished, setFinished] = useState(false);
     const [charReaction, setCharReaction] = useState('idle');
     const [timedOut, setTimedOut] = useState(false);
-    const [stepStartTime, setStepStartTime] = useState(Date.now());
+    const [stepStartTime, setStepStartTime] = useState(0);
     const [timeBonusTotal, setTimeBonusTotal] = useState(0);
 
-    const character = characters[id];
-
+    // Initial load and ambient audio
     useEffect(() => {
         if (scenario) {
             speakScenario(scenario, state.settings);
-            setCharReaction('idle');
-            // Transition to thinking after seeing the scenario
-            const timer = setTimeout(() => setCharReaction('thinking'), 2000);
-            return () => clearTimeout(timer);
+            if (state.settings?.soundEffects) {
+                startAmbient();
+            }
         }
-    }, [scenario?.id]);
+
+        // Cleanup ambient audio when leaving scenario
+        return () => {
+            stopAmbient();
+        };
+    }, [id, scenario, state.settings]);
 
     // Reset reaction when step changes
     useEffect(() => {
@@ -297,6 +301,13 @@ export default function ScenarioPlay() {
         setSelectedOption(index);
         setShowFeedback(true);
         setStepResults(prev => [...prev, { isCorrect: option.isCorrect }]);
+
+        // Play sound effect
+        if (state.settings?.soundEffects) {
+            if (option.isCorrect) playCorrect();
+            else playIncorrect();
+        }
+
         // Calculate time bonus if timed scenario
         if (scenario.timeLimit && option.isCorrect) {
             const elapsed = (Date.now() - stepStartTime) / 1000;
@@ -311,6 +322,11 @@ export default function ScenarioPlay() {
     const handleTimeout = () => {
         if (selectedOption !== null || timedOut) return;
         setTimedOut(true);
+
+        if (state.settings?.soundEffects) {
+            playTimerTimeout();
+        }
+
         // Auto-select the first incorrect option
         const wrongIdx = step.options.findIndex(o => !o.isCorrect);
         const idx = wrongIdx >= 0 ? wrongIdx : 0;
@@ -323,13 +339,24 @@ export default function ScenarioPlay() {
     const handleContinue = () => {
         setShowFeedback(false);
 
-        if (currentStep < totalSteps - 1) {
-            setCurrentStep(prev => prev + 1);
+        // Branching logic: If the selected option specifies a nextStep path, use it. Otherwise go to currentStep + 1.
+        let nextIndex = currentStep + 1;
+        if (selectedOption !== null && step.options[selectedOption].nextStep !== undefined) {
+            nextIndex = step.options[selectedOption].nextStep;
+        }
+
+        if (nextIndex < totalSteps) {
+            setCurrentStep(nextIndex);
             setSelectedOption(null);
             setCharReaction('idle');
-            speak(`Step ${currentStep + 2} of ${totalSteps}`, state.settings);
+            speak(`Step ${nextIndex + 1} of ${totalSteps}`, state.settings);
         } else {
             // Scenario complete
+            stopAmbient();
+            if (state.settings?.soundEffects) {
+                playScenarioComplete();
+            }
+
             const correctCount = [...stepResults].filter(r => r.isCorrect).length;
             const accuracy = Math.round((correctCount / totalSteps) * 100);
             const xpEarned = Math.round(accuracy * 0.5 * scenario.difficulty);
