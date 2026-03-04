@@ -210,6 +210,9 @@ export default function ScenarioPlay() {
     if (!scenario) return <div className="error-page">Scenario not found.</div>;
 
     const step = scenario.steps[currentStepIndex];
+    if (!step) {
+        return <div className="error-page">Loading step...</div>;
+    }
     const totalSteps = scenario.steps.length;
     const progress = Math.min(100, ((stepResults.length + 1) / totalSteps) * 100);
 
@@ -299,7 +302,10 @@ export default function ScenarioPlay() {
     };
 
     const renderVisual = () => {
-        const vd = step.visualData;
+        const vd = step?.visualData || {};
+        if (!step.visualType || step.visualType === 'none') {
+            return <div className="decision-visual sim-entrance"><div className="decision-card"><p>{step.prompt}</p></div></div>;
+        }
         return (
             <div className="visual-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
                 {(() => {
@@ -361,7 +367,8 @@ export default function ScenarioPlay() {
             <Character character={character} reaction={charReaction} />
             <div className="scenario-visual">{renderVisual()}</div>
             <div className="scenario-options">
-                <h3>What do you do? {timedOut && <span className="text-danger">(Timed Out)</span>}</h3>
+                {step.title && <p className="step-subtitle">{step.title}</p>}
+                <h3>{step.prompt || 'What do you do?'} {timedOut && <span className="text-danger">(Timed Out)</span>}</h3>
                 {step.options.map((option, i) => (
                     <button key={i} className={`option-btn ${selectedOption === i ? (option.isCorrect ? 'selected-correct' : 'selected-incorrect') : ''}`} onClick={() => handleOptionSelect(option, i)} disabled={selectedOption !== null}>{option.text}</button>
                 ))}
