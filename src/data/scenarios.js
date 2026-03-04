@@ -792,72 +792,122 @@ const scenarios = [
     icon: 'ShieldAlert',
     steps: [
       {
-        prompt: 'You notice your computer is running extremely slowly. Suddenly, several windows flash on your screen and your wallpapers changes. What is your first reaction?',
+        id: 'rd-1',
+        title: "The Breach Begins",
         visualType: 'desktop',
         visualData: {
-          windows: [
-            {
-              title: 'SYSTEM CRITICAL ALERT',
-              type: 'alert',
-              isFlashing: true,
-              content: 'WARNING: 42,981 files are currently being encrypted. Your personal keys are being sent to a C&C server in Eastern Europe.',
-              actionOnClose: 'close-alert',
-              x: '30%',
-              y: '25%'
-            },
-            {
-              title: 'Note.txt',
-              content: 'ALL YOUR FILES ARE BELONG TO US. PAY 0.5 BTC TO THE ADDRESS BELOW.',
-              x: '10%',
-              y: '10%'
-            }
+          activeWindows: ['alert'],
+          alert: {
+            title: "Security Warning",
+            message: "Unauthorized access attempt detected from unknown IP 192.168.1.105",
+            isFlashing: true
+          },
+          icons: [
+            { id: 'pc', label: 'My Computer', icon: 'Monitor' },
+            { id: 'files', label: 'Sensitive Data', icon: 'HardDrive' },
+            { id: 'trash', label: 'Recycle Bin', icon: 'Trash2' }
           ]
         },
         options: [
           {
-            text: 'Try to close the flashing alerts immediately.',
+            text: "Close the alert and continue working",
             isCorrect: false,
-            trigger: 'close-alert',
-            feedback: '❌ Closing the alert window doesn\'t stop the background encryption process. This is a distraction technique.',
-            defenseTip: 'Ransomware alerts are designed to cause panic. Focus on isolating the system, not clearing the UI.'
+            feedback: "Ignoring an IOC (Indicator of Compromise) is a fatal mistake.",
+            defenseTip: "Always investigate security alerts immediately.",
+            consequence: 'MALWARE',
+            nextStep: 1 // Go to fail branch
           },
           {
-            text: 'Pull the Ethernet cable / Disconnect Wi-Fi immediately.',
+            text: "Click the 'X' to dismiss and run an AV scan",
             isCorrect: true,
-            feedback: '✅ EXCELLENT! Cutting the network connection is the most effective way to stop the encryption software from communicating with its command-and-control server.',
-            defenseTip: 'Containment is the first rule of incident response. Isolate the infected machine from the network immediately.'
-          },
-          {
-            text: 'Read the Note.txt to see how to pay.',
-            isCorrect: false,
-            feedback: '❌ Paying the ransom only encourages attackers and doesn\'t guarantee you\'ll get your files back.',
-            defenseTip: 'Never pay the ransom. It funds further criminal activity and rarely results in full data recovery.'
+            trigger: 'close-alert',
+            feedback: "Good reflex! Dismissing the distraction to take defensive action.",
+            defenseTip: "Running scans after alerts is a standard SOP.",
+            nextStep: 2 // Go to investigation branch
           }
         ]
       },
       {
-        prompt: 'You\'ve isolated the machine. Now you notice a highly suspicious file named "payload.exe" has appeared on your desktop. What should you do with it?',
+        id: 'rd-fail-1',
+        title: "System Compromised",
         visualType: 'desktop',
         visualData: {
-          files: [
-            { name: 'payload.exe', type: 'malware' },
-            { name: 'budget_2024.pdf', type: 'normal' }
+          activeWindows: ['ransom'],
+          icons: [
+            { id: 'pc', label: 'My Computer', icon: 'Monitor' },
+            { id: 'trash', label: 'Recycle Bin', icon: 'Trash2' }
+          ]
+        },
+        prompt: "Your files have been encrypted. The attacker is demanding payment.",
+        options: [
+          {
+            text: "Contact IT Security immediately",
+            isCorrect: true,
+            feedback: "Even after failure, reporting is the right step to prevent lateral movement.",
+            defenseTip: "Incident response starts with transparency.",
+            nextStep: 3
+          },
+          {
+            text: "Pay the Ransom (0.5 BTC)",
+            isCorrect: false,
+            feedback: "Paying ransoms only funds further criminal activity and doesn't guarantee data recovery.",
+            defenseTip: "Never pay the ransom. Use backups instead.",
+            consequence: 'RANSOMWARE',
+            nextStep: 3
+          }
+        ]
+      },
+      {
+        id: 'rd-invest-1',
+        title: "Containment Phase",
+        visualType: 'desktop',
+        visualData: {
+          activeWindows: ['explorer'],
+          explorer: {
+            path: 'C:\\Sensitive Data',
+            files: [
+              { name: 'passwords.txt', isSuspicious: false },
+              { name: 'payload.exe', isSuspicious: true },
+              { name: 'network_config.bak', isSuspicious: false }
+            ]
+          },
+          icons: [
+            { id: 'pc', label: 'My Computer', icon: 'Monitor' },
+            { id: 'trash', label: 'Recycle Bin', icon: 'Trash2' }
           ]
         },
         options: [
           {
-            text: 'Drag "payload.exe" to the Recycle Bin.',
+            text: "Hover over the suspicious files before deciding",
             isCorrect: false,
-            trigger: 'delete',
-            target: 'payload.exe',
-            feedback: '⚠️ Simply deleting the file might remove the source, but it doesn\'t address the modifications already made to your systemRegistry or hidden files.',
-            defenseTip: 'Deleting a single file is rarely enough to remove modern persistent malware. A full wipe or professional remediation is needed.'
+            feedback: "Good for gathering info, but don't wait too long.",
+            defenseTip: "Investigation is good, but containment is priority.",
+            nextStep: 2
+          }
+        ]
+      },
+      {
+        id: 'rd-final',
+        title: "Incident Resolution",
+        visualType: 'chat',
+        visualData: {
+          messages: [
+            { sender: 'IT Admin', text: 'I see you reported the IP. We are blocking it at the firewall now.' },
+            { sender: 'IT Admin', text: 'Did you manage to find any suspicious files?' }
+          ]
+        },
+        options: [
+          {
+            text: "Yes, I isolated payload.exe. System is clean.",
+            isCorrect: true,
+            feedback: "Perfect incident response. You detected, contained, and reported.",
+            defenseTip: "Clean handoffs to IT teams ensure the whole network stays safe."
           },
           {
-            text: 'Move it to a secure "Quarantine" folder for IT to analyze.',
-            isCorrect: true,
-            feedback: '✅ Smart! Preserving the sample in a secure way allows your security team to perform reverse engineering and improve the entire network\'s defenses.',
-            defenseTip: 'Malware samples are vital for forensic analysis and threat intelligence.'
+            text: "No, I think I was hacked.",
+            isCorrect: false,
+            feedback: "Failure to provide details makes IT's job much harder.",
+            defenseTip: "Always document and share findings after an incident."
           }
         ]
       }
