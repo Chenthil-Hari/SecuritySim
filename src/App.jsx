@@ -6,12 +6,15 @@ import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Scenarios from './pages/Scenarios';
 import ScenarioPlay from './pages/ScenarioPlay';
+import WeeklyChallenge from './pages/WeeklyChallenge';
+import Teams from './pages/Teams';
 import Achievements from './pages/Achievements';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Profile from './pages/Profile';
 import Leaderboard from './pages/Leaderboard';
+import SkillTree from './pages/SkillTree';
 import Contact from './pages/Contact';
 import ChatWidget from './components/ChatWidget';
 import './App.css';
@@ -36,8 +39,12 @@ function AppContent() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/scenarios" element={<Scenarios />} />
+          <Route path="/weekly" element={<WeeklyChallenge />} />
+          <Route path="/teams" element={<Teams />} />
           <Route path="/scenarios/:id" element={<ScenarioPlay />} />
+          <Route path="/scenarios/weekly/:id" element={<ScenarioPlay />} />
           <Route path="/achievements" element={<Achievements />} />
+          <Route path="/skill-tree" element={<SkillTree />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/settings" element={<Settings />} />

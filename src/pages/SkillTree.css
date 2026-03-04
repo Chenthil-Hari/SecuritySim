@@ -1,0 +1,250 @@
+.skill-tree-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.skill-tree-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 3rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sp-counter {
+    background: rgba(var(--primary-rgb), 0.1);
+    border: 1px solid var(--primary);
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+
+.sp-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    text-shadow: 0 0 10px rgba(var(--primary-rgb), 0.5);
+    line-height: 1;
+}
+
+.sp-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.skill-tree-grid {
+    position: relative;
+    padding: 2rem;
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-color);
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: auto;
+}
+
+.tree-container {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(200px, 1fr));
+    grid-template-rows: repeat(3, 150px);
+    gap: 3rem;
+    position: relative;
+}
+
+/* Fallback connecting lines */
+.tree-container::before {
+    content: '';
+    position: absolute;
+    top: 50px;
+    bottom: 50px;
+    left: 100px;
+    right: 100px;
+    border: 2px dashed var(--border-color);
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 20px;
+}
+
+.skill-node {
+    position: relative;
+    z-index: 10;
+    background: var(--bg-color);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: not-allowed;
+    justify-self: center;
+    align-self: center;
+    width: 100%;
+    max-width: 220px;
+    box-shadow: var(--shadow-md);
+}
+
+.skill-icon-wrapper {
+    background: var(--surface);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.skill-node h3 {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+    color: var(--text-secondary);
+}
+
+.skill-cost {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--surface);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+/* States */
+.skill-node.locked {
+    opacity: 0.6;
+    filter: grayscale(100%);
+}
+
+.skill-node.available {
+    cursor: pointer;
+    border-color: var(--warning);
+    box-shadow: 0 0 15px rgba(255, 171, 0, 0.2);
+}
+
+.skill-node.available .skill-icon-wrapper {
+    color: var(--warning);
+    border-color: var(--warning);
+}
+
+.skill-node.available:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(255, 171, 0, 0.4);
+}
+
+.skill-node.unlocked {
+    border-color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.05);
+    box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.3);
+}
+
+.skill-node.unlocked .skill-icon-wrapper {
+    color: var(--bg-color);
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.skill-node.unlocked h3 {
+    color: var(--text-primary);
+}
+
+/* Tooltip on Hover */
+.skill-tooltip {
+    position: absolute;
+    bottom: calc(100% + 15px);
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    width: 260px;
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 100;
+}
+
+.skill-node:hover .skill-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.skill-tooltip h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.skill-tooltip p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin-bottom: 0;
+}
+
+.prereq-warning {
+    margin-top: 0.75rem;
+    color: var(--danger) !important;
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+
+/* Node lines specific positions to make a tree */
+.skill-node:nth-child(1)::after,
+/* soc_1 down to soc_2 */
+.skill-node:nth-child(2)::after,
+/* net_1 down to net_2 */
+.skill-node:nth-child(5)::after {
+    /* inc_1 down to inc_2 */
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    width: 2px;
+    height: 3rem;
+    background: var(--border-color);
+    z-index: -1;
+}
+
+.skill-node.unlocked::after {
+    background: var(--primary);
+    box-shadow: 0 0 10px var(--primary);
+}
+
+@media (max-width: 768px) {
+    .tree-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        gap: 1.5rem;
+    }
+
+    .tree-container::before {
+        display: none;
+    }
+
+    .skill-node::after {
+        display: none !important;
+    }
+
+    .skill-tooltip {
+        display: none;
+        /* Tooltips hard on mobile, simplify */
+    }
+}

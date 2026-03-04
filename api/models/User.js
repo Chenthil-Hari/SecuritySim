@@ -55,6 +55,24 @@ const userSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    // Advanced Feature Properties
+    skillPoints: {
+        type: Number,
+        default: 0
+    },
+    unlockedSkills: {
+        type: [String],
+        default: []
+    },
+    weeklyCompleted: {
+        type: [String],
+        default: []
+    },
+    teamId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Team',
+        default: null
     }
 });
 

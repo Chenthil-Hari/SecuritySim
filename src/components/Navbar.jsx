@@ -1,5 +1,5 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy } from 'lucide-react';
+import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Zap, Calendar, Users } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
@@ -63,8 +63,23 @@ export default function Navbar() {
                             </NavLink>
                         </li>
                         <li>
+                            <NavLink to="/teams" onClick={handleNavClick}>
+                                <Users size={16} /> Teams
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/weekly" onClick={handleNavClick} className={({ isActive }) => isActive ? "active weekly-nav" : "weekly-nav"}>
+                                <Calendar size={16} /> Weekly Op
+                            </NavLink>
+                        </li>
+                        <li>
                             <NavLink to="/achievements" onClick={handleNavClick}>
                                 <Award size={16} /> Achievements
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/skill-tree" onClick={handleNavClick}>
+                                <Zap size={16} /> Skill Tree
                             </NavLink>
                         </li>
                         <li>

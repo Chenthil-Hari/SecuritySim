@@ -11,6 +11,9 @@ const defaultState = {
     score: 50,
     xp: 0,
     level: 1,
+    skillPoints: 0,
+    unlockedSkills: [],
+    weeklyCompleted: [],
     badges: [],
     completedScenarios: [],
     difficulty: 1,
@@ -57,6 +60,9 @@ function syncToDatabase(state) {
                 score: state.score,
                 xp: state.xp,
                 level: state.level,
+                skillPoints: state.skillPoints,
+                unlockedSkills: state.unlockedSkills,
+                weeklyCompleted: state.weeklyCompleted,
                 badges: state.badges,
                 completedScenarios: state.completedScenarios
             })
@@ -99,6 +105,7 @@ function gameReducer(state, action) {
             const { scenarioId, category, accuracy, xpEarned } = action.payload;
             const newXp = state.xp + xpEarned;
             const newLevel = calculateLevel(newXp);
+            const newSkillPoints = state.skillPoints + (newLevel > state.level ? newLevel - state.level : 0);
             const newCompleted = [
                 ...state.completedScenarios,
                 { scenarioId, category, accuracy, timestamp: Date.now() }
@@ -110,6 +117,7 @@ function gameReducer(state, action) {
                 ...state,
                 xp: newXp,
                 level: newLevel,
+                skillPoints: newSkillPoints,
                 completedScenarios: newCompleted,
                 score: newScore,
                 difficulty: newDifficulty
@@ -147,8 +155,41 @@ function gameReducer(state, action) {
                 score: action.payload.score,
                 xp: action.payload.xp,
                 level: action.payload.level,
+                skillPoints: action.payload.skillPoints !== undefined ? action.payload.skillPoints : state.skillPoints,
+                unlockedSkills: action.payload.unlockedSkills || state.unlockedSkills,
+                weeklyCompleted: action.payload.weeklyCompleted || state.weeklyCompleted,
                 badges: action.payload.badges,
                 completedScenarios: action.payload.completedScenarios
+            };
+            break;
+        }
+        case 'SPEND_SKILL_POINT': {
+            const skillId = action.payload;
+            if (state.skillPoints > 0 && !state.unlockedSkills.includes(skillId)) {
+                newState = {
+                    ...state,
+                    skillPoints: state.skillPoints - 1,
+                    unlockedSkills: [...state.unlockedSkills, skillId]
+                };
+            } else {
+                return state;
+            }
+            break;
+        }
+        case 'COMPLETE_WEEKLY': {
+            const { weekId, xpEarned, category } = action.payload;
+            if (state.weeklyCompleted.includes(weekId)) return state;
+
+            const newXp = state.xp + xpEarned;
+            const newLevel = calculateLevel(newXp);
+            const newSkillPoints = state.skillPoints + (newLevel > state.level ? newLevel - state.level : 0);
+
+            newState = {
+                ...state,
+                xp: newXp,
+                level: newLevel,
+                skillPoints: newSkillPoints,
+                weeklyCompleted: [...state.weeklyCompleted, weekId]
             };
             break;
         }
