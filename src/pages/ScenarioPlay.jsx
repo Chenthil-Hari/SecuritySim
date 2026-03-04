@@ -249,6 +249,8 @@ export default function ScenarioPlay() {
     const [stepStartTime, setStepStartTime] = useState(0);
     const [timeBonusTotal, setTimeBonusTotal] = useState(0);
 
+    const character = characters[id];
+
     // Initial load and ambient audio
     useEffect(() => {
         if (scenario) {
