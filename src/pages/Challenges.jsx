@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useGame } from '../context/GameContext';
 import { buildApiUrl } from '../utils/api';
 import { Swords, Check, X, ShieldAlert, History, UserSearch, Send, Play } from 'lucide-react';
 import Loader from '../components/Loader';
@@ -9,6 +10,7 @@ import './Challenges.css';
 
 export default function Challenges() {
     const { user } = useAuth();
+    const { completedScenarios } = useGame();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [challenges, setChallenges] = useState({ incoming: [], outgoing: [], history: [] });
@@ -72,7 +74,7 @@ export default function Challenges() {
         if (!opponentUsername || !selectedScenario) return;
 
         // Find user's best accuracy for this scenario
-        const scenarioLogs = user.completedScenarios?.filter(s => s.scenarioId === selectedScenario) || [];
+        const scenarioLogs = (completedScenarios || []).filter(s => s.scenarioId === selectedScenario);
         if (scenarioLogs.length === 0) {
             setChallengeStatusMsg({ type: 'error', text: 'You must complete a scenario first before challenging someone else to it!' });
             return;
