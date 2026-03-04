@@ -34,13 +34,13 @@ const MISSIONS = [
                             name: 'System32',
                             type: 'folder',
                             children: [
-                                { name: 'cmd.exe', type: 'file', ext: 'exe', size: '276 KB', modified: '2019-03-15', icon: 'exe', suspicious: false },
-                                { name: 'notepad.exe', type: 'file', ext: 'exe', size: '193 KB', modified: '2019-03-15', icon: 'exe', suspicious: false },
-                                { name: 'svchost.exe', type: 'file', ext: 'exe', size: '51 KB', modified: '2019-03-15', icon: 'exe', suspicious: false },
-                                { name: 'svch0st.exe', type: 'file', ext: 'exe', size: '847 KB', modified: '2025-03-04 23:41', icon: 'exe', suspicious: true, threatType: 'trojan', hint: 'Notice the zero instead of "o" — classic trojan naming. Also modified TODAY, unlike the real svchost.exe.' },
+                                { name: 'cmd.exe', type: 'file', ext: 'exe', size: '276 KB', modified: '2019-03-15', icon: 'exe', suspicious: false, explanation: 'Standard Windows Command Processor. This is a legitimate system file used for executing commands.' },
+                                { name: 'notepad.exe', type: 'file', ext: 'exe', size: '193 KB', modified: '2019-03-15', icon: 'exe', suspicious: false, explanation: 'Official Microsoft Notepad executable. A core utility for text editing.' },
+                                { name: 'svchost.exe', type: 'file', ext: 'exe', size: '51 KB', modified: '2019-03-15', icon: 'exe', suspicious: false, explanation: 'Genuine Service Host process. Windows uses this to host multiple services to reduce resource usage.' },
+                                { name: 'svch0st.exe', type: 'file', ext: 'exe', size: '847 KB', modified: '2025-03-04 23:41', icon: 'exe', suspicious: true, threatType: 'trojan', hint: 'Notice the zero instead of "o" — classic trojan naming.', explanation: 'Typosquatting/Homoglyph attack. Attackers use names like "svch0st.exe" (with a zero) to hide alongside legitimate "svchost.exe" files.' },
                             ]
                         },
-                        { name: 'explorer.exe', type: 'file', ext: 'exe', size: '3.1 MB', modified: '2019-03-15', icon: 'exe', suspicious: false },
+                        { name: 'explorer.exe', type: 'file', ext: 'exe', size: '3.1 MB', modified: '2019-03-15', icon: 'exe', suspicious: false, explanation: 'Windows Explorer. This is the legitimate process responsible for the taskbar, desktop, and file management.' },
                     ]
                 },
                 {
@@ -55,17 +55,17 @@ const MISSIONS = [
                                     name: 'Desktop',
                                     type: 'folder',
                                     children: [
-                                        { name: 'Q4_Report.xlsx', type: 'file', ext: 'xlsx', size: '245 KB', modified: '2025-02-28', icon: 'doc', suspicious: false },
-                                        { name: 'meeting_notes.docx', type: 'file', ext: 'docx', size: '18 KB', modified: '2025-03-01', icon: 'doc', suspicious: false },
+                                        { name: 'Q4_Report.xlsx', type: 'file', ext: 'xlsx', size: '245 KB', modified: '2025-02-28', icon: 'doc', suspicious: false, explanation: 'A standard Excel spreadsheet. No suspicious macros or external calls detected.' },
+                                        { name: 'meeting_notes.docx', type: 'file', ext: 'docx', size: '18 KB', modified: '2025-03-01', icon: 'doc', suspicious: false, explanation: 'A standard Word document containing internal meeting minutes.' },
                                     ]
                                 },
                                 {
                                     name: 'Downloads',
                                     type: 'folder',
                                     children: [
-                                        { name: 'invoice_march.pdf.exe', type: 'file', ext: 'exe', size: '1.2 MB', modified: '2025-03-04 23:38', icon: 'pdf-exe', suspicious: true, threatType: 'dropper', hint: 'Double extension! This appears to be a PDF but is actually an executable (.pdf.exe). The real payload dropper.' },
-                                        { name: 'chrome_setup.msi', type: 'file', ext: 'msi', size: '89 MB', modified: '2025-02-20', icon: 'installer', suspicious: false },
-                                        { name: 'vacation_photo.jpg', type: 'file', ext: 'jpg', size: '3.4 MB', modified: '2025-02-14', icon: 'image', suspicious: false },
+                                        { name: 'invoice_march.pdf.exe', type: 'file', ext: 'exe', size: '1.2 MB', modified: '2025-03-04 23:38', icon: 'pdf-exe', suspicious: true, threatType: 'dropper', hint: 'Double extension! This appears to be a PDF but is actually an executable.', explanation: 'Double Extension Attack. Windows hides known extensions by default, so "invoice.pdf.exe" appears as "invoice.pdf" to the user, tricking them into running code.' },
+                                        { name: 'chrome_setup.msi', type: 'file', ext: 'msi', size: '89 MB', modified: '2025-02-20', icon: 'installer', suspicious: false, explanation: 'Digitally signed Google Chrome installer. A common and safe software installer.' },
+                                        { name: 'vacation_photo.jpg', type: 'file', ext: 'jpg', size: '3.4 MB', modified: '2025-02-14', icon: 'image', suspicious: false, explanation: 'A legitimate JPEG image. Standard file headers and no embedded scripts found.' },
                                     ]
                                 },
                                 {
@@ -80,8 +80,8 @@ const MISSIONS = [
                                                     name: 'Temp',
                                                     type: 'folder',
                                                     children: [
-                                                        { name: 'update_service.bat', type: 'file', ext: 'bat', size: '4 KB', modified: '2025-03-04 23:39', icon: 'script', suspicious: true, threatType: 'persistence', hint: 'A batch script created seconds after the PDF was opened. It adds a registry key to auto-run the trojan on startup.' },
-                                                        { name: 'tmpA23F.tmp', type: 'file', ext: 'tmp', size: '0 KB', modified: '2025-03-02', icon: 'file', suspicious: false },
+                                                        { name: 'update_service.bat', type: 'file', ext: 'bat', size: '4 KB', modified: '2025-03-04 23:39', icon: 'script', suspicious: true, threatType: 'persistence', hint: 'Created seconds after the PDF dropper was run.', explanation: 'Persistence Mechanism. This batch script was configured to run "svch0st.exe" every time the computer reboots, ensuring the infection survives a restart.' },
+                                                        { name: 'tmpA23F.tmp', type: 'file', ext: 'tmp', size: '0 KB', modified: '2025-03-02', icon: 'file', suspicious: false, explanation: 'A temporary system file. Common in the Temp directory and poses no threat.' },
                                                     ]
                                                 }
                                             ]
@@ -92,8 +92,8 @@ const MISSIONS = [
                                     name: 'Documents',
                                     type: 'folder',
                                     children: [
-                                        { name: 'budget_2025.xlsx', type: 'file', ext: 'xlsx', size: '156 KB', modified: '2025-01-15', icon: 'doc', suspicious: false },
-                                        { name: 'project_plan.pptx', type: 'file', ext: 'pptx', size: '2.1 MB', modified: '2025-02-10', icon: 'doc', suspicious: false },
+                                        { name: 'budget_2025.xlsx', type: 'file', ext: 'xlsx', size: '156 KB', modified: '2025-01-15', icon: 'doc', suspicious: false, explanation: 'Internal financial document. Last modified months ago, consistent with legitimate use.' },
+                                        { name: 'project_plan.pptx', type: 'file', ext: 'pptx', size: '2.1 MB', modified: '2025-02-10', icon: 'doc', suspicious: false, explanation: 'Standard PowerPoint presentation for project roadmapping.' },
                                     ]
                                 }
                             ]
@@ -108,14 +108,14 @@ const MISSIONS = [
                             name: 'Google', type: 'folder', children: [
                                 {
                                     name: 'Chrome', type: 'folder', children: [
-                                        { name: 'chrome.exe', type: 'file', ext: 'exe', size: '2.8 MB', modified: '2025-01-10', icon: 'exe', suspicious: false }
+                                        { name: 'chrome.exe', type: 'file', ext: 'exe', size: '2.8 MB', modified: '2025-01-10', icon: 'exe', suspicious: false, explanation: 'The official Google Chrome browser executable, located in the correct Program Files path.' }
                                     ]
                                 }
                             ]
                         },
                         {
                             name: 'Microsoft Office', type: 'folder', children: [
-                                { name: 'WINWORD.EXE', type: 'file', ext: 'exe', size: '1.9 MB', modified: '2024-11-05', icon: 'exe', suspicious: false }
+                                { name: 'WINWORD.EXE', type: 'file', ext: 'exe', size: '1.9 MB', modified: '2024-11-05', icon: 'exe', suspicious: false, explanation: 'Microsoft Word executable. A standard application component.' }
                             ]
                         }
                     ]
@@ -143,16 +143,16 @@ const MISSIONS = [
                             name: 'System32',
                             type: 'folder',
                             children: [
-                                { name: 'cmd.exe', type: 'file', ext: 'exe', size: '276 KB', modified: '2019-03-15', icon: 'exe', suspicious: false },
-                                { name: 'powershell.exe', type: 'file', ext: 'exe', size: '452 KB', modified: '2019-03-15', icon: 'exe', suspicious: false },
+                                { name: 'cmd.exe', type: 'file', ext: 'exe', size: '276 KB', modified: '2019-03-15', icon: 'exe', suspicious: false, explanation: 'Legitimate Windows Command Prompt.' },
+                                { name: 'powershell.exe', type: 'file', ext: 'exe', size: '452 KB', modified: '2019-03-15', icon: 'exe', suspicious: false, explanation: 'Legitimate Windows PowerShell engine.' },
                             ]
                         },
                         {
                             name: 'Tasks',
                             type: 'folder',
                             children: [
-                                { name: 'GoogleUpdateTask.xml', type: 'file', ext: 'xml', size: '2 KB', modified: '2025-01-10', icon: 'code', suspicious: false },
-                                { name: 'SystemSyncTask.xml', type: 'file', ext: 'xml', size: '3 KB', modified: '2025-03-04 02:58', icon: 'code', suspicious: true, threatType: 'scheduled-task', hint: 'A scheduled task created at 2:58 AM — right before the data transfer started. It runs a PowerShell script every hour to upload compressed archives to an external server.' },
+                                { name: 'GoogleUpdateTask.xml', type: 'file', ext: 'xml', size: '2 KB', modified: '2025-01-10', icon: 'code', suspicious: false, explanation: 'A standard scheduled task for Google Chrome updates.' },
+                                { name: 'SystemSyncTask.xml', type: 'file', ext: 'xml', size: '3 KB', modified: '2025-03-04 02:58', icon: 'code', suspicious: true, threatType: 'scheduled-task', hint: 'A scheduled task created at 2:58 AM — right before the transfer.', explanation: 'Automation of Exfiltration. Using the Windows Task Scheduler, the attacker automated the upload script to run hidden at night.' },
                             ]
                         }
                     ]
@@ -169,15 +169,15 @@ const MISSIONS = [
                                     name: 'Desktop',
                                     type: 'folder',
                                     children: [
-                                        { name: 'work_files.lnk', type: 'file', ext: 'lnk', size: '1 KB', modified: '2025-02-28', icon: 'file', suspicious: false },
+                                        { name: 'work_files.lnk', type: 'file', ext: 'lnk', size: '1 KB', modified: '2025-02-28', icon: 'file', suspicious: false, explanation: 'A standard shortcut link to a work directory.' },
                                     ]
                                 },
                                 {
                                     name: 'Documents',
                                     type: 'folder',
                                     children: [
-                                        { name: 'salary_data_ALL.csv', type: 'file', ext: 'csv', size: '14 MB', modified: '2025-03-04 01:15', icon: 'doc', suspicious: true, threatType: 'stolen-data', hint: 'A 14MB CSV file of ALL employee salaries, created at 1:15 AM. This was exported from the HR database — no legitimate reason for jsmith to have this.' },
-                                        { name: 'personal_budget.xlsx', type: 'file', ext: 'xlsx', size: '45 KB', modified: '2025-01-20', icon: 'doc', suspicious: false },
+                                        { name: 'salary_data_ALL.csv', type: 'file', ext: 'csv', size: '14 MB', modified: '2025-03-04 01:15', icon: 'doc', suspicious: true, threatType: 'stolen-data', hint: '14MB CSV of ALL employee salaries, created at 1:15 AM.', explanation: 'Data Staging. The insider exported sensitive HR data and stored it in a generic folder before exfiltrating it.' },
+                                        { name: 'personal_budget.xlsx', type: 'file', ext: 'xlsx', size: '45 KB', modified: '2025-01-20', icon: 'doc', suspicious: false, explanation: 'A user\'s personal budget file. No sensitive company data detected.' },
                                     ]
                                 },
                                 {
@@ -192,8 +192,8 @@ const MISSIONS = [
                                                     name: 'Temp',
                                                     type: 'folder',
                                                     children: [
-                                                        { name: 'rclone.exe', type: 'file', ext: 'exe', size: '45 MB', modified: '2025-03-03 23:50', icon: 'exe', suspicious: true, threatType: 'exfil-tool', hint: 'Rclone is a legitimate cloud sync tool, but it is frequently abused by insiders and ransomware gangs to rapidly exfiltrate data to personal cloud storage.' },
-                                                        { name: 'rclone.conf', type: 'file', ext: 'conf', size: '1 KB', modified: '2025-03-04 00:05', icon: 'code', suspicious: true, threatType: 'exfil-config', hint: 'Rclone config file pointing to a personal Mega.nz account. This is the destination where stolen data is being uploaded.' },
+                                                        { name: 'rclone.exe', type: 'file', ext: 'exe', size: '45 MB', modified: '2025-03-03 23:50', icon: 'exe', suspicious: true, threatType: 'exfil-tool', hint: 'Cloud sync tool frequently used by hackers for exfiltration.', explanation: 'Dual-Use Tool Abuse. Rclone is powerful for cloud sync but is the #1 tool for attackers to quickly upload Gigabytes of stolen data to their own cloud storage.' },
+                                                        { name: 'rclone.conf', type: 'file', ext: 'conf', size: '1 KB', modified: '2025-03-04 00:05', icon: 'code', suspicious: true, threatType: 'exfil-config', hint: 'Rclone config file pointing to a personal Mega.nz account.', explanation: 'Attacker Infrastructure. This configuration file contains the credentials for the attacker\'s personal storage, confirming the intent to steal data.' },
                                                     ]
                                                 }
                                             ]
@@ -204,8 +204,8 @@ const MISSIONS = [
                                     name: 'Downloads',
                                     type: 'folder',
                                     children: [
-                                        { name: '7z.exe', type: 'file', ext: 'exe', size: '1.1 MB', modified: '2025-03-03 23:45', icon: 'archive', suspicious: false },
-                                        { name: 'client_contracts_Q1.7z', type: 'file', ext: '7z', size: '340 MB', modified: '2025-03-04 02:30', icon: 'archive', suspicious: true, threatType: 'compressed-loot', hint: '340MB compressed archive of client contracts created at 2:30 AM. This was staged for exfiltration via rclone to Mega.nz.' },
+                                        { name: '7z.exe', type: 'file', ext: 'exe', size: '1.1 MB', modified: '2025-03-03 23:45', icon: 'archive', suspicious: false, explanation: 'Legitimate 7-Zip archiver. Used for compressing files.' },
+                                        { name: 'client_contracts_Q1.7z', type: 'file', ext: '7z', size: '340 MB', modified: '2025-03-04 02:30', icon: 'archive', suspicious: true, threatType: 'compressed-loot', hint: '340MB archive of contracts staged for upload.', explanation: 'Data Compression for Speed. Attackers compress large datasets into single archives (often password-protected) to make exfiltration faster and bypass some network monitoring.' },
                                     ]
                                 }
                             ]
@@ -218,7 +218,7 @@ const MISSIONS = [
                     children: [
                         {
                             name: 'Microsoft Office', type: 'folder', children: [
-                                { name: 'EXCEL.EXE', type: 'file', ext: 'exe', size: '2.3 MB', modified: '2024-11-05', icon: 'exe', suspicious: false }
+                                { name: 'EXCEL.EXE', type: 'file', ext: 'exe', size: '2.3 MB', modified: '2024-11-05', icon: 'exe', suspicious: false, explanation: 'Official Microsoft Excel executable.' }
                             ]
                         }
                     ]
@@ -276,9 +276,10 @@ export default function ForensicsGame() {
     const [gameState, setGameState] = useState('menu'); // menu | playing | success | failed
     const [quarantined, setQuarantined] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
-    const [wrongGuesses, setWrongGuesses] = useState(0);
+    const [wrongGuesses, setWrongGuesses] = useState([]); // Store objects with name and explanation
     const [scanAnimation, setScanAnimation] = useState(null);
     const [showHint, setShowHint] = useState(null);
+    const [guidance, setGuidance] = useState(null); // Educational guidance for clean files
     const timerRef = useRef(null);
 
     // Get current directory node
@@ -323,9 +324,10 @@ export default function ForensicsGame() {
         setCurrentPath([]);
         setTimeLeft(mission.timeLimit);
         setQuarantined([]);
-        setWrongGuesses(0);
+        setWrongGuesses([]);
         setSelectedFile(null);
         setShowHint(null);
+        setGuidance(null);
         setGameState('playing');
     };
 
@@ -359,14 +361,20 @@ export default function ForensicsGame() {
         if (file.suspicious) {
             setScanAnimation('threat-found');
             setQuarantined(prev => [...prev, filePath]);
-            setShowHint(file.hint);
+            setShowHint(file.explanation); // Show educational explanation instead of hint
+            setGuidance(null);
         } else {
             setScanAnimation('clean');
-            setWrongGuesses(prev => prev + 1);
+            setWrongGuesses(prev => [...prev, { name: file.name, explanation: file.explanation }]);
+            setGuidance(file.explanation);
             setTimeLeft(prev => Math.max(0, prev - 10)); // Penalty: lose 10 sec
+            setShowHint(null);
         }
 
-        setTimeout(() => setScanAnimation(null), 2000);
+        setTimeout(() => {
+            setScanAnimation(null);
+            setGuidance(null);
+        }, 4000); // Increase time to read explanation
     };
 
     const currentNode = getCurrentNode();
@@ -448,7 +456,7 @@ export default function ForensicsGame() {
                         </div>
                         <div className="result-stat">
                             <span className="stat-label">Wrong Guesses</span>
-                            <span className="stat-value">{wrongGuesses}</span>
+                            <span className="stat-value">{wrongGuesses.length}</span>
                         </div>
                         <div className="result-stat">
                             <span className="stat-label">XP Earned</span>
@@ -456,19 +464,40 @@ export default function ForensicsGame() {
                         </div>
                     </div>
 
-                    {isSuccess && allThreats.length > 0 && (
-                        <div className="threat-summary">
-                            <h3>Threats Identified:</h3>
-                            {allThreats.map((t, i) => (
-                                <div className="threat-summary-item" key={i}>
-                                    <div className="threat-summary-name">
-                                        <AlertTriangle size={14} color="#ef4444" /> {t.name}
+                    <div className="forensics-report">
+                        <h2>Forensics Case Report</h2>
+
+                        <div className="report-section">
+                            <h3><AlertTriangle size={16} color="#ef4444" /> Threats Neutralized</h3>
+                            {allThreats.map((t, i) => {
+                                const isFound = quarantined.includes(t.path);
+                                return (
+                                    <div className={`report-item ${isFound ? 'found' : 'missed'}`} key={i}>
+                                        <div className="report-item-header">
+                                            <span>{isFound ? '✅' : '❌'} {t.name}</span>
+                                            <span className="report-tag">{t.threatType}</span>
+                                        </div>
+                                        <p>{t.explanation}</p>
                                     </div>
-                                    <div className="threat-summary-hint">{t.hint}</div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
-                    )}
+
+                        {wrongGuesses.length > 0 && (
+                            <div className="report-section">
+                                <h3><Shield size={16} color="var(--primary)" /> Collateral Damage (Clean Files)</h3>
+                                {wrongGuesses.map((g, i) => (
+                                    <div className="report-item clean" key={i}>
+                                        <div className="report-item-header">
+                                            <span>⚠️ {g.name}</span>
+                                            <span className="report-tag clean">Legitimate</span>
+                                        </div>
+                                        <p>{g.explanation}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
                     <div className="result-actions">
                         <button className="btn-primary" onClick={() => startMission(selectedMission)}>
@@ -678,12 +707,23 @@ export default function ForensicsGame() {
                         <>
                             <AlertTriangle size={48} />
                             <span>☢️ THREAT QUARANTINED</span>
-                            {showHint && <p className="scan-hint">{showHint}</p>}
+                            {showHint && (
+                                <div className="scan-explanation">
+                                    <strong>Evidence:</strong>
+                                    <p>{showHint}</p>
+                                </div>
+                            )}
                         </>
                     ) : (
                         <>
-                            <CheckCircle size={48} />
+                            <XCircle size={48} />
                             <span>✓ FILE IS CLEAN (-10s penalty)</span>
+                            {guidance && (
+                                <div className="scan-explanation guidance">
+                                    <strong>Forensics Guidance:</strong>
+                                    <p>{guidance}</p>
+                                </div>
+                            )}
                         </>
                     )}
                 </div>

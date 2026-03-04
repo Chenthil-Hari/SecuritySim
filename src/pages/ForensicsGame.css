@@ -790,6 +790,151 @@
 }
 
 /* ====================================================
+   SCAN EXPLANATION (In-game)
+   ==================================================== */
+
+.scan-explanation {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    max-width: 500px;
+    margin-top: var(--space-md);
+    backdrop-filter: blur(10px);
+    animation: slideUp 0.3s ease;
+}
+
+.scan-explanation strong {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    color: var(--text-muted);
+}
+
+.scan-explanation p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    font-weight: 400;
+    margin: 0;
+}
+
+.scan-explanation.guidance {
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.scan-explanation.guidance strong {
+    color: #ef4444;
+}
+
+/* ====================================================
+   FORENSICS REPORT (Results screen)
+   ==================================================== */
+
+.forensics-report {
+    text-align: left;
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-2xl);
+    border-top: 1px solid var(--border-color);
+}
+
+.forensics-report h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: var(--space-xl);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--primary);
+}
+
+.report-section {
+    margin-bottom: var(--space-2xl);
+}
+
+.report-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: var(--space-lg);
+    color: var(--text-secondary);
+}
+
+.report-item {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-md);
+    transition: transform 0.2s;
+}
+
+.report-item:hover {
+    transform: translateX(4px);
+}
+
+.report-item.found {
+    border-left: 3px solid var(--success);
+}
+
+.report-item.missed {
+    border-left: 3px solid #ef4444;
+    opacity: 0.8;
+}
+
+.report-item.clean {
+    border-left: 3px solid var(--primary);
+}
+
+.report-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.report-item-header span:first-child {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.report-tag {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.report-tag.clean {
+    background: var(--primary-bg);
+    color: var(--primary);
+}
+
+.report-item p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ====================================================
    RESPONSIVE
    ==================================================== */
 
@@ -814,11 +959,12 @@
 
     .file-list-header,
     .file-row {
-        grid-template-columns: 1fr 60px 50px;
+        grid-template-columns: 1fr 60px 40px;
     }
 
     .col-ext,
-    .col-modified {
+    .col-modified,
+    .col-size {
         display: none;
     }
 
@@ -828,5 +974,9 @@
 
     .hud-mission span {
         display: none;
+    }
+
+    .forensics-report {
+        max-width: 100%;
     }
 }
