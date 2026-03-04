@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Shield, Mail, Lock, User } from 'lucide-react';
+import { Shield, Mail, Lock, User, CheckCircle2, XCircle } from 'lucide-react';
+import { buildApiUrl } from '../utils/api';
 import './Login.css';
 
 const Signup = () => {
@@ -11,11 +12,50 @@ const Signup = () => {
     const [country, setCountry] = useState('Global');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+
+    // Availability states
+    const [usernameStatus, setUsernameStatus] = useState({ loading: false, available: null, message: '' });
+
     const { signup } = useAuth();
     const navigate = useNavigate();
 
+    const checkUsernameAvailability = useCallback(async (name) => {
+        if (name.length < 3) {
+            setUsernameStatus({ loading: false, available: null, message: '' });
+            return;
+        }
+
+        setUsernameStatus(prev => ({ ...prev, loading: true }));
+        try {
+            const res = await fetch(buildApiUrl(`/api/auth/check-username?username=${encodeURIComponent(name)}`));
+            const data = await res.json();
+            setUsernameStatus({
+                loading: false,
+                available: data.available,
+                message: data.message
+            });
+        } catch (err) {
+            console.error("Failed to check username", err);
+            setUsernameStatus({ loading: false, available: null, message: '' });
+        }
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (username) checkUsernameAvailability(username);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [username, checkUsernameAvailability]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (usernameStatus.available === false) {
+            setError('Please choose a different Agent Name');
+            return;
+        }
+
         setError('');
         setIsLoading(true);
         const result = await signup(username, email, password, country);
@@ -41,8 +81,25 @@ const Signup = () => {
                         <label htmlFor="username">Agent Name</label>
                         <div className="input-wrapper">
                             <User className="input-icon" size={20} />
-                            <input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Agent ID" required minLength={3} />
+                            <input
+                                id="username"
+                                type="text"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                placeholder="Agent ID"
+                                required
+                                minLength={3}
+                                maxLength={20}
+                            />
+                            {usernameStatus.loading && <div className="input-loader"></div>}
+                            {usernameStatus.available === true && <CheckCircle2 size={18} className="status-icon success" />}
+                            {usernameStatus.available === false && <XCircle size={18} className="status-icon error" />}
                         </div>
+                        {usernameStatus.message && (
+                            <p className={`status-message ${usernameStatus.available ? 'success' : 'error'}`}>
+                                {usernameStatus.message}
+                            </p>
+                        )}
                     </div>
                     <div className="form-group">
                         <label htmlFor="email">Email</label>
@@ -81,7 +138,7 @@ const Signup = () => {
                             <option value="Brazil">Brazil</option>
                         </select>
                     </div>
-                    <button type="submit" className="auth-submit" disabled={isLoading}>
+                    <button type="submit" className="auth-submit" disabled={isLoading || usernameStatus.available === false}>
                         {isLoading ? <div className="spinner"></div> : 'Register Profile'}
                     </button>
                 </form>

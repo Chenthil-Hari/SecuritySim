@@ -10,9 +10,14 @@ router.post('/signup', async (req, res) => {
     try {
         const { username, email, password, country } = req.body;
 
-        const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-        if (existingUser) {
-            return res.status(400).json({ message: 'User with this email or username already exists' });
+        const existingEmail = await User.findOne({ email });
+        if (existingEmail) {
+            return res.status(400).json({ message: 'Email is already taken.' });
+        }
+
+        const existingUsername = await User.findOne({ username: new RegExp(`^${username}$`, 'i') });
+        if (existingUsername) {
+            return res.status(400).json({ message: 'Agent Name is already taken.' });
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -45,6 +50,25 @@ router.post('/signup', async (req, res) => {
     } catch (error) {
         console.error('Signup error:', error);
         res.status(500).json({ message: 'Error creating user', error: error.message });
+    }
+});
+
+// Check Username Availability
+router.get('/check-username', async (req, res) => {
+    try {
+        const { username } = req.query;
+        if (!username || username.length < 3) {
+            return res.json({ available: false, message: 'Invalid username' });
+        }
+
+        const user = await User.findOne({ username: new RegExp(`^${username}$`, 'i') });
+        if (user) {
+            return res.json({ available: false, message: 'Name already taken' });
+        }
+
+        res.json({ available: true, message: 'Name available' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error checking username', error: error.message });
     }
 });
 
