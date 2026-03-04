@@ -97,8 +97,6 @@
 
 .team-card .btn-primary {
     width: 100%;
-    padding: 0.8rem;
-    font-size: 1.1rem;
 }
 
 /* Divider block */
@@ -155,15 +153,7 @@
 }
 
 .leave-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
     font-size: 0.9rem;
-    opacity: 0.8;
-}
-
-.leave-btn:hover {
-    opacity: 1;
 }
 
 .team-invite-code-card {

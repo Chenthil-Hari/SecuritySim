@@ -106,7 +106,10 @@ export default function Teams() {
             const token = localStorage.getItem('token');
             const res = await fetch(buildApiUrl('/api/teams/leave'), {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
             });
             if (!res.ok) {
                 const data = await res.json();
@@ -196,7 +199,7 @@ export default function Teams() {
                                 <Trophy size={16} /> Total Score: {team.totalScore.toLocaleString()}
                             </div>
                         </div>
-                        <button className="btn-danger leave-btn" onClick={handleLeaveTeam}>
+                        <button className="btn btn-danger leave-btn" type="button" onClick={handleLeaveTeam}>
                             <LogOut size={16} /> Leave Team
                         </button>
                     </div>

@@ -122,14 +122,19 @@ router.post('/leave', authMiddleware, async (req, res) => {
         }
 
         const team = await Team.findById(user.teamId);
+        if (!team) {
+            user.teamId = null;
+            await user.save();
+            return res.json({ message: 'Left team successfully (Note: Team data was missing)' });
+        }
 
         // Remove user from members array
-        team.members = team.members.filter(id => id.toString() !== user._id.toString());
+        team.members = team.members.filter(id => id && id.toString() !== user._id.toString());
 
         if (team.members.length === 0) {
             // If team is empty, delete it
             await Team.findByIdAndDelete(team._id);
-        } else if (team.ownerId.toString() === user._id.toString()) {
+        } else if (team.ownerId && team.ownerId.toString() === user._id.toString()) {
             // If owner left, reassign ownership to the first remaining member
             team.ownerId = team.members[0];
             await team.save();
