@@ -13,7 +13,6 @@ import scenariosData from '../data/scenarios';
 import characters from '../data/characters';
 import Timer from '../components/Timer';
 import DesktopSim from '../components/DesktopSim';
-import ConsequenceEngine from '../components/ConsequenceEngine';
 import './ScenarioPlay.css';
 
 /* ====================================================
@@ -194,7 +193,6 @@ export default function ScenarioPlay() {
     const [timedOut, setTimedOut] = useState(false);
     const [stepStartTime, setStepStartTime] = useState(0);
     const [timeBonusTotal, setTimeBonusTotal] = useState(0);
-    const [activeConsequence, setActiveConsequence] = useState(null);
 
     const character = characters[id] || characters['default'] || { name: 'Agent', avatar: '🕵️' };
 
@@ -227,10 +225,6 @@ export default function ScenarioPlay() {
 
         setStepResults([...stepResults, { step: currentStep, isCorrect, timeBonus }]);
         setCharReaction(isCorrect ? 'relief' : 'panic');
-
-        if (!isCorrect && option.consequence) {
-            setActiveConsequence(option.consequence);
-        }
     };
 
     const handleTimeout = () => {
@@ -243,9 +237,6 @@ export default function ScenarioPlay() {
     const handleContinue = () => {
         setShowFeedback(false);
         let nextIndex = currentStep + 1;
-        if (selectedOption !== null && step.options[selectedOption] && step.options[selectedOption].nextStep !== undefined) {
-            nextIndex = step.options[selectedOption].nextStep;
-        }
 
         if (nextIndex < totalSteps) {
             setCurrentStep(nextIndex);
@@ -292,7 +283,6 @@ export default function ScenarioPlay() {
         const vd = step.visualData;
         return (
             <div className="visual-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
-                {activeConsequence && <ConsequenceEngine type={activeConsequence} onComplete={() => setActiveConsequence(null)} />}
                 {(() => {
                     switch (step.visualType) {
                         case 'desktop': return <DesktopSim vd={vd} onAction={handleDesktopAction} key={currentStep} />;

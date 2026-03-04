@@ -2,12 +2,12 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth.js';
-import profileRoutes from './routes/profile.js';
-import leaderboardRoutes from './routes/leaderboard.js';
-import aiRoutes from './routes/ai.js';
-import teamsRoutes from './routes/teams.js';
-import challengesRoutes from './routes/challenges.js';
+import authRoutes from '../server/routes/auth.js';
+import profileRoutes from '../server/routes/profile.js';
+import leaderboardRoutes from '../server/routes/leaderboard.js';
+import aiRoutes from '../server/routes/ai.js';
+import teamsRoutes from '../server/routes/teams.js';
+import challengesRoutes from '../server/routes/challenges.js';
 
 dotenv.config();
 
