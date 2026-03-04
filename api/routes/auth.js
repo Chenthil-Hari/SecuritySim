@@ -40,7 +40,6 @@ router.post('/signup', async (req, res) => {
                 username: newUser.username,
                 email: newUser.email,
                 country: newUser.country,
-                streakDays: newUser.streakDays
             }
         });
     } catch (error) {
@@ -64,29 +63,6 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // Streak logic
-        const now = new Date();
-        const lastActive = new Date(user.lastActiveDate || now);
-
-        // Normalize dates to midnight to compare days
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const lastDate = new Date(lastActive.getFullYear(), lastActive.getMonth(), lastActive.getDate());
-
-        const diffTime = Math.abs(today - lastDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays === 1) {
-            // Logged in yesterday
-            user.streakDays += 1;
-        } else if (diffDays > 1) {
-            // Missed a day
-            user.streakDays = 1;
-        }
-        // If diffDays === 0, they already logged in today, keep the same streak
-
-        user.lastActiveDate = now;
-        await user.save();
-
         const token = jwt.sign(
             { userId: user._id, username: user.username },
             process.env.JWT_SECRET || 'fallback_secret',
@@ -101,7 +77,6 @@ router.post('/login', async (req, res) => {
                 username: user.username,
                 email: user.email,
                 country: user.country,
-                streakDays: user.streakDays
             }
         });
     } catch (error) {

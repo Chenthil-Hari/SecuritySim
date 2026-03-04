@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useGame } from '../context/GameContext';
-import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin, Flame } from 'lucide-react';
+import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin } from 'lucide-react';
 import { buildApiUrl } from '../utils/api';
 import badges from '../data/badges';
 import { Link } from 'react-router-dom';
@@ -253,14 +253,6 @@ const Profile = () => {
                     </div>
                 </div>
             )}
-
-            {/* Streak Section */}
-            <div className="streak-section">
-                <div className="streak-header">
-                    <h2><Flame size={24} style={{ color: '#ff9800' }} /> Daily Streak: <span className="streak-count">{user.streakDays || 0} Days</span></h2>
-                </div>
-                <p>Keep logging in every day to build your streak and become a true Cyber Guardian!</p>
-            </div>
 
             {/* Stats Grid */}
             <div className="profile-stats-grid">

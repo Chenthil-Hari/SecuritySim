@@ -52,14 +52,6 @@ const userSchema = new mongoose.Schema({
         accuracy: Number,
         timestamp: { type: Date, default: Date.now }
     }],
-    streakDays: {
-        type: Number,
-        default: 1
-    },
-    lastActiveDate: {
-        type: Date,
-        default: Date.now
-    },
     createdAt: {
         type: Date,
         default: Date.now
