@@ -6,6 +6,7 @@ import ScoreRing from '../components/ScoreRing';
 import StatCard from '../components/StatCard';
 import ScenarioCard from '../components/ScenarioCard';
 import scenarios from '../data/scenarios';
+import { getRank } from '../utils/ranks';
 import './Dashboard.css';
 
 const categoryIcons = { 'Phishing': Mail, 'Scam Calls': Phone, 'Malware': Bug, 'Social Engineering': Users };
@@ -110,6 +111,9 @@ export default function Dashboard() {
                     <div className="level-display">
                         <div className="level-number">Level {level}</div>
                         <div className="level-label">Difficulty: {['Beginner', 'Intermediate', 'Advanced'][difficulty - 1]}</div>
+                        <div className="rank-display" style={{ color: getRank(level).color, marginTop: '6px', fontSize: '0.9rem', fontWeight: 600 }}>
+                            {getRank(level).icon} {getRank(level).title}
+                        </div>
                     </div>
 
                     <div className="xp-bar-container">

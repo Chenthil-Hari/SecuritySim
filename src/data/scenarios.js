@@ -76,6 +76,7 @@ const scenarios = [
     title: 'CEO Fraud Email',
     category: 'Phishing',
     difficulty: 2,
+    timeLimit: 45,
     description: 'An email from your "CEO" urgently requests a wire transfer while they\'re traveling.',
     icon: 'Mail',
     steps: [
@@ -117,6 +118,7 @@ const scenarios = [
     title: 'AI Voice Clone Emergency',
     category: 'Scam Calls',
     difficulty: 2,
+    timeLimit: 40,
     description: 'You receive a panicked call from someone who sounds exactly like your family member claiming an emergency.',
     icon: 'Phone',
     steps: [
@@ -298,6 +300,7 @@ const scenarios = [
     title: 'Infected USB Drive',
     category: 'Malware',
     difficulty: 2,
+    timeLimit: 45,
     description: 'You find a USB drive labeled "Salary Data" in the office parking lot.',
     icon: 'Bug',
     steps: [
@@ -378,6 +381,7 @@ const scenarios = [
     title: 'LinkedIn Impersonation',
     category: 'Social Engineering',
     difficulty: 2,
+    timeLimit: 40,
     description: 'A recruiter on LinkedIn asks for your personal information for an amazing job opportunity.',
     icon: 'Users',
     steps: [
@@ -462,6 +466,7 @@ const scenarios = [
     title: 'Wi-Fi Honeypot Attack',
     category: 'Social Engineering',
     difficulty: 3,
+    timeLimit: 35,
     description: 'You\'re at a coffee shop and see a free Wi-Fi network with a familiar name.',
     icon: 'Users',
     steps: [

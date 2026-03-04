@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useGame } from '../context/GameContext';
 import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin } from 'lucide-react';
 import { buildApiUrl } from '../utils/api';
+import { getRank } from '../utils/ranks';
 import badges from '../data/badges';
 import { Link } from 'react-router-dom';
 import Loader from '../components/Loader';
@@ -165,6 +166,7 @@ const Profile = () => {
                     </div>
                     <p className="profile-email">{user.email}</p>
                     <div className="profile-meta">
+                        <span className="rank-badge" style={{ color: getRank(level).color }}>{getRank(level).icon} {getRank(level).title}</span>
                         <span><MapPin size={14} /> {user.country || 'Global'}</span>
                         <span><Calendar size={14} /> Joined {memberSince}</span>
                     </div>

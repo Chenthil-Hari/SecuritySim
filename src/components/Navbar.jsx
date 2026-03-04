@@ -1,12 +1,13 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Mail } from 'lucide-react';
+import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Mail, Terminal } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
+import { getRank } from '../utils/ranks';
 import './Navbar.css';
 
 export default function Navbar() {
-    const { score } = useGame();
+    const { score, level } = useGame();
     const { user, logout } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
     const navigate = useNavigate();
@@ -60,6 +61,11 @@ export default function Navbar() {
                                 <User size={16} /> Profile
                             </NavLink>
                         </li>
+                        <li>
+                            <NavLink to="/terminal" onClick={() => setMenuOpen(false)}>
+                                <Terminal size={16} /> Terminal
+                            </NavLink>
+                        </li>
                     </>
                 )}
                 <li>
@@ -78,6 +84,7 @@ export default function Navbar() {
                 {user ? (
                     <>
                         <div className="user-greeting">
+                            <span title={getRank(level).title}>{getRank(level).icon}</span>
                             <span>{user.username}</span>
                         </div>
                         <div className="score-pill" title="Cyber Safety Score">

@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Trophy, Shield, Zap, Medal, Crown, Star, Globe, MapPin, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { buildApiUrl } from '../utils/api';
+import { getRank } from '../utils/ranks';
 import Loader from '../components/Loader';
 import './Leaderboard.css';
 
@@ -140,7 +141,7 @@ const Leaderboard = () => {
                                                 )}
                                             </div>
                                             <span className="agent-name">
-                                                {entry.username}
+                                                <span title={getRank(entry.level).title}>{getRank(entry.level).icon}</span> {entry.username}
                                                 {user && user.id === entry.id && <span className="you-tag">YOU</span>}
                                             </span>
                                         </div>

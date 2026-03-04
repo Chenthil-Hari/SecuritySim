@@ -9,6 +9,7 @@ import { useTypewriter, useStaggeredReveal } from '../hooks/useAnimations';
 import badgesList from '../data/badges';
 import scenariosData from '../data/scenarios';
 import characters from '../data/characters';
+import Timer from '../components/Timer';
 import './ScenarioPlay.css';
 
 /* ====================================================
@@ -243,6 +244,9 @@ export default function ScenarioPlay() {
     const [stepResults, setStepResults] = useState([]);
     const [finished, setFinished] = useState(false);
     const [charReaction, setCharReaction] = useState('idle');
+    const [timedOut, setTimedOut] = useState(false);
+    const [stepStartTime, setStepStartTime] = useState(Date.now());
+    const [timeBonusTotal, setTimeBonusTotal] = useState(0);
 
     const character = characters[id];
 
@@ -263,6 +267,12 @@ export default function ScenarioPlay() {
             const timer = setTimeout(() => setCharReaction('thinking'), 1500);
             return () => clearTimeout(timer);
         }
+    }, [currentStep]);
+
+    // Reset step start time on step change
+    useEffect(() => {
+        setStepStartTime(Date.now());
+        setTimedOut(false);
     }, [currentStep]);
 
     if (!scenario) {
@@ -287,8 +297,27 @@ export default function ScenarioPlay() {
         setSelectedOption(index);
         setShowFeedback(true);
         setStepResults(prev => [...prev, { isCorrect: option.isCorrect }]);
+        // Calculate time bonus if timed scenario
+        if (scenario.timeLimit && option.isCorrect) {
+            const elapsed = (Date.now() - stepStartTime) / 1000;
+            const ratio = Math.max(0, 1 - (elapsed / scenario.timeLimit));
+            const bonus = Math.round(ratio * 25 * scenario.difficulty);
+            setTimeBonusTotal(prev => prev + bonus);
+        }
         // Update character reaction based on answer correctness
         setCharReaction(option.isCorrect ? 'relief' : 'panic');
+    };
+
+    const handleTimeout = () => {
+        if (selectedOption !== null || timedOut) return;
+        setTimedOut(true);
+        // Auto-select the first incorrect option
+        const wrongIdx = step.options.findIndex(o => !o.isCorrect);
+        const idx = wrongIdx >= 0 ? wrongIdx : 0;
+        setSelectedOption(idx);
+        setShowFeedback(true);
+        setStepResults(prev => [...prev, { isCorrect: false }]);
+        setCharReaction('panic');
     };
 
     const handleContinue = () => {
@@ -368,7 +397,7 @@ export default function ScenarioPlay() {
     if (finished) {
         const correctCount = stepResults.filter(r => r.isCorrect).length;
         const accuracy = Math.round((correctCount / totalSteps) * 100);
-        const xpEarned = Math.round(accuracy * 0.5 * scenario.difficulty);
+        const xpEarned = Math.round(accuracy * 0.5 * scenario.difficulty) + timeBonusTotal;
         const grade = accuracy >= 80 ? 'great' : accuracy >= 50 ? 'ok' : 'poor';
 
         return (
@@ -401,21 +430,28 @@ export default function ScenarioPlay() {
                                 <div className="summary-stat-label">XP Earned</div>
                             </div>
                         </div>
+                        {timeBonusTotal > 0 && (
+                            <div className="summary-stat">
+                                <div className="summary-stat-value" style={{ color: 'var(--primary)' }}>+{timeBonusTotal}</div>
+                                <div className="summary-stat-label">Time Bonus</div>
+                            </div>
+                        )}
                     </div>
+                </div>
 
-                    <div className="summary-actions">
-                        <button className="btn-outline" onClick={() => {
-                            setCurrentStep(0);
-                            setSelectedOption(null);
-                            setStepResults([]);
-                            setFinished(false);
-                        }}>
-                            <RotateCcw size={16} /> Try Again
-                        </button>
-                        <Link to="/scenarios" className="btn-primary">
-                            Next Scenario <ArrowRight size={16} />
-                        </Link>
-                    </div>
+                <div className="summary-actions">
+                    <button className="btn-outline" onClick={() => {
+                        setCurrentStep(0);
+                        setSelectedOption(null);
+                        setStepResults([]);
+                        setFinished(false);
+                        setTimeBonusTotal(0);
+                    }}>
+                        <RotateCcw size={16} /> Try Again
+                    </button>
+                    <Link to="/scenarios" className="btn-primary">
+                        Next Scenario <ArrowRight size={16} />
+                    </Link>
                 </div>
             </div>
         );
@@ -445,6 +481,18 @@ export default function ScenarioPlay() {
                     </div>
                     <span className="progress-text">Step {currentStep + 1}/{totalSteps}</span>
                 </div>
+
+                {scenario.timeLimit && (
+                    <div className="scenario-timer-bar">
+                        <Timer
+                            key={currentStep}
+                            seconds={scenario.timeLimit}
+                            onTimeout={handleTimeout}
+                            isPaused={showFeedback}
+                        />
+                        <span className="timer-label">⏱ Time Limit</span>
+                    </div>
+                )}
             </div>
 
             {character && (
