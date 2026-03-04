@@ -14,6 +14,7 @@ import characters from '../data/characters';
 import Timer from '../components/Timer';
 import DesktopSim from '../components/DesktopSim';
 import ConsequenceEngine from '../components/ConsequenceEngine';
+import AttackExplainer from '../components/AttackExplainer';
 import './ScenarioPlay.css';
 
 /* ====================================================
@@ -195,6 +196,12 @@ export default function ScenarioPlay() {
     const [stepStartTime, setStepStartTime] = useState(0);
     const [timeBonusTotal, setTimeBonusTotal] = useState(0);
     const [activeConsequence, setActiveConsequence] = useState(null);
+    const [showExplainer, setShowExplainer] = useState(true);
+
+    const handleExplainerSkip = useCallback(() => {
+        setShowExplainer(false);
+        setStepStartTime(Date.now());
+    }, []);
 
     const character = characters[id] || characters['default'] || { name: 'Agent', avatar: '🕵️' };
 
@@ -208,6 +215,7 @@ export default function ScenarioPlay() {
     }, [id, scenario, state?.settings]);
 
     if (!scenario) return <div className="error-page">Scenario not found.</div>;
+    if (showExplainer) return <AttackExplainer category={scenario.category} onSkip={handleExplainerSkip} />;
 
     const step = scenario.steps[currentStepIndex];
     if (!step) {
