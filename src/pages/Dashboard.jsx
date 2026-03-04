@@ -174,6 +174,12 @@ export default function Dashboard() {
                     </div>
                 </div>
             )}
+
+            <div className="dashboard-footer">
+                <Link to="/contact" className="dashboard-contact-link">
+                    <Mail size={16} /> Contact Support
+                </Link>
+            </div>
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Mail, Terminal } from 'lucide-react';
+import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Terminal } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
@@ -71,11 +71,6 @@ export default function Navbar() {
                 <li>
                     <NavLink to="/settings" onClick={() => setMenuOpen(false)}>
                         <Settings size={16} /> Settings
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink to="/contact" onClick={() => setMenuOpen(false)}>
-                        <Mail size={16} /> Contact Support
                     </NavLink>
                 </li>
             </ul>

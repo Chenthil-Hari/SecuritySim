@@ -214,6 +214,32 @@
     margin-bottom: var(--space-xl);
 }
 
+/* Dashboard Footer */
+.dashboard-footer {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.dashboard-contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    text-decoration: none;
+}
+
+.dashboard-contact-link:hover {
+    color: var(--primary);
+    background: var(--primary-bg);
+}
+
 @media (max-width: 768px) {
     .dashboard {
         padding: var(--space-xl) var(--space-md);
