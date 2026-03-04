@@ -1,5 +1,5 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Zap, Calendar, Users, Swords, Globe } from 'lucide-react';
+import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Zap, Calendar, Users, Swords, Globe, ChevronDown, Gamepad2 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
@@ -11,6 +11,7 @@ export default function Navbar() {
     const { score, level } = useGame();
     const { user, logout } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [multiplayerOpen, setMultiplayerOpen] = useState(false);
     const navigate = useNavigate();
 
     const playNavSound = () => {
@@ -62,34 +63,31 @@ export default function Navbar() {
                                 <Crosshair size={16} /> Scenarios
                             </NavLink>
                         </li>
-                        <li>
-                            <NavLink to="/teams" onClick={handleNavClick}>
-                                <Users size={16} /> Teams
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink to="/challenges" onClick={handleNavClick}>
-                                <Swords size={16} /> PvP Challenge
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink to="/threat-map" onClick={handleNavClick}>
-                                <Globe size={16} /> Threat Map
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink to="/weekly" onClick={handleNavClick} className={({ isActive }) => isActive ? "active weekly-nav" : "weekly-nav"}>
-                                <Calendar size={16} /> Weekly Op
-                            </NavLink>
+                        <li
+                            className={`nav-dropdown ${multiplayerOpen ? 'open' : ''}`}
+                            onMouseEnter={() => setMultiplayerOpen(true)}
+                            onMouseLeave={() => setMultiplayerOpen(false)}
+                            onClick={() => setMultiplayerOpen(!multiplayerOpen)}
+                        >
+                            <button className="dropdown-trigger" type="button">
+                                <Gamepad2 size={16} /> Multiplayer <ChevronDown size={14} className={multiplayerOpen ? 'rotate' : ''} />
+                            </button>
+                            <ul className="dropdown-menu">
+                                <li>
+                                    <NavLink to="/teams" onClick={handleNavClick}>
+                                        <Users size={16} /> Teams
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink to="/challenges" onClick={handleNavClick}>
+                                        <Swords size={16} /> PvP Challenge
+                                    </NavLink>
+                                </li>
+                            </ul>
                         </li>
                         <li>
                             <NavLink to="/achievements" onClick={handleNavClick}>
                                 <Award size={16} /> Achievements
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink to="/skill-tree" onClick={handleNavClick}>
-                                <Zap size={16} /> Skill Tree
                             </NavLink>
                         </li>
                         <li>
