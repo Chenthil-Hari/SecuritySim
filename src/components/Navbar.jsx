@@ -8,14 +8,15 @@ import { playClick } from '../utils/soundEffects';
 import './Navbar.css';
 
 export default function Navbar() {
-    const { score, level } = useGame();
+    const gameState = useGame();
+    const { score = 0, level = 1, settings = {} } = gameState || {};
     const { user, logout } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
     const [multiplayerOpen, setMultiplayerOpen] = useState(false);
     const navigate = useNavigate();
 
     const playNavSound = () => {
-        if (state.settings?.soundEffects) {
+        if (settings?.soundEffects) {
             playClick();
         }
     };
@@ -106,6 +107,33 @@ export default function Navbar() {
                     <NavLink to="/settings" onClick={handleNavClick}>
                         <Settings size={16} /> Settings
                     </NavLink>
+                </li>
+
+                {/* Mobile-only Auth/User section */}
+                <li className="mobile-only-nav-section">
+                    {user ? (
+                        <div className="mobile-user-info">
+                            <div className="user-details">
+                                <span title={getRank(level).title}>{getRank(level).icon}</span>
+                                <span>{user.username}</span>
+                                <div className="score-pill">
+                                    <Shield size={14} /> {score}
+                                </div>
+                            </div>
+                            <button className="logout-btn full-width" onClick={handleLogout}>
+                                <LogOut size={16} /> Logout
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="mobile-auth-buttons">
+                            <Link to="/login" className="login-btn" onClick={handleNavClick}>
+                                <LogIn size={16} /> Login
+                            </Link>
+                            <Link to="/signup" className="signup-btn" onClick={handleNavClick}>
+                                <UserPlus size={16} /> Signup
+                            </Link>
+                        </div>
+                    )}
                 </li>
             </ul>
 
