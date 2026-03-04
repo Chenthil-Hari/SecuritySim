@@ -181,9 +181,9 @@ export default function ScenarioPlay() {
     const [searchParams] = useSearchParams();
     const challengeId = searchParams.get('challengeId');
     const navigate = useNavigate();
-    const { state } = useGame();
+    const state = useGame();
     const dispatch = useGameDispatch();
-    const scenario = scenariosData.find(s => s.id === id);
+    const scenario = scenariosData?.find(s => s.id === id);
 
     const [currentStep, setCurrentStep] = useState(0);
     const [selectedOption, setSelectedOption] = useState(null);
@@ -199,13 +199,13 @@ export default function ScenarioPlay() {
     const character = characters[id] || characters['default'] || { name: 'Agent', avatar: '🕵️' };
 
     useEffect(() => {
-        if (scenario) {
+        if (scenario && state?.settings) {
             setStepStartTime(Date.now());
             startAmbient(scenario.category);
             speakScenario(scenario.steps[0], state.settings);
         }
         return () => stopAmbient();
-    }, [id, scenario, state.settings]);
+    }, [id, scenario, state?.settings]);
 
     if (!scenario) return <div className="error-page">Scenario not found.</div>;
 
@@ -253,7 +253,9 @@ export default function ScenarioPlay() {
             setCharReaction('idle');
             setStepStartTime(Date.now());
             setTimedOut(false);
-            speakScenario(scenario.steps[nextIndex], state.settings);
+            if (state?.settings) {
+                speakScenario(scenario.steps[nextIndex], state.settings);
+            }
         } else {
             stopAmbient();
             playScenarioComplete();
