@@ -139,4 +139,30 @@ router.put('/:id/decline', authMiddleware, async (req, res) => {
     }
 });
 
+// PUT /api/challenges/:id/cancel
+router.put('/:id/cancel', authMiddleware, async (req, res) => {
+    try {
+        const challenge = await Challenge.findById(req.params.id);
+
+        if (!challenge) return res.status(404).json({ message: 'Challenge not found.' });
+
+        // Only the sender can cancel the challenge
+        if (challenge.senderId.toString() !== req.userId) {
+            return res.status(403).json({ message: 'Unauthorized. Only the sender can cancel this challenge.' });
+        }
+
+        if (challenge.status !== 'pending') {
+            return res.status(400).json({ message: 'Only pending challenges can be cancelled.' });
+        }
+
+        challenge.status = 'cancelled';
+        challenge.completedAt = new Date();
+        await challenge.save();
+
+        res.json({ message: 'Challenge cancelled.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error cancelling challenge', error: error.message });
+    }
+});
+
 export default router;

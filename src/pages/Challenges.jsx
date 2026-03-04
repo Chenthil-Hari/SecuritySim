@@ -59,21 +59,36 @@ export default function Challenges() {
         }
     };
 
+    const handleCancel = async (challengeId) => {
+        if (!window.confirm("Cancel this challenge?")) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/challenges/${challengeId}/cancel`), {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                fetchChallenges();
+            } else {
+                const data = await res.json();
+                alert(data.message || "Failed to cancel challenge");
+            }
+        } catch (err) {
+            console.error("Error cancelling challenge", err);
+        }
+    };
+
     const handleAccept = (challenge) => {
         // Navigate to scenario play with a query param signaling it's a challenge mode
         navigate(`/scenarios/${challenge.scenarioId}?challengeId=${challenge._id}`);
     };
 
-    // Sending a challenge currently depends on the user ALREADY having a score.
-    // For MVP flow, users create a challenge by selecting a scenario. If they have completed it, 
-    // it uses their best logged score. Otherwise it errors. (More advanced: navigate to scenario, play it, then send).
     const handleSendChallenge = async (e) => {
         e.preventDefault();
         setChallengeStatusMsg(null);
 
         if (!opponentUsername || !selectedScenario) return;
 
-        // Find user's best accuracy for this scenario
         const scenarioLogs = (completedScenarios || []).filter(s => s.scenarioId === selectedScenario);
         if (scenarioLogs.length === 0) {
             setChallengeStatusMsg({ type: 'error', text: 'You must complete a scenario first before challenging someone else to it!' });
@@ -110,7 +125,7 @@ export default function Challenges() {
             fetchChallenges();
 
         } catch (err) {
-            setChallengeStatusMsg({ type: 'error', text: err.message });
+            setChallengeStatusMsg({ type: 'error', text: err.name === 'AbortError' ? 'Request timed out' : err.message });
         }
     };
 
@@ -178,8 +193,6 @@ export default function Challenges() {
             )}
 
             <div className="challenges-grid">
-
-                {/* INCOMING CHALLENGES */}
                 <div className="challenge-column">
                     <h2><ShieldAlert size={20} className="text-warning" /> Incoming Directives</h2>
                     {challenges.incoming?.length === 0 ? (
@@ -207,7 +220,6 @@ export default function Challenges() {
                     )}
                 </div>
 
-                {/* OUTGOING CHALLENGES */}
                 <div className="challenge-column">
                     <h2><Send size={20} className="text-primary" /> Sent Directives</h2>
                     {challenges.outgoing?.length === 0 ? (
@@ -217,11 +229,16 @@ export default function Challenges() {
                             {challenges.outgoing.map(c => (
                                 <li key={c._id} className="challenge-item outgoing-call">
                                     <div className="challenge-meta">
-                                        <h4>Awaiting {c.receiverId.username}</h4>
+                                        <h4>Awaiting {c.receiverId?.username || 'Unknown Agent'}</h4>
                                         <p className="scenario-name">Op: {getScenarioName(c.scenarioId)}</p>
                                         <div className="target-score">Your score: <strong>{c.senderAccuracy}%</strong></div>
                                     </div>
-                                    <div className="status-badge pending">Pending</div>
+                                    <div className="challenge-actions">
+                                        <div className="status-badge pending">Pending</div>
+                                        <button className="btn-icon btn-danger" onClick={() => handleCancel(c._id)} title="Cancel Challenge">
+                                            <X size={18} />
+                                        </button>
+                                    </div>
                                 </li>
                             ))}
                         </ul>
@@ -229,7 +246,6 @@ export default function Challenges() {
                 </div>
             </div>
 
-            {/* HISTORY */}
             <div className="challenge-history">
                 <h2><History size={20} /> Combat Log</h2>
                 {challenges.history?.length === 0 ? (
@@ -238,13 +254,16 @@ export default function Challenges() {
                     <ul className="history-list">
                         {challenges.history.map(c => {
                             const isSender = c.senderId._id === user?.id;
-                            const opponentName = isSender ? c.receiverId.username : c.senderId.username;
+                            const opponentName = isSender ? (c.receiverId?.username || 'Unknown') : (c.senderId?.username || 'Unknown');
 
                             let resolution = "Tie";
                             let resolutionClass = "tie";
 
                             if (c.status === 'declined') {
                                 resolution = "Declined";
+                                resolutionClass = "declined";
+                            } else if (c.status === 'cancelled') {
+                                resolution = "Cancelled";
                                 resolutionClass = "declined";
                             } else if (c.status === 'completed') {
                                 if (isSender) {
@@ -278,7 +297,9 @@ export default function Challenges() {
                                                 </div>
                                             </>
                                         ) : (
-                                            <span className="declined-text">Declined</span>
+                                            <span className="declined-text">
+                                                {c.status === 'cancelled' ? 'Retracted' : 'Declined'}
+                                            </span>
                                         )}
                                     </div>
                                 </li>
@@ -287,7 +308,6 @@ export default function Challenges() {
                     </ul>
                 )}
             </div>
-
         </div>
     );
 }

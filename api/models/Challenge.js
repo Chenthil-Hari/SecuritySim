@@ -33,7 +33,7 @@ const challengeSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'completed', 'declined'],
+        enum: ['pending', 'completed', 'declined', 'cancelled'],
         default: 'pending'
     },
     createdAt: {
