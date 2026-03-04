@@ -13,6 +13,7 @@ export default function Navbar() {
     const { user, logout } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
     const [multiplayerOpen, setMultiplayerOpen] = useState(false);
+    const [gamesOpen, setGamesOpen] = useState(false);
     const navigate = useNavigate();
 
     const playNavSound = () => {
@@ -64,10 +65,22 @@ export default function Navbar() {
                                 <Crosshair size={16} /> Scenarios
                             </NavLink>
                         </li>
-                        <li>
-                            <NavLink to="/forensics" onClick={handleNavClick}>
-                                <Search size={16} /> Forensics
-                            </NavLink>
+                        <li
+                            className={`nav-dropdown ${gamesOpen ? 'open' : ''}`}
+                            onMouseEnter={() => setGamesOpen(true)}
+                            onMouseLeave={() => setGamesOpen(false)}
+                            onClick={() => setGamesOpen(!gamesOpen)}
+                        >
+                            <button className="dropdown-trigger" type="button">
+                                <Gamepad2 size={16} /> Games <ChevronDown size={14} className={gamesOpen ? 'rotate' : ''} />
+                            </button>
+                            <ul className="dropdown-menu">
+                                <li>
+                                    <NavLink to="/forensics" onClick={handleNavClick}>
+                                        <Search size={16} /> Forensics
+                                    </NavLink>
+                                </li>
+                            </ul>
                         </li>
                         <li
                             className={`nav-dropdown ${multiplayerOpen ? 'open' : ''}`}
@@ -90,11 +103,6 @@ export default function Navbar() {
                                     </NavLink>
                                 </li>
                             </ul>
-                        </li>
-                        <li>
-                            <NavLink to="/achievements" onClick={handleNavClick}>
-                                <Award size={16} /> Achievements
-                            </NavLink>
                         </li>
                         <li>
                             <NavLink to="/leaderboard" onClick={handleNavClick}>
