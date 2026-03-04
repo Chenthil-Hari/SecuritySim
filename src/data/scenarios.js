@@ -534,30 +534,35 @@ const scenarios = [
         title: "The Breach Begins",
         visualType: 'desktop',
         visualData: {
-          activeWindows: ['alert'],
-          alert: {
-            title: "Security Warning",
-            message: "Unauthorized access attempt detected from unknown IP 192.168.1.105",
-            isFlashing: true
-          },
           icons: [
             { id: 'pc', label: 'My Computer', icon: 'Monitor' },
             { id: 'files', label: 'Sensitive Data', icon: 'HardDrive' },
             { id: 'trash', label: 'Recycle Bin', icon: 'Trash2' }
+          ],
+          windows: [
+            {
+              type: 'alert',
+              title: "Security Warning",
+              content: "Unauthorized access attempt detected from unknown IP 192.168.1.105",
+              isFlashing: true,
+              actionOnClose: 'close-alert'
+            }
           ]
         },
         options: [
           {
             text: "Close the alert and continue working",
             isCorrect: false,
+            consequence: 'glitch',
+            nextStepId: 'rd-fail-1',
             feedback: "Ignoring an IOC (Indicator of Compromise) is a fatal mistake.",
             defenseTip: "Always investigate security alerts immediately.",
           },
           {
-            text: "Click the 'X' to dismiss and run an AV scan",
+            text: "Investigate: Open 'Sensitive Data' to check for changes",
             isCorrect: true,
-            trigger: 'close-alert',
-            feedback: "Good reflex! Dismissing the distraction to take defensive action.",
+            nextStepId: 'rd-invest-1',
+            feedback: "Good reflex! Checking your sensitive assets is a key first step.",
             defenseTip: "Running scans after alerts is a standard SOP.",
           }
         ]
@@ -567,10 +572,17 @@ const scenarios = [
         title: "System Compromised",
         visualType: 'desktop',
         visualData: {
-          activeWindows: ['ransom'],
           icons: [
             { id: 'pc', label: 'My Computer', icon: 'Monitor' },
             { id: 'trash', label: 'Recycle Bin', icon: 'Trash2' }
+          ],
+          windows: [
+            {
+              type: 'alert',
+              title: 'CRITICAL FAILURE',
+              content: 'All files have been encrypted. System is locked.',
+              isFlashing: true
+            }
           ]
         },
         prompt: "Your files have been encrypted. The attacker is demanding payment.",
@@ -578,12 +590,16 @@ const scenarios = [
           {
             text: "Contact IT Security immediately",
             isCorrect: true,
+            consequence: 'leak',
+            isTerminal: true,
             feedback: "Even after failure, reporting is the right step to prevent lateral movement.",
             defenseTip: "Incident response starts with transparency.",
           },
           {
             text: "Pay the Ransom (0.5 BTC)",
             isCorrect: false,
+            consequence: 'ransom',
+            isTerminal: true,
             feedback: "Paying ransoms only funds further criminal activity and doesn't guarantee data recovery.",
             defenseTip: "Never pay the ransom. Use backups instead.",
           }
@@ -594,26 +610,33 @@ const scenarios = [
         title: "Containment Phase",
         visualType: 'desktop',
         visualData: {
-          activeWindows: ['explorer'],
-          explorer: {
-            path: 'C:\\Sensitive Data',
-            files: [
-              { name: 'passwords.txt', isSuspicious: false },
-              { name: 'payload.exe', isSuspicious: true },
-              { name: 'network_config.bak', isSuspicious: false }
-            ]
-          },
           icons: [
             { id: 'pc', label: 'My Computer', icon: 'Monitor' },
             { id: 'trash', label: 'Recycle Bin', icon: 'Trash2' }
+          ],
+          files: [
+            { name: 'passwords.txt', type: 'text' },
+            { name: 'payload.exe', type: 'malware' },
+            { name: 'network_config.bak', type: 'text' }
           ]
         },
         options: [
           {
-            text: "Hover over the suspicious files before deciding",
+            text: "Drag 'payload.exe' to the Recycle Bin",
+            isCorrect: true,
+            trigger: 'delete',
+            target: 'payload.exe',
+            nextStepId: 'rd-final',
+            feedback: "Great work! You identified and quarantined the threat.",
+            defenseTip: "Isolation is the first step in remediation.",
+          },
+          {
+            text: "Double-click 'payload.exe' to see what it is",
             isCorrect: false,
-            feedback: "Good for gathering info, but don't wait too long.",
-            defenseTip: "Investigation is good, but containment is priority.",
+            consequence: 'glitch',
+            nextStepId: 'rd-fail-1',
+            feedback: "NO! Never execute unknown files during a breach!",
+            defenseTip: "Malware often uses enticing names to trigger execution.",
           }
         ]
       },

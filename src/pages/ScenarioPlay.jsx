@@ -13,6 +13,7 @@ import scenariosData from '../data/scenarios';
 import characters from '../data/characters';
 import Timer from '../components/Timer';
 import DesktopSim from '../components/DesktopSim';
+import ConsequenceEngine from '../components/ConsequenceEngine';
 import './ScenarioPlay.css';
 
 /* ====================================================
@@ -184,7 +185,7 @@ export default function ScenarioPlay() {
     const dispatch = useGameDispatch();
     const scenario = scenariosData?.find(s => s.id === id);
 
-    const [currentStep, setCurrentStep] = useState(0);
+    const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState(null);
     const [showFeedback, setShowFeedback] = useState(false);
     const [stepResults, setStepResults] = useState([]);
@@ -193,6 +194,7 @@ export default function ScenarioPlay() {
     const [timedOut, setTimedOut] = useState(false);
     const [stepStartTime, setStepStartTime] = useState(0);
     const [timeBonusTotal, setTimeBonusTotal] = useState(0);
+    const [activeConsequence, setActiveConsequence] = useState(null);
 
     const character = characters[id] || characters['default'] || { name: 'Agent', avatar: '🕵️' };
 
@@ -207,9 +209,9 @@ export default function ScenarioPlay() {
 
     if (!scenario) return <div className="error-page">Scenario not found.</div>;
 
-    const step = scenario.steps[currentStep];
+    const step = scenario.steps[currentStepIndex];
     const totalSteps = scenario.steps.length;
-    const progress = ((currentStep + 1) / totalSteps) * 100;
+    const progress = Math.min(100, ((stepResults.length + 1) / totalSteps) * 100);
 
     const handleOptionSelect = (option, index) => {
         if (selectedOption !== null || finished) return;
@@ -219,11 +221,19 @@ export default function ScenarioPlay() {
         const isCorrect = option.isCorrect;
         if (isCorrect) playCorrect(); else playIncorrect();
 
+        if (option.consequence) {
+            setActiveConsequence(option.consequence);
+            // Hide consequence after 3 seconds unless it's a persistent one
+            if (option.consequence !== 'ransom') {
+                setTimeout(() => setActiveConsequence(null), 3500);
+            }
+        }
+
         const timeTaken = (Date.now() - stepStartTime) / 1000;
         const timeBonus = isCorrect ? Math.max(0, Math.round((scenario.timeLimit || 30) - timeTaken)) : 0;
         setTimeBonusTotal(prev => prev + timeBonus);
 
-        setStepResults([...stepResults, { step: currentStep, isCorrect, timeBonus }]);
+        setStepResults([...stepResults, { step: currentStepIndex, isCorrect, timeBonus }]);
         setCharReaction(isCorrect ? 'relief' : 'panic');
     };
 
@@ -236,10 +246,19 @@ export default function ScenarioPlay() {
 
     const handleContinue = () => {
         setShowFeedback(false);
-        let nextIndex = currentStep + 1;
+        setActiveConsequence(null);
 
-        if (nextIndex < totalSteps) {
-            setCurrentStep(nextIndex);
+        const lastOption = step.options[selectedOption];
+        let nextIndex = -1;
+
+        if (lastOption?.nextStepId) {
+            nextIndex = scenario.steps.findIndex(s => s.id === lastOption.nextStepId);
+        } else {
+            nextIndex = currentStepIndex + 1;
+        }
+
+        if (nextIndex !== -1 && nextIndex < scenario.steps.length && !lastOption?.isTerminal) {
+            setCurrentStepIndex(nextIndex);
             setSelectedOption(null);
             setCharReaction('idle');
             setStepStartTime(Date.now());
@@ -285,18 +304,19 @@ export default function ScenarioPlay() {
             <div className="visual-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
                 {(() => {
                     switch (step.visualType) {
-                        case 'desktop': return <DesktopSim vd={vd} onAction={handleDesktopAction} key={currentStep} />;
-                        case 'email': return <AnimatedEmail vd={vd} key={currentStep} />;
-                        case 'phone': return <AnimatedPhone vd={vd} key={currentStep} />;
-                        case 'chat': return <AnimatedChat vd={vd} key={currentStep} />;
-                        case 'popup': return <AnimatedPopup vd={vd} key={currentStep} />;
-                        case 'browser': return <AnimatedBrowser vd={vd} key={currentStep} />;
-                        case 'file-explorer': return <AnimatedFileExplorer vd={vd} key={currentStep} />;
-                        case 'wifi': return <AnimatedWifiSelector vd={vd} key={currentStep} />;
-                        case 'social-feed': return <AnimatedSocialFeed vd={vd} key={currentStep} />;
-                        default: return <AnimatedDecision prompt={step.prompt} key={currentStep} />;
+                        case 'desktop': return <DesktopSim vd={vd} onAction={handleDesktopAction} key={currentStepIndex} />;
+                        case 'email': return <AnimatedEmail vd={vd} key={currentStepIndex} />;
+                        case 'phone': return <AnimatedPhone vd={vd} key={currentStepIndex} />;
+                        case 'chat': return <AnimatedChat vd={vd} key={currentStepIndex} />;
+                        case 'popup': return <AnimatedPopup vd={vd} key={currentStepIndex} />;
+                        case 'browser': return <AnimatedBrowser vd={vd} key={currentStepIndex} />;
+                        case 'file-explorer': return <AnimatedFileExplorer vd={vd} key={currentStepIndex} />;
+                        case 'wifi': return <AnimatedWifiSelector vd={vd} key={currentStepIndex} />;
+                        case 'social-feed': return <AnimatedSocialFeed vd={vd} key={currentStepIndex} />;
+                        default: return <AnimatedDecision prompt={step.prompt} key={currentStepIndex} />;
                     }
                 })()}
+                {activeConsequence && <ConsequenceEngine type={activeConsequence} />}
             </div>
         );
     };
@@ -323,7 +343,7 @@ export default function ScenarioPlay() {
                     </div>
                 </div>
                 <div className="summary-actions">
-                    <button className="btn-outline" onClick={() => { setCurrentStep(0); setSelectedOption(null); setStepResults([]); setFinished(false); setTimeBonusTotal(0); }}><RotateCcw size={16} /> Try Again</button>
+                    <button className="btn-outline" onClick={() => { setCurrentStepIndex(0); setSelectedOption(null); setStepResults([]); setFinished(false); setTimeBonusTotal(0); setActiveConsequence(null); }}><RotateCcw size={16} /> Try Again</button>
                     <Link to={challengeId ? "/challenges" : "/scenarios"} className="btn-primary">Continue <ArrowRight size={16} /></Link>
                 </div>
             </div>
