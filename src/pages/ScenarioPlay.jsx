@@ -9,7 +9,6 @@ import Character from '../components/Character';
 import { useTypewriter, useStaggeredReveal } from '../hooks/useAnimations';
 import badgesList from '../data/badges';
 import scenariosData from '../data/scenarios';
-import weeklyChallenge from '../data/weeklyChallenges';
 import characters from '../data/characters';
 import Timer from '../components/Timer';
 import './ScenarioPlay.css';
@@ -238,8 +237,7 @@ export default function ScenarioPlay() {
     const navigate = useNavigate();
     const { state, dispatch } = useGame(); // Updated useGame hook destructuring
 
-    const isWeekly = id === weeklyChallenge.id; // Added isWeekly definition
-    const scenario = isWeekly ? weeklyChallenge : scenariosData.find(s => s.id === id); // Updated scenario definition
+    const scenario = scenariosData.find(s => s.id === id);
     const [currentStep, setCurrentStep] = useState(0);
     const [selectedOption, setSelectedOption] = useState(null);
     const [showFeedback, setShowFeedback] = useState(false);
@@ -362,46 +360,35 @@ export default function ScenarioPlay() {
 
             const correctCount = [...stepResults].filter(r => r.isCorrect).length;
             const accuracy = Math.round((correctCount / totalSteps) * 100);
-            const xpEarned = isWeekly ? weeklyChallenge.xpReward : Math.round(accuracy * 0.5 * scenario.difficulty);
+            const xpEarned = Math.round(accuracy * 0.5 * scenario.difficulty);
 
-            if (isWeekly) {
-                dispatch({
-                    type: 'COMPLETE_WEEKLY',
-                    payload: { weekId: scenario.id, xpEarned, category: scenario.category }
-                });
-
-                if (scenario.badgeReward && !state.badges.includes(scenario.badgeReward)) {
-                    dispatch({ type: 'EARN_BADGE', payload: scenario.badgeReward });
+            dispatch({
+                type: 'COMPLETE_SCENARIO',
+                payload: {
+                    scenarioId: scenario.id,
+                    category: scenario.category,
+                    accuracy,
+                    xpEarned
                 }
-            } else {
-                dispatch({
-                    type: 'COMPLETE_SCENARIO',
-                    payload: {
-                        scenarioId: scenario.id,
-                        category: scenario.category,
-                        accuracy,
-                        xpEarned
-                    }
-                });
+            });
 
-                // Check for new badges
-                const updatedState = {
-                    ...state,
-                    completedScenarios: [
-                        ...state.completedScenarios,
-                        { scenarioId: scenario.id, category: scenario.category, accuracy }
-                    ],
-                    xp: state.xp + xpEarned,
-                    level: Math.floor((state.xp + xpEarned) / 100) + 1,
-                    score: accuracy
-                };
+            // Check for new badges
+            const updatedState = {
+                ...state,
+                completedScenarios: [
+                    ...state.completedScenarios,
+                    { scenarioId: scenario.id, category: scenario.category, accuracy }
+                ],
+                xp: state.xp + xpEarned,
+                level: Math.floor((state.xp + xpEarned) / 100) + 1,
+                score: accuracy
+            };
 
-                badgesList.forEach(badge => {
-                    if (!state.badges.includes(badge.id) && badge.condition(updatedState)) {
-                        dispatch({ type: 'EARN_BADGE', payload: badge.id });
-                    }
-                });
-            }
+            badgesList.forEach(badge => {
+                if (!state.badges.includes(badge.id) && badge.condition(updatedState)) {
+                    dispatch({ type: 'EARN_BADGE', payload: badge.id });
+                }
+            });
 
             setFinished(true);
             // Set final character reaction based on accuracy
