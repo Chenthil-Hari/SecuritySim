@@ -267,11 +267,11 @@ const Profile = () => {
 
     if (loading) return <Loader />;
 
-    const score = gameState.score;
-    const xp = gameState.xp;
-    const level = gameState.level;
-    const earnedBadges = gameState.badges;
-    const completedScenarios = gameState.completedScenarios;
+    const score = profileData?.score !== undefined ? profileData.score : (isOwnProfile ? gameState.score : 0);
+    const xp = profileData?.xp !== undefined ? profileData.xp : (isOwnProfile ? gameState.xp : 0);
+    const level = profileData?.level !== undefined ? profileData.level : (isOwnProfile ? gameState.level : 1);
+    const earnedBadges = profileData?.badges || (isOwnProfile ? gameState.badges : []);
+    const completedScenarios = profileData?.completedScenarios || (isOwnProfile ? gameState.completedScenarios : []);
     const memberSince = profileData?.createdAt ? new Date(profileData.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
     const xpToNext = 100 - (xp % 100);
     const xpProgress = (xp % 100) / 100 * 100;
@@ -281,8 +281,9 @@ const Profile = () => {
         earned: earnedBadges.includes(b.id)
     }));
 
-    const activeBanner = customizations.banners.find(b => b.id === (gameState?.customization?.activeBanner || 'default'));
-    const auraConfig = gameState.customization?.auraEnabled ? (
+    const activeBanner = customizations.banners.find(b => b.id === (profileData?.customization?.activeBanner || (isOwnProfile ? gameState?.customization?.activeBanner : 'default')));
+    const auraEnabled = profileData?.customization?.auraEnabled !== undefined ? profileData.customization.auraEnabled : (isOwnProfile ? gameState.customization?.auraEnabled : false);
+    const auraConfig = auraEnabled ? (
         profileData?.rank === 1 ? customizations.auras.rank1 :
             profileData?.rank <= 10 ? customizations.auras.top10 :
                 profileData?.rank <= 50 ? customizations.auras.top50 :
@@ -296,7 +297,7 @@ const Profile = () => {
 
             {/* Profile Header */}
             <div className="profile-header">
-                <div className={`profile-avatar ${gameState.customization?.auraEnabled ? 'has-aura' : ''}`}
+                <div className={`profile-avatar ${auraEnabled ? 'has-aura' : ''}`}
                     style={{ '--aura-color': auraConfig.color, '--aura-blur': auraConfig.blur }}>
                     {profileData?.profilePhoto ? (
                         <img src={profileData.profilePhoto} alt="Profile" />
@@ -497,11 +498,11 @@ const Profile = () => {
                     </div>
 
                     {/* Trophy Room & Medals */}
-                    {gameState.seasonalMedals?.length > 0 && (
+                    {((profileData?.seasonalMedals || (isOwnProfile ? gameState.seasonalMedals : []))?.length > 0) && (
                         <div className="trophy-room-section">
                             <h2><Medal size={20} /> Trophy Room</h2>
                             <div className="medals-grid">
-                                {gameState.seasonalMedals.map((medal, idx) => (
+                                {(profileData?.seasonalMedals || (isOwnProfile ? gameState.seasonalMedals : [])).map((medal, idx) => (
                                     <div key={idx} className={`medal-item ${medal.type}`}>
                                         <Crown size={32} />
                                         <div className="medal-info">
