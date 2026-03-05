@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Shield, Mail, Lock } from 'lucide-react';
+import { Shield, Mail, Lock, ArrowLeft } from 'lucide-react';
 import './Login.css';
 
 const Login = () => {
@@ -27,6 +27,9 @@ const Login = () => {
 
     return (
         <div className="auth-container">
+            <button className="back-btn auth-back-btn" onClick={() => navigate('/')}>
+                <ArrowLeft size={18} /> Back to Home
+            </button>
             <div className="auth-card">
                 <div className="auth-header">
                     <Shield className="auth-logo" size={48} />

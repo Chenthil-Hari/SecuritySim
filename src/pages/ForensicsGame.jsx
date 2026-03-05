@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
     Folder, File, FileText, FileImage, FileCode, FileArchive,
     ArrowLeft, HardDrive, Clock, AlertTriangle, Shield, ShieldAlert,
@@ -270,6 +270,7 @@ function collectThreats(node, path = '') {
    ==================================================== */
 export default function ForensicsGame() {
     const state = useGame();
+    const navigate = useNavigate();
     const dispatch = useGameDispatch();
     const [selectedMission, setSelectedMission] = useState(null);
     const [currentPath, setCurrentPath] = useState([]);
@@ -400,7 +401,9 @@ export default function ForensicsGame() {
     if (gameState === 'menu') {
         return (
             <div className="forensics-page">
-                <Link to="/dashboard" className="forensics-back"><ArrowLeft size={16} /> Dashboard</Link>
+                <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                    <ArrowLeft size={18} /> Back to Dashboard
+                </button>
                 <div className="forensics-hero">
                     <div className="forensics-hero-icon">
                         <Search size={32} />

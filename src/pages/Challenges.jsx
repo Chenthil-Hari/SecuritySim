@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useGame } from '../context/GameContext';
 import { buildApiUrl } from '../utils/api';
-import { Swords, Check, X, ShieldAlert, History, UserSearch, Send, Play } from 'lucide-react';
+import { Swords, Check, X, ShieldAlert, History, UserSearch, Send, Play, ArrowLeft } from 'lucide-react';
 import Loader from '../components/Loader';
 import scenariosData from '../data/scenarios';
 import './Challenges.css';
@@ -138,6 +138,9 @@ export default function Challenges() {
 
     return (
         <div className="challenges-page">
+            <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                <ArrowLeft size={18} /> Back to Dashboard
+            </button>
             <header className="challenges-header">
                 <div className="title-row">
                     <div className="title-left">

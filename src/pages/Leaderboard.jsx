@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Trophy, Shield, Zap, Medal, Crown, Star, Globe, MapPin, Lock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Trophy, Shield, Zap, Medal, Crown, Star, Globe, MapPin, Lock, ArrowLeft } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { buildApiUrl } from '../utils/api';
 import { getRank } from '../utils/ranks';
 import Loader from '../components/Loader';
 import './Leaderboard.css';
 
 const Leaderboard = () => {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [leaderboard, setLeaderboard] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -75,6 +76,9 @@ const Leaderboard = () => {
 
     return (
         <div className="leaderboard-container">
+            <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                <ArrowLeft size={18} /> Back to Dashboard
+            </button>
             <div className="leaderboard-header">
                 <Trophy size={32} className="leaderboard-icon" />
                 <h1>{tab === 'regional' ? 'Regional Leaderboard' : 'Global Leaderboard'}</h1>

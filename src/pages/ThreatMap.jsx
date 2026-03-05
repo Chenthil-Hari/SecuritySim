@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSimulatedThreats } from '../hooks/useSimulatedThreats';
 import { buildApiUrl } from '../utils/api';
-import { Globe, ShieldAlert, Activity, ShieldCheck, Server, Radio } from 'lucide-react';
+import { Globe, ShieldAlert, Activity, ShieldCheck, Server, Radio, ArrowLeft } from 'lucide-react';
 import './ThreatMap.css';
 
 export default function ThreatMap() {
+    const navigate = useNavigate();
     const [realEvents, setRealEvents] = useState([]);
 
     // Fetch recent real challenges to mix into the map as "Neutralized Threats"
@@ -30,6 +32,9 @@ export default function ThreatMap() {
 
     return (
         <div className="threat-map-page">
+            <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                <ArrowLeft size={18} /> Back to Dashboard
+            </button>
             <header className="map-header">
                 <div className="map-title">
                     <Globe size={28} className="text-primary" />

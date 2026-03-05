@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useGame, useGameDispatch } from '../context/GameContext';
-import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin, Upload, UserPlus, UserCheck, UserMinus, Search, MessageSquare } from 'lucide-react';
+import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin, Upload, UserPlus, UserCheck, UserMinus, Search, MessageSquare, ArrowLeft } from 'lucide-react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { buildApiUrl } from '../utils/api';
 import { getRank } from '../utils/ranks';
@@ -292,6 +292,9 @@ const Profile = () => {
 
     return (
         <div className="profile-container">
+            <button className="back-btn" onClick={() => navigate(-1)}>
+                <ArrowLeft size={18} /> Back
+            </button>
             {/* Banner Background */}
             <div className="profile-banner-bg" style={activeBanner?.style}></div>
 

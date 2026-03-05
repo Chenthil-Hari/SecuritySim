@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import { buildApiUrl } from '../utils/api';
-import { Users, UserPlus, ShieldPlus, LogOut, Copy, Trophy, CheckCircle2 } from 'lucide-react';
+import { Users, UserPlus, ShieldPlus, LogOut, Copy, Trophy, CheckCircle2, ArrowLeft } from 'lucide-react';
 import Loader from '../components/Loader';
 import './Teams.css';
 
 export default function Teams() {
+    const navigate = useNavigate();
     const { user, updateUser } = useAuth();
     const { state } = useGame(); // using to re-sync profile if needed
     const [team, setTeam] = useState(null);
@@ -133,6 +135,9 @@ export default function Teams() {
 
     return (
         <div className="teams-page">
+            <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                <ArrowLeft size={18} /> Back to Dashboard
+            </button>
             <header className="teams-header">
                 <div className="teams-title">
                     <Users size={32} />

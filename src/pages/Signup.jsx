@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Shield, Mail, Lock, User, CheckCircle2, XCircle } from 'lucide-react';
+import { Shield, Mail, Lock, User, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
 import { buildApiUrl } from '../utils/api';
 import './Login.css';
 
@@ -69,6 +69,9 @@ const Signup = () => {
 
     return (
         <div className="auth-container">
+            <button className="back-btn auth-back-btn" onClick={() => navigate('/')}>
+                <ArrowLeft size={18} /> Back to Home
+            </button>
             <div className="auth-card">
                 <div className="auth-header">
                     <Shield className="auth-logo" size={48} />

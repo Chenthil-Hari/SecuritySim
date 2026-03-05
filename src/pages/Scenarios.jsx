@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Filter, Lock, Shield } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Filter, Lock, Shield, ArrowLeft } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ScenarioCard from '../components/ScenarioCard';
 import scenarios from '../data/scenarios';
@@ -9,6 +9,7 @@ import './Scenarios.css';
 const categories = ['All', 'Phishing', 'Scam Calls', 'Malware', 'Social Engineering'];
 
 export default function Scenarios() {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [activeFilter, setActiveFilter] = useState('All');
 
@@ -40,6 +41,9 @@ export default function Scenarios() {
 
     return (
         <div className="scenarios-page">
+            <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                <ArrowLeft size={18} /> Back to Dashboard
+            </button>
             <div className="scenarios-header">
                 <h1>Threat Scenarios</h1>
                 <p>Choose a scenario and test your cyber defense skills</p>

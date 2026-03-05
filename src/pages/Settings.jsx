@@ -1,9 +1,11 @@
-import { Accessibility, Volume2, Eye, AlertTriangle, Info, RotateCcw } from 'lucide-react';
+import { Accessibility, Volume2, Eye, AlertTriangle, Info, RotateCcw, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useGame, useGameDispatch } from '../context/GameContext';
 import { speak, stop } from '../utils/voiceGuidance';
 import './Settings.css';
 
 export default function Settings() {
+    const navigate = useNavigate();
     const { settings } = useGame();
     const dispatch = useGameDispatch();
 
@@ -26,6 +28,9 @@ export default function Settings() {
 
     return (
         <div className="settings-page">
+            <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                <ArrowLeft size={18} /> Back to Dashboard
+            </button>
             <div className="settings-header">
                 <h1>Settings</h1>
                 <p>Customize your SecuritySim:Cyber Survival experience</p>

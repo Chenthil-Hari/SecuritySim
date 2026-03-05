@@ -1,13 +1,14 @@
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
-import { Lock } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Lock, ArrowLeft } from 'lucide-react';
 import BadgeComponent from '../components/Badge';
 import ScoreRing from '../components/ScoreRing';
 import badgesList from '../data/badges';
 import './Achievements.css';
 
 export default function Achievements() {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const { badges: earnedBadges, level, xp } = useGame();
 
@@ -40,6 +41,9 @@ export default function Achievements() {
 
     return (
         <div className="achievements-page">
+            <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                <ArrowLeft size={18} /> Back to Dashboard
+            </button>
             <div className="achievements-header">
                 <h1>Achievements</h1>
                 <p>Track your progress and earn badges by mastering cyber defense skills</p>

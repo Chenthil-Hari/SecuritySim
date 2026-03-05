@@ -1,9 +1,14 @@
-import { Mail } from 'lucide-react';
+import { Mail, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import './Contact.css';
 
 export default function Contact() {
+    const navigate = useNavigate();
     return (
         <div className="contact-page">
+            <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                <ArrowLeft size={18} /> Back to Dashboard
+            </button>
             <div className="contact-header">
                 <h1>Contact Support</h1>
                 <p>Have an issue, feedback, or a partnership inquiry? We'd love to hear from you.</p>
