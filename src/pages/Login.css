@@ -8,6 +8,30 @@
     overflow: hidden;
 }
 
+.auth-back-btn {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 20;
+}
+
+.auth-back-btn:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    transform: translateX(-2px);
+}
+
 .auth-card {
     background: var(--surface-light);
     border: 1px solid var(--border-color);
