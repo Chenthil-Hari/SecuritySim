@@ -128,9 +128,12 @@ const Leaderboard = () => {
                             {leaderboard.map((entry) => (
                                 <tr
                                     key={entry.id}
-                                    className={`leaderboard-row ${user && user.id === entry.id ? 'current-user' : ''} ${entry.rank <= 3 ? 'top-3' : ''}`}
+                                    className={`leaderboard-row ${user && user.id === entry.id ? 'current-user' : ''} ${entry.rank <= 3 ? 'top-3' : ''} ${entry.rank === 1 ? 'rank-1-row' : ''}`}
                                 >
-                                    <td className="col-rank">{getRankIcon(entry.rank)}</td>
+                                    <td className="col-rank">
+                                        {entry.rank === 1 && <div className="rank-1-aura" />}
+                                        {getRankIcon(entry.rank)}
+                                    </td>
                                     <td className="col-agent">
                                         <div className="agent-cell">
                                             <div className="agent-avatar-sm">
@@ -140,10 +143,26 @@ const Leaderboard = () => {
                                                     entry.username.charAt(0).toUpperCase()
                                                 )}
                                             </div>
-                                            <span className="agent-name">
-                                                <span title={getRank(entry.level).title}>{getRank(entry.level).icon}</span> {entry.username}
-                                                {user && user.id === entry.id && <span className="you-tag">YOU</span>}
-                                            </span>
+                                            <div className="agent-name">
+                                                <div className="agent-name-main">
+                                                    <span title={getRank(entry.level).title}>{getRank(entry.level).icon}</span>
+                                                    <strong>{entry.username}</strong>
+                                                    {user && user.id === entry.id && <span className="you-tag">YOU</span>}
+
+                                                    {entry.seasonalMedals && entry.seasonalMedals.length > 0 && (
+                                                        <div className="seasonal-medals">
+                                                            {entry.seasonalMedals.map((m, i) => (
+                                                                <div key={i} className="medal-tooltip" title={`Season Winner: ${m.season}`}>
+                                                                    <Medal size={14} className={`rank-icon ${m.type}`} />
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {entry.unlockedTitles && entry.unlockedTitles.length > 0 && (
+                                                    <span className="agent-title">{entry.unlockedTitles[entry.unlockedTitles.length - 1]}</span>
+                                                )}
+                                            </div>
                                         </div>
                                     </td>
                                     <td className="col-region">

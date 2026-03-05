@@ -80,9 +80,26 @@ const badges = [
     {
         id: 'quick-learner',
         name: 'Quick Learner',
-        description: 'Reach Cyber Safety Score of 70+',
+        requirement: 'Reach Cyber Safety Score of 70+',
         icon: 'Zap',
         condition: (state) => state.score >= 70
+    },
+    {
+        id: 'incident-commander',
+        name: 'Incident Commander',
+        description: 'Complete 15 scenarios total',
+        icon: 'ShieldCheck',
+        condition: (state) => state.completedScenarios.length >= 15
+    },
+    {
+        id: 'perfect-stealth',
+        name: 'Perfect Stealth',
+        description: '100% Accuracy on 5 different scenarios',
+        icon: 'EyeOff',
+        condition: (state) => {
+            const perfectOnes = state.completedScenarios.filter(s => s.accuracy === 100);
+            return perfectOnes.length >= 5;
+        }
     }
 ];
 

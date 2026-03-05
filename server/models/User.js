@@ -73,7 +73,16 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Team',
         default: null
-    }
+    },
+    unlockedTitles: {
+        type: [String],
+        default: []
+    },
+    seasonalMedals: [{
+        type: { type: String }, // 'gold', 'silver', 'bronze'
+        season: String,
+        awardedAt: { type: Date, default: Date.now }
+    }]
 });
 
 const User = mongoose.model('User', userSchema);

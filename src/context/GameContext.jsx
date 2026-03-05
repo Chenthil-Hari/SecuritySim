@@ -1,6 +1,7 @@
 import { createContext, useContext, useReducer, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { buildApiUrl } from '../utils/api';
+import titles from '../data/titles';
 
 const GameContext = createContext(null);
 const GameDispatchContext = createContext(null);
@@ -15,6 +16,7 @@ const defaultState = {
     unlockedSkills: [],
     weeklyCompleted: [],
     badges: [],
+    unlockedTitles: [],
     completedScenarios: [],
     difficulty: 1,
     settings: {
@@ -64,6 +66,7 @@ function syncToDatabase(state) {
                 unlockedSkills: state.unlockedSkills,
                 weeklyCompleted: state.weeklyCompleted,
                 badges: state.badges,
+                unlockedTitles: state.unlockedTitles,
                 completedScenarios: state.completedScenarios
             })
         }).catch(err => console.warn('Background sync failed:', err));
@@ -99,6 +102,20 @@ function calculateDifficulty(score, level) {
 
 function gameReducer(state, action) {
     let newState;
+
+    const checkNewTitles = (currState) => {
+        const newlyUnlocked = titles
+            .filter(t => !currState.unlockedTitles.includes(t.name) && t.condition(currState))
+            .map(t => t.name);
+
+        if (newlyUnlocked.length > 0) {
+            return {
+                ...currState,
+                unlockedTitles: [...currState.unlockedTitles, ...newlyUnlocked]
+            };
+        }
+        return currState;
+    };
 
     switch (action.type) {
         case 'COMPLETE_SCENARIO': {
@@ -139,6 +156,7 @@ function gameReducer(state, action) {
                 score: newScore,
                 difficulty: newDifficulty
             };
+            newState = checkNewTitles(newState);
             break;
         }
         case 'EARN_BADGE': {
@@ -153,6 +171,7 @@ function gameReducer(state, action) {
                 score: newScore,
                 difficulty: newDifficulty
             };
+            newState = checkNewTitles(newState);
             break;
         }
         case 'UPDATE_SETTINGS': {
@@ -176,6 +195,8 @@ function gameReducer(state, action) {
                 unlockedSkills: action.payload.unlockedSkills || state.unlockedSkills,
                 weeklyCompleted: action.payload.weeklyCompleted || state.weeklyCompleted,
                 badges: action.payload.badges,
+                unlockedTitles: action.payload.unlockedTitles || [],
+                seasonalMedals: action.payload.seasonalMedals || [],
                 completedScenarios: action.payload.completedScenarios,
                 campaignState: action.payload.campaignState || state.campaignState
             };

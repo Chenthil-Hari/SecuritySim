@@ -176,6 +176,9 @@ const Profile = () => {
                 <div className="profile-info">
                     <div className="profile-title-row">
                         <h1>{user.username}</h1>
+                        {gameState.unlockedTitles?.length > 0 && (
+                            <span className="agent-title-display">{gameState.unlockedTitles[gameState.unlockedTitles.length - 1]}</span>
+                        )}
                         <button className="edit-profile-btn" onClick={openEditModal}>
                             <Edit2 size={16} /> Edit Profile
                         </button>
@@ -312,6 +315,24 @@ const Profile = () => {
                     <div className="stat-label">Badges Earned</div>
                 </div>
             </div>
+
+            {/* Trophy Room & Medals */}
+            {gameState.seasonalMedals?.length > 0 && (
+                <div className="trophy-room-section">
+                    <h2><Medal size={20} /> Trophy Room</h2>
+                    <div className="medals-grid">
+                        {gameState.seasonalMedals.map((medal, idx) => (
+                            <div key={idx} className={`medal-item ${medal.type}`}>
+                                <Crown size={32} />
+                                <div className="medal-info">
+                                    <div className="medal-name">Season Winner: {medal.season}</div>
+                                    <div className="medal-type">{medal.type.toUpperCase()} MEDAL</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* XP Progress */}
             <div className="xp-section">
