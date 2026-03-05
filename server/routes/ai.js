@@ -61,7 +61,7 @@ router.post('/message', authenticateToken, async (req, res) => {
         const groq = getGroqClient();
         const chatCompletion = await groq.chat.completions.create({
             messages: messages,
-            model: "llama3-8b-8192", // Fast model for chat
+            model: "llama-3.1-8b-instant", // Fast model for chat
             max_tokens: 1000,
             temperature: 0.7,
         });
@@ -72,7 +72,7 @@ router.post('/message', authenticateToken, async (req, res) => {
         res.json({ message: { role: 'model', text: aiResponseText, _id: Date.now().toString() } });
 
     } catch (error) {
-        console.error('AI Error:', error);
+        console.error('AI Error (Full Detail):', error);
         res.status(500).json({
             message: 'Failed to process AI response. The service might be temporarily unavailable.',
             error: error.message
