@@ -173,6 +173,58 @@ function AnimatedSocialFeed({ vd }) {
     );
 }
 
+function AnimatedUSB({ vd }) {
+    const [inserted, setInserted] = useState(false);
+    useEffect(() => {
+        const t = setTimeout(() => setInserted(true), 1200);
+        return () => clearTimeout(t);
+    }, []);
+    return (
+        <div className="usb-visual sim-entrance">
+            <div className="usb-device"><HardDrive size={64} /></div>
+            <div className="usb-port" />
+            <div className={`usb-status-light ${inserted ? 'active' : ''}`} />
+            <p className="scanner-text">{inserted ? 'USB DEVICE CONNECTED' : 'INSERTING DEVICE...'}</p>
+        </div>
+    );
+}
+
+function AnimatedScanner({ vd }) {
+    return (
+        <div className="scanner-visual sim-entrance">
+            <div className="scanner-grid" />
+            <div className="scanner-line" />
+            <div className="scanner-status">
+                <Shield size={48} className="pulse-glow" style={{ color: 'var(--primary)' }} />
+                <div className="scanner-text">{vd.scanText || 'SYSTEM SCAN IN PROGRESS...'}</div>
+            </div>
+        </div>
+    );
+}
+
+function AnimatedReport({ vd }) {
+    const [progress, setProgress] = useState(0);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setProgress(prev => (prev < 100 ? prev + 1 : 100));
+        }, 20);
+        return () => clearInterval(interval);
+    }, []);
+    return (
+        <div className="report-visual sim-entrance">
+            <h3>{vd.title || 'Submitting Incident Report'}</h3>
+            <div className="report-progress-container">
+                <div className="report-progress-bar" style={{ width: `${progress}%` }} />
+            </div>
+            <div className="report-steps">
+                <div className={`report-step ${progress > 30 ? 'complete' : 'active'}`}><CheckCircle size={14} /> Collecting Evidence</div>
+                <div className={`report-step ${progress > 60 ? 'complete' : progress > 30 ? 'active' : ''}`}><CheckCircle size={14} /> Notifying Security Operations</div>
+                <div className={`report-step ${progress >= 100 ? 'complete' : progress > 60 ? 'active' : ''}`}><CheckCircle size={14} /> Incident Log Created</div>
+            </div>
+        </div>
+    );
+}
+
 /* ====================================================
    MAIN PAGE COMPONENT
    ==================================================== */
@@ -327,6 +379,9 @@ export default function ScenarioPlay() {
                         case 'file-explorer': return <AnimatedFileExplorer vd={vd} key={currentStepIndex} />;
                         case 'wifi': return <AnimatedWifiSelector vd={vd} key={currentStepIndex} />;
                         case 'social-feed': return <AnimatedSocialFeed vd={vd} key={currentStepIndex} />;
+                        case 'usb-sim': return <AnimatedUSB vd={vd} key={currentStepIndex} />;
+                        case 'scanner-sim': return <AnimatedScanner vd={vd} key={currentStepIndex} />;
+                        case 'report-sim': return <AnimatedReport vd={vd} key={currentStepIndex} />;
                         default: return <AnimatedDecision prompt={step.prompt} key={currentStepIndex} />;
                     }
                 })()}
@@ -378,7 +433,7 @@ export default function ScenarioPlay() {
                 <div className="scenario-play-progress"><div className="progress-bar"><div className="progress-bar-fill" style={{ width: `${progress}%` }} /></div></div>
             </div>
             <Character character={character} reaction={charReaction} />
-            <div className="scenario-visual">{renderVisual()}</div>
+            <div className="scenario-visual step-transition-enter" key={currentStepIndex}>{renderVisual()}</div>
             <div className="scenario-options">
                 {step.title && <p className="step-subtitle">{step.title}</p>}
                 <h3>{step.prompt || 'What do you do?'} {timedOut && <span className="text-danger">(Timed Out)</span>}</h3>

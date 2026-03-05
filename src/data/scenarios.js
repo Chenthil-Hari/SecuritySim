@@ -47,7 +47,8 @@ const scenarios = [
       },
       {
         prompt: 'You called your bank and confirmed the email was fake. Now what should you do with the phishing email?',
-        visualType: 'decision',
+        visualType: 'report-sim',
+        visualData: { title: 'Reporting Phishing Attempt' },
         options: [
           {
             text: 'Just delete it and move on',
@@ -160,7 +161,8 @@ const scenarios = [
       },
       {
         prompt: 'You hung up and called your daughter directly. She\'s perfectly safe and confused by your call. What do you do next?',
-        visualType: 'decision',
+        visualType: 'report-sim',
+        visualData: { title: 'Reporting Fraudulent Call' },
         options: [
           {
             text: 'Feel relieved and forget about it',
@@ -271,7 +273,8 @@ const scenarios = [
       },
       {
         prompt: 'You closed the popup successfully using Task Manager. What should you do next to ensure your computer is safe?',
-        visualType: 'decision',
+        visualType: 'scanner-sim',
+        visualData: { scanText: 'DEEP SYSTEM SCAN IN PROGRESS...' },
         options: [
           {
             text: 'Run a scan with my already-installed, legitimate antivirus',
@@ -306,7 +309,7 @@ const scenarios = [
     steps: [
       {
         prompt: 'You find a USB drive in the office parking lot. It has a label that reads "Confidential - Employee Salary Data Q4". You\'re curious about it. What do you do?',
-        visualType: 'decision',
+        visualType: 'usb-sim',
         options: [
           {
             text: 'Plug it into my work computer to see what\'s on it',
