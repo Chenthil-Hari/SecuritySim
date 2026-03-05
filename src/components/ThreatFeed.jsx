@@ -51,7 +51,7 @@ function ThreatTicker({ items }) {
                         <span key={i} className="ticker-item">
                             <span className="ticker-bullet" style={{ color: '#8b5cf6' }}>●</span>
                             <span className="ticker-type" style={{ color: '#8b5cf6' }}>[INTEL]</span>
-                            {item.title}
+                            {item.title ? (item.title.length > 80 ? item.title.substring(0, 80) + '...' : item.title) : 'Active Threat Alert'}
                         </span>
                     ))}
                 </div>

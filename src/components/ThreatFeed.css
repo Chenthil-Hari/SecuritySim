@@ -143,9 +143,11 @@
     display: flex;
     align-items: center;
     border-bottom: 1px solid var(--border-color);
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.4);
     overflow: hidden;
-    height: 32px;
+    height: 36px;
+    position: relative;
+    z-index: 10;
 }
 
 .threat-ticker-label {
@@ -174,19 +176,23 @@
 
 .threat-ticker-track {
     display: flex;
+    flex-wrap: nowrap;
     gap: 0;
-    animation: tickerScroll 60s linear infinite;
+    animation: tickerScroll 120s linear infinite;
     white-space: nowrap;
+    width: max-content;
 }
 
 .ticker-item {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     padding: 0 var(--space-xl);
     font-size: 0.72rem;
     color: var(--text-muted);
     border-right: 1px solid var(--border-color);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .ticker-bullet {
