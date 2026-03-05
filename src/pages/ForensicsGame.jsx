@@ -6,7 +6,7 @@ import {
     ChevronRight, RotateCcw, Zap, CheckCircle, XCircle, Skull,
     Monitor, Search, Ban
 } from 'lucide-react';
-import { useGame } from '../context/GameContext';
+import { useGame, useGameDispatch } from '../context/GameContext';
 import './ForensicsGame.css';
 
 /* ====================================================
@@ -269,7 +269,8 @@ function collectThreats(node, path = '') {
    MAIN COMPONENT
    ==================================================== */
 export default function ForensicsGame() {
-    const { dispatch } = useGame();
+    const state = useGame();
+    const dispatch = useGameDispatch();
     const [selectedMission, setSelectedMission] = useState(null);
     const [currentPath, setCurrentPath] = useState([]);
     const [timeLeft, setTimeLeft] = useState(0);
@@ -451,7 +452,7 @@ export default function ForensicsGame() {
     // ========== SUCCESS / FAILED ==========
     if (gameState === 'success' || gameState === 'failed') {
         const isSuccess = gameState === 'success';
-        const existingAttempt = state.completedScenarios.find(s => s.scenarioId === selectedMission?.id);
+        const existingAttempt = state?.completedScenarios?.find(s => s.scenarioId === selectedMission?.id);
         const isAlreadyCompleted = !!existingAttempt;
 
         const timeBonus = isSuccess ? Math.round(timeLeft * 0.5) : 0;
@@ -562,7 +563,7 @@ export default function ForensicsGame() {
                     </div>
                 </div>
                 <div className="hud-penalties">
-                    {wrongGuesses > 0 && <span className="penalty-badge"><XCircle size={12} /> {wrongGuesses} wrong</span>}
+                    {wrongGuesses.length > 0 && <span className="penalty-badge"><XCircle size={12} /> {wrongGuesses.length} wrong</span>}
                 </div>
             </div>
 
@@ -731,33 +732,35 @@ export default function ForensicsGame() {
             </div>
 
             {/* Scan animation overlay */}
-            {scanAnimation && (
-                <div className={`scan-overlay ${scanAnimation}`}>
-                    {scanAnimation === 'threat-found' ? (
-                        <>
-                            <AlertTriangle size={48} />
-                            <span>☢️ THREAT QUARANTINED</span>
-                            {showHint && (
-                                <div className="scan-explanation">
-                                    <strong>Evidence:</strong>
-                                    <p>{showHint}</p>
-                                </div>
-                            )}
-                        </>
-                    ) : (
-                        <>
-                            <XCircle size={48} />
-                            <span>✓ FILE IS CLEAN (-10s penalty)</span>
-                            {guidance && (
-                                <div className="scan-explanation guidance">
-                                    <strong>Forensics Guidance:</strong>
-                                    <p>{guidance}</p>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-            )}
-        </div>
+            {
+                scanAnimation && (
+                    <div className={`scan-overlay ${scanAnimation}`}>
+                        {scanAnimation === 'threat-found' ? (
+                            <>
+                                <AlertTriangle size={48} />
+                                <span>☢️ THREAT QUARANTINED</span>
+                                {showHint && (
+                                    <div className="scan-explanation">
+                                        <strong>Evidence:</strong>
+                                        <p>{showHint}</p>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                <XCircle size={48} />
+                                <span>✓ FILE IS CLEAN (-10s penalty)</span>
+                                {guidance && (
+                                    <div className="scan-explanation guidance">
+                                        <strong>Forensics Guidance:</strong>
+                                        <p>{guidance}</p>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                )
+            }
+        </div >
     );
 }
