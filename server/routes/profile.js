@@ -46,6 +46,30 @@ router.get('/:userId', async (req, res) => {
         const userData = user.toObject();
         userData.rank = rank;
 
+        // Check relationship if requester is logged in
+        userData.friendStatus = 'none';
+        const tokenToken = req.headers.authorization?.split(' ')[1];
+        if (tokenToken) {
+            try {
+                const decoded = jwt.verify(tokenToken, process.env.JWT_SECRET || 'fallback_secret');
+                const requesterId = decoded.userId;
+
+                if (user.friends.some(f => f.toString() === requesterId)) {
+                    userData.friendStatus = 'friends';
+                } else {
+                    const requester = await User.findById(requesterId);
+                    const isPending = user.friendRequests.some(r => r.from.toString() === requesterId);
+                    const sentToRequester = requester?.friendRequests.some(r => r.from.toString() === user._id.toString());
+
+                    if (isPending || sentToRequester) {
+                        userData.friendStatus = 'pending';
+                    }
+                }
+            } catch (authErr) {
+                // Ignore auth error for public profile
+            }
+        }
+
         res.json(userData);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching profile', error: error.message });

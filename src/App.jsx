@@ -18,12 +18,15 @@ import Leaderboard from './pages/Leaderboard';
 import Contact from './pages/Contact';
 import ForensicsGame from './pages/ForensicsGame';
 import ChatWidget from './components/ChatWidget';
+import MatrixBackground from './components/MatrixBackground';
 import './App.css';
 
 import { useAuth } from './context/AuthContext';
+import { useGame } from './context/GameContext';
 
 function AppContent() {
   const { user } = useAuth();
+  const gameState = useGame();
   const isLoggedIn = !!user;
   const location = useLocation();
 

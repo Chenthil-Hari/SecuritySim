@@ -128,7 +128,11 @@ const Leaderboard = () => {
                             {leaderboard.map((entry) => (
                                 <tr
                                     key={entry.id}
-                                    className={`leaderboard-row ${user && user.id === entry.id ? 'current-user' : ''} ${entry.rank <= 3 ? 'top-3' : ''} ${entry.rank === 1 ? 'rank-1-row' : ''}`}
+                                    className={`leaderboard-row ${user && user.id === entry.id ? 'current-user' : ''} ${entry.rank <= 3 ? 'top-3' : ''} ${entry.rank === 1 ? 'rank-1-row' : ''} ${entry.customization?.auraEnabled && entry.rank <= 50 ? 'has-aura' : ''}`}
+                                    style={entry.customization?.auraEnabled && entry.rank <= 50 ? {
+                                        '--aura-color': entry.rank === 1 ? '#ffd700' : entry.rank <= 10 ? '#00f0ff' : '#7c4dff',
+                                        '--aura-opacity': entry.rank === 1 ? '0.4' : '0.2'
+                                    } : {}}
                                 >
                                     <td className="col-rank">
                                         {entry.rank === 1 && <div className="rank-1-aura" />}

@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
         }
 
         const users = await User.find(query)
-            .select('username score xp level badges profilePhoto country unlockedTitles seasonalMedals')
+            .select('username score xp level badges profilePhoto country unlockedTitles seasonalMedals customization')
             .sort({ score: -1, xp: -1 })
             .limit(50);
 
@@ -30,7 +30,8 @@ router.get('/', async (req, res) => {
             profilePhoto: user.profilePhoto,
             country: user.country || 'Global',
             unlockedTitles: user.unlockedTitles || [],
-            seasonalMedals: user.seasonalMedals || []
+            seasonalMedals: user.seasonalMedals || [],
+            customization: user.customization || { auraEnabled: true }
         }));
 
         res.json(leaderboard);

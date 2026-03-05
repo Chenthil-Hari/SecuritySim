@@ -65,8 +65,11 @@ const Profile = () => {
                     const data = await response.json();
                     setProfileData(data);
 
-                    if (!isPersonal && user) {
-                        // Check friend status
+                    if (data.friendStatus) {
+                        setFriendStatus(data.friendStatus);
+                    } else if (!isPersonal && user) {
+                        // Fallback check friend status if needed, though server should provide it
+                        const token = localStorage.getItem('token');
                         const friendsRes = await fetch(buildApiUrl('/api/friends'), {
                             headers: { Authorization: `Bearer ${token}` }
                         });
@@ -76,9 +79,6 @@ const Profile = () => {
                             if (isFriend) {
                                 setFriendStatus('friends');
                             } else {
-                                // Check if request sent
-                                // This would need a specific endpoint or checking requests list
-                                // For now, we'll check if pending in our requests or theirs
                                 setFriendStatus('none');
                             }
                         }

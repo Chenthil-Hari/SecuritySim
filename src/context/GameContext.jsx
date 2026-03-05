@@ -202,9 +202,9 @@ function gameReducer(state, action) {
                 unlockedSkills: action.payload.unlockedSkills || state.unlockedSkills,
                 weeklyCompleted: action.payload.weeklyCompleted || state.weeklyCompleted,
                 badges: action.payload.badges,
-                unlockedTitles: action.payload.unlockedTitles || [],
-                seasonalMedals: action.payload.seasonalMedals || [],
-                customization: action.payload.customization || state.customization,
+                unlockedTitles: action.payload.unlockedTitles || state.unlockedTitles || [],
+                seasonalMedals: action.payload.seasonalMedals || state.seasonalMedals || [],
+                customization: { ...state.customization, ...(action.payload.customization || {}) },
                 completedScenarios: action.payload.completedScenarios,
                 campaignState: action.payload.campaignState || state.campaignState
             };
@@ -290,7 +290,10 @@ export function GameProvider({ children }) {
                                     xp: data.xp ?? 0,
                                     level: data.level ?? 1,
                                     badges: data.badges ?? [],
-                                    completedScenarios: data.completedScenarios ?? []
+                                    completedScenarios: data.completedScenarios ?? [],
+                                    unlockedTitles: data.unlockedTitles ?? [],
+                                    seasonalMedals: data.seasonalMedals ?? [],
+                                    customization: data.customization ?? {}
                                 }
                             });
                         }

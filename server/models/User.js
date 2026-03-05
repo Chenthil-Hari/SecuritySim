@@ -84,7 +84,9 @@ const userSchema = new mongoose.Schema({
         awardedAt: { type: Date, default: Date.now }
     }],
     customization: {
-        auraEnabled: { type: Boolean, default: true }
+        auraEnabled: { type: Boolean, default: true },
+        matrixEnabled: { type: Boolean, default: false },
+        activeBanner: { type: String, default: 'default' }
     },
     friends: [{
         type: mongoose.Schema.Types.ObjectId,
