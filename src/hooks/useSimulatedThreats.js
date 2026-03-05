@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
+import { buildApiUrl } from '../utils/api';
 
-// Generates simulated threat data + mixes with actual recent scenario completions (if provided)
+// Bridges real OTX Threat Intel with the Visual Map
 export function useSimulatedThreats(realEvents = []) {
     const [threats, setThreats] = useState([]);
     const [activeNodes, setActiveNodes] = useState([]);
+    const [otxFeed, setOtxFeed] = useState([]);
 
-    // Map coordinates for major hubs (approximate SVG pixel coordinates for a standard 1000x500 map)
+    // Map coordinates for major hubs
     const hubs = [
         { id: 'tokyo', name: 'Tokyo-01', x: 850, y: 180, type: 'datacenter' },
         { id: 'london', name: 'London-Prime', x: 480, y: 150, type: 'finance' },
@@ -17,83 +19,98 @@ export function useSimulatedThreats(realEvents = []) {
         { id: 'singapore', name: 'Singapore-Hub', x: 780, y: 280, type: 'finance' }
     ];
 
-    const attackTypes = [
-        { type: 'DDoS', severity: 'high', color: 'var(--danger)' },
-        { type: 'Phishing', severity: 'low', color: 'var(--warning)' },
-        { type: 'Ransomware', severity: 'critical', color: '#ff00ff' },
-        { type: 'Data Exfiltration', severity: 'high', color: 'var(--primary)' },
-        { type: 'SQL Injection', severity: 'medium', color: '#00ffff' }
+    const attackStyles = [
+        { type: 'DDoS', color: '#ff4444' },
+        { type: 'Phishing', color: '#ffbb33' },
+        { type: 'Malware', color: '#aa66cc' },
+        { type: 'Exfiltration', color: '#33b5e5' }
     ];
 
+    // Fetch Real OTX Data
     useEffect(() => {
-        // Procedurally generate attacks
-        const generateThreat = () => {
+        const fetchOTX = async () => {
+            try {
+                const res = await fetch(buildApiUrl('/api/threats/live'));
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    setOtxFeed(data);
+                }
+            } catch (err) {
+                console.error("OTX Fetch Failed:", err);
+            }
+        };
+
+        fetchOTX();
+        const interval = setInterval(fetchOTX, 60000); // Update every minute
+        return () => clearInterval(interval);
+    }, []);
+
+    // Procedural Animation Loop (using real types from feed if available)
+    useEffect(() => {
+        const triggerVisualAttack = () => {
             const sourceHub = hubs[Math.floor(Math.random() * hubs.length)];
             let targetHub = hubs[Math.floor(Math.random() * hubs.length)];
+            while (sourceHub.id === targetHub.id) targetHub = hubs[Math.floor(Math.random() * hubs.length)];
 
-            while (sourceHub.id === targetHub.id) {
-                targetHub = hubs[Math.floor(Math.random() * hubs.length)];
-            }
+            // Pick a type from the real OTX feed if possible, else fallback
+            const realType = otxFeed.length > 0
+                ? otxFeed[Math.floor(Math.random() * otxFeed.length)].type
+                : attackStyles[Math.floor(Math.random() * attackStyles.length)].type;
 
-            const attack = attackTypes[Math.floor(Math.random() * attackTypes.length)];
+            const style = attackStyles.find(s => realType.toLowerCase().includes(s.type.toLowerCase())) || attackStyles[0];
 
-            const newThreat = {
-                id: `threat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            const newVisualThreat = {
+                id: `v-${Date.now()}`,
                 source: sourceHub,
                 target: targetHub,
-                type: attack.type,
-                severity: attack.severity,
-                color: attack.color,
+                type: realType.length > 30 ? realType.substring(0, 30) + '...' : realType,
+                color: style.color,
                 timestamp: new Date()
             };
 
-            setThreats(prev => [newThreat, ...prev].slice(0, 50)); // Keep last 50 in log
-
-            // Activate nodes briefly
-            setActiveNodes(prev => {
-                const updated = [...prev, sourceHub.id, targetHub.id];
-                return [...new Set(updated)];
-            });
-
-            // Deactivate nodes after animation
+            setThreats(prev => [newVisualThreat, ...prev].slice(0, 10));
+            setActiveNodes(prev => [...new Set([...prev, sourceHub.id, targetHub.id])]);
             setTimeout(() => {
                 setActiveNodes(prev => prev.filter(id => id !== sourceHub.id && id !== targetHub.id));
-            }, 2000);
+            }, 2500);
         };
 
-        // Fire a new threat every 1.5 to 5 seconds
-        const threatLoop = () => {
-            generateThreat();
-            const nextTimeout = Math.random() * 3500 + 1500;
-            timeoutRef.current = setTimeout(threatLoop, nextTimeout);
+        const loop = setInterval(triggerVisualAttack, 4000);
+        return () => clearInterval(loop);
+    }, [otxFeed]);
+
+    // Combine OTX Feed + Local Session Progress
+    const combinedLog = otxFeed.map(f => {
+        const sourceHub = hubs[Math.floor(Math.random() * hubs.length)];
+        const targetHub = hubs[Math.floor(Math.random() * hubs.length)];
+        return {
+            ...f,
+            source: sourceHub,
+            target: targetHub,
+            timestamp: new Date(f.timestamp),
+            color: attackStyles.find(s => f.type.toLowerCase().includes(s.type.toLowerCase()))?.color || '#00C851'
         };
-
-        const timeoutRef = { current: setTimeout(threatLoop, 1000) };
-
-        return () => clearTimeout(timeoutRef.current);
-    }, []);
-
-    // Combine real events (completed scenarios) into the log disguised as "Neutralized Threats"
-    const combinedLog = [...threats];
-
-    realEvents.forEach(e => {
-        // Check if we already incorporated this real event to avoid dupes on re-render
-        if (!combinedLog.find(t => t.id === e._id)) {
-            combinedLog.push({
-                id: e._id,
-                type: `Neutralized: ${e.category || 'Threat'}`,
-                severity: 'resolved',
-                color: 'var(--success)',
-                target: hubs[Math.floor(Math.random() * hubs.length)],
-                timestamp: new Date(e.completedAt || Date.now()),
-                isReal: true,
-                agent: e.senderId?.username || 'Unknown Agent'
-            });
-        }
     });
 
-    // Sort by timestamp descending
+    realEvents.forEach(e => {
+        combinedLog.push({
+            id: e._id,
+            type: `Neutralized: ${e.category || 'Threat'}`,
+            color: '#00C851',
+            target: hubs[Math.floor(Math.random() * hubs.length)],
+            timestamp: new Date(e.completedAt || Date.now()),
+            isReal: true,
+            agent: e.senderId?.username || 'Unknown Agent'
+        });
+    });
+
     combinedLog.sort((a, b) => b.timestamp - a.timestamp);
 
-    return { activeThreats: threats.slice(0, 10), log: combinedLog.slice(0, 50), hubs, activeNodes };
+    return {
+        activeThreats: threats,
+        log: combinedLog.slice(0, 50),
+        hubs,
+        activeNodes
+    };
 }
+
