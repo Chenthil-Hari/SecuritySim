@@ -7,16 +7,23 @@ import './Campaign.css';
 
 export default function Campaign() {
     const navigate = useNavigate();
-    const { campaignState, xp, level } = useGame();
+    const state = useGame();
+    const { campaignState } = state || {};
     const [selectedStage, setSelectedStage] = useState(null);
 
     useEffect(() => {
-        // Default to current stage or first stage
-        const currentStageObj = campaignData.stages.find(s => s.id === campaignState.currentStage);
-        setSelectedStage(currentStageObj || campaignData.stages[0]);
-    }, [campaignState.currentStage]);
+        if (campaignState && campaignData.stages) {
+            // Default to current stage or first stage
+            const currentStageObj = campaignData.stages.find(s => s.id === campaignState.currentStage);
+            if (currentStageObj) {
+                setSelectedStage(currentStageObj);
+            } else if (campaignData.stages.length > 0) {
+                setSelectedStage(campaignData.stages[0]);
+            }
+        }
+    }, [campaignState?.currentStage]);
 
-    if (!campaignState) return <div className="loading">Loading Campaign...</div>;
+    if (!campaignState) return <div className="loading">Loading Campaign State...</div>;
 
     const isUnlocked = (stageId) => {
         return stageId <= campaignState.currentStage;
@@ -111,7 +118,7 @@ export default function Campaign() {
                             <div className="briefing-actions">
                                 <button
                                     className="btn-primary start-btn"
-                                    onClick={() => navigate(`/scenario/${selectedStage.scenarioId}?campaignMode=true&stageId=${selectedStage.id}`)}
+                                    onClick={() => navigate(`/scenarios/${selectedStage.scenarioId}?campaignMode=true&stageId=${selectedStage.id}`)}
                                 >
                                     Launch Mission
                                 </button>
