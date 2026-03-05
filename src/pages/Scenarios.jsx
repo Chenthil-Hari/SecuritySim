@@ -43,6 +43,11 @@ export default function Scenarios() {
             <div className="scenarios-header">
                 <h1>Threat Scenarios</h1>
                 <p>Choose a scenario and test your cyber defense skills</p>
+                <Link to="/campaign" className="campaign-link-banner animate-glow">
+                    <Shield size={20} />
+                    <span>Story Mode: Operation Black Byte</span>
+                    <ChevronRight size={16} />
+                </Link>
             </div>
 
             <div className="scenarios-filters">

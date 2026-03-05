@@ -42,7 +42,7 @@ router.get('/:userId', async (req, res) => {
 // PUT /api/profile/sync — sync game state from frontend to DB
 router.put('/sync', authMiddleware, async (req, res) => {
     try {
-        const { score, xp, level, badges, completedScenarios, skillPoints, unlockedSkills, weeklyCompleted, teamId } = req.body;
+        const { score, xp, level, badges, completedScenarios, skillPoints, unlockedSkills, weeklyCompleted, teamId, campaignState } = req.body;
         const updateData = {};
 
         if (score !== undefined) updateData.score = score;
@@ -54,6 +54,7 @@ router.put('/sync', authMiddleware, async (req, res) => {
         if (unlockedSkills !== undefined) updateData.unlockedSkills = unlockedSkills;
         if (weeklyCompleted !== undefined) updateData.weeklyCompleted = weeklyCompleted;
         if (teamId !== undefined) updateData.teamId = teamId;
+        if (campaignState !== undefined) updateData.campaignState = campaignState;
 
         const user = await User.findByIdAndUpdate(
             req.userId,

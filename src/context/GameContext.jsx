@@ -17,6 +17,11 @@ const defaultState = {
     badges: [],
     completedScenarios: [],
     difficulty: 1,
+    campaignState: {
+        currentStage: 1,
+        stagesCompleted: [],
+        decisions: {}
+    },
     settings: {
         highContrast: false,
         voiceGuidance: false,
@@ -64,7 +69,8 @@ function syncToDatabase(state) {
                 unlockedSkills: state.unlockedSkills,
                 weeklyCompleted: state.weeklyCompleted,
                 badges: state.badges,
-                completedScenarios: state.completedScenarios
+                completedScenarios: state.completedScenarios,
+                campaignState: state.campaignState
             })
         }).catch(err => console.warn('Background sync failed:', err));
     } catch (e) {
@@ -176,7 +182,8 @@ function gameReducer(state, action) {
                 unlockedSkills: action.payload.unlockedSkills || state.unlockedSkills,
                 weeklyCompleted: action.payload.weeklyCompleted || state.weeklyCompleted,
                 badges: action.payload.badges,
-                completedScenarios: action.payload.completedScenarios
+                completedScenarios: action.payload.completedScenarios,
+                campaignState: action.payload.campaignState || state.campaignState
             };
             break;
         }
@@ -207,6 +214,44 @@ function gameReducer(state, action) {
                 level: newLevel,
                 skillPoints: newSkillPoints,
                 weeklyCompleted: [...state.weeklyCompleted, weekId]
+            };
+            break;
+        }
+        case 'COMPLETE_CAMPAIGN_STAGE': {
+            const { stageId, accuracy, xpEarned } = action.payload;
+            const newStagesCompleted = [...state.campaignState.stagesCompleted];
+            if (!newStagesCompleted.includes(stageId)) {
+                newStagesCompleted.push(stageId);
+            }
+
+            const nextStage = Math.max(state.campaignState.currentStage, stageId + 1);
+
+            const newXp = state.xp + xpEarned;
+            const newLevel = calculateLevel(newXp);
+
+            newState = {
+                ...state,
+                xp: newXp,
+                level: newLevel,
+                campaignState: {
+                    ...state.campaignState,
+                    stagesCompleted: newStagesCompleted,
+                    currentStage: nextStage <= 10 ? nextStage : 10
+                }
+            };
+            break;
+        }
+        case 'RECORD_CAMPAIGN_DECISION': {
+            const { key, value } = action.payload;
+            newState = {
+                ...state,
+                campaignState: {
+                    ...state.campaignState,
+                    decisions: {
+                        ...state.campaignState.decisions,
+                        [key]: value
+                    }
+                }
             };
             break;
         }
@@ -253,7 +298,8 @@ export function GameProvider({ children }) {
                                     xp: data.xp ?? 0,
                                     level: data.level ?? 1,
                                     badges: data.badges ?? [],
-                                    completedScenarios: data.completedScenarios ?? []
+                                    completedScenarios: data.completedScenarios ?? [],
+                                    campaignState: data.campaignState ?? defaultState.campaignState
                                 }
                             });
                         }

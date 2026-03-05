@@ -69,6 +69,11 @@ const userSchema = new mongoose.Schema({
         type: [String],
         default: []
     },
+    campaignState: {
+        currentStage: { type: Number, default: 1 },
+        stagesCompleted: { type: [Number], default: [] },
+        decisions: { type: Object, default: {} }
+    },
     teamId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Team',
