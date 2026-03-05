@@ -1,7 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useGame } from '../context/GameContext';
-import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin, Upload } from 'lucide-react';
+import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin, Upload, UserPlus, UserCheck, UserMinus, Search, MessageSquare } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { buildApiUrl } from '../utils/api';
 import { getRank } from '../utils/ranks';
 import badges from '../data/badges';
@@ -22,12 +20,23 @@ const avatarPresets = [
 ];
 
 const Profile = () => {
+    const { userId } = useParams();
+    const navigate = useNavigate();
     const { user, updateUser } = useAuth();
     const gameState = useGame();
     const dispatch = useGameDispatch();
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'customization'
+    const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'customization', 'social'
+    const [isOwnProfile, setIsOwnProfile] = useState(true);
+
+    // Social State
+    const [friendStatus, setFriendStatus] = useState('none'); // 'none', 'pending', 'friends'
+    const [friends, setFriends] = useState([]);
+    const [friendRequests, setFriendRequests] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSocialLoading, setIsSocialLoading] = useState(false);
 
     // Edit Profile State
     const [isEditing, setIsEditing] = useState(false);
@@ -39,18 +48,42 @@ const Profile = () => {
 
     useEffect(() => {
         const fetchProfile = async () => {
+            setLoading(true);
             try {
                 const token = localStorage.getItem('token');
-                if (!token) {
-                    setLoading(false);
-                    return;
-                }
-                const response = await fetch(buildApiUrl('/api/profile/me'), {
-                    headers: { Authorization: `Bearer ${token}` }
+                const isPersonal = !userId || userId === user?._id;
+                setIsOwnProfile(isPersonal);
+
+                const profileUrl = isPersonal ? buildApiUrl('/api/profile/me') : buildApiUrl(`/api/profile/${userId}`);
+
+                const response = await fetch(profileUrl, {
+                    headers: { Authorization: token ? `Bearer ${token}` : '' }
                 });
+
                 if (response.ok) {
                     const data = await response.json();
                     setProfileData(data);
+
+                    if (!isPersonal && user) {
+                        // Check friend status
+                        const friendsRes = await fetch(buildApiUrl('/api/friends'), {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+                        if (friendsRes.ok) {
+                            const friendsList = await friendsRes.json();
+                            const isFriend = friendsList.some(f => f._id === userId);
+                            if (isFriend) {
+                                setFriendStatus('friends');
+                            } else {
+                                // Check if request sent
+                                // This would need a specific endpoint or checking requests list
+                                // For now, we'll check if pending in our requests or theirs
+                                setFriendStatus('none');
+                            }
+                        }
+                    }
+                } else if (response.status === 404) {
+                    navigate('/dashboard');
                 }
             } catch (err) {
                 console.error('Error fetching profile:', err);
@@ -59,7 +92,31 @@ const Profile = () => {
             }
         };
         fetchProfile();
-    }, []);
+    }, [userId, user?._id, navigate]);
+
+    useEffect(() => {
+        if (isOwnProfile && activeTab === 'social' && user) {
+            fetchSocialData();
+        }
+    }, [activeTab, isOwnProfile, user]);
+
+    const fetchSocialData = async () => {
+        setIsSocialLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const [friendsRes, requestsRes] = await Promise.all([
+                fetch(buildApiUrl('/api/friends'), { headers: { Authorization: `Bearer ${token}` } }),
+                fetch(buildApiUrl('/api/friends/requests'), { headers: { Authorization: `Bearer ${token}` } })
+            ]);
+
+            if (friendsRes.ok) setFriends(await friendsRes.json());
+            if (requestsRes.ok) setFriendRequests(await requestsRes.json());
+        } catch (err) {
+            console.error('Error fetching social data:', err);
+        } finally {
+            setIsSocialLoading(false);
+        }
+    };
 
     const openEditModal = () => {
         setEditUsername(user.username);
@@ -133,7 +190,59 @@ const Profile = () => {
         });
     };
 
-    if (!user) {
+    const handleAddFriend = async (targetUsername) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/friends/request/${targetUsername}`), {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) {
+                setFriendStatus('pending');
+                alert('Friend request sent!');
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleRespondToRequest = async (requestId, action) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/friends/request/${requestId}/respond`), {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ action })
+            });
+            if (res.ok) fetchSocialData();
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleUserSearch = async (e) => {
+        const query = e.target.value;
+        setSearchTerm(query);
+        if (query.length < 2) {
+            setSearchResults([]);
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/profile/search/${query}`), {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) setSearchResults(await res.json());
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    if (!user && isOwnProfile) {
         return (
             <div className="profile-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', textAlign: 'center' }}>
                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '40px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', maxWidth: '500px' }}>
@@ -195,22 +304,40 @@ const Profile = () => {
                             <User size={48} />
                         </div>
                     )}
-                    <div className="level-badge">Lv.{level}</div>
+                    <div className="level-badge">Lv.{profileData?.level || level}</div>
                 </div>
                 <div className="profile-info">
                     <div className="profile-title-row">
-                        <h1>{user.username}</h1>
-                        {gameState.unlockedTitles?.length > 0 && (
-                            <span className="agent-title-display">{gameState.unlockedTitles[gameState.unlockedTitles.length - 1]}</span>
+                        <h1>{profileData?.username || user.username}</h1>
+                        {profileData?.unlockedTitles?.length > 0 && (
+                            <span className="agent-title-display">{profileData.unlockedTitles[profileData.unlockedTitles.length - 1]}</span>
                         )}
-                        <button className="edit-profile-btn" onClick={openEditModal}>
-                            <Edit2 size={16} /> Edit Profile
-                        </button>
+                        {isOwnProfile ? (
+                            <button className="edit-profile-btn" onClick={openEditModal}>
+                                <Edit2 size={16} /> Edit Profile
+                            </button>
+                        ) : (
+                            <div className="social-actions">
+                                {friendStatus === 'friends' ? (
+                                    <button className="btn-social friend"><UserCheck size={16} /> Friends</button>
+                                ) : friendStatus === 'pending' ? (
+                                    <button className="btn-social pending"><Calendar size={16} /> Request Sent</button>
+                                ) : (
+                                    <button
+                                        className="btn-social add"
+                                        onClick={() => handleAddFriend(profileData.username)}
+                                    >
+                                        <UserPlus size={16} /> Add Friend
+                                    </button>
+                                )}
+                                <button className="btn-social msg"><MessageSquare size={16} /></button>
+                            </div>
+                        )}
                     </div>
-                    <p className="profile-email">{user.email}</p>
+                    <p className="profile-email">{isOwnProfile ? user.email : 'Classified Agent'}</p>
                     <div className="profile-meta">
-                        <span className="rank-badge" style={{ color: getRank(level).color }}>{getRank(level).icon} {getRank(level).title}</span>
-                        <span><MapPin size={14} /> {user.country || 'Global'}</span>
+                        <span className="rank-badge" style={{ color: getRank(profileData?.level || level).color }}>{getRank(profileData?.level || level).icon} {getRank(profileData?.level || level).title}</span>
+                        <span><MapPin size={14} /> {profileData?.country || 'Global'}</span>
                         <span><Calendar size={14} /> Joined {memberSince}</span>
                     </div>
                 </div>
@@ -324,12 +451,22 @@ const Profile = () => {
                 >
                     <Layout size={18} /> Overview
                 </button>
-                <button
-                    className={`tab-btn ${activeTab === 'customization' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('customization')}
-                >
-                    <Palette size={18} /> Customization
-                </button>
+                {isOwnProfile && (
+                    <>
+                        <button
+                            className={`tab-btn ${activeTab === 'customization' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('customization')}
+                        >
+                            <Palette size={18} /> Customization
+                        </button>
+                        <button
+                            className={`tab-btn ${activeTab === 'social' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('social')}
+                        >
+                            <Search size={18} /> Social & Friends
+                        </button>
+                    </>
+                )}
             </div>
 
             {activeTab === 'overview' ? (
@@ -406,7 +543,7 @@ const Profile = () => {
                         </div>
                     </div>
                 </>
-            ) : (
+            ) : activeTab === 'customization' ? (
                 <div className="customization-panel">
                     <div className="cust-section">
                         <h3><Sparkles size={18} /> Profile Aura</h3>
@@ -459,6 +596,88 @@ const Profile = () => {
                                     </div>
                                 );
                             })}
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="social-panel">
+                    <div className="social-top-row">
+                        <div className="friend-requests-section">
+                            <h3>Friend Requests {friendRequests.length > 0 && <span className="req-count">{friendRequests.length}</span>}</h3>
+                            <div className="requests-list">
+                                {friendRequests.length === 0 ? (
+                                    <p className="empty-msg">No pending requests</p>
+                                ) : (
+                                    friendRequests.map(req => (
+                                        <div key={req._id} className="request-card">
+                                            <div className="req-user">
+                                                <img src={req.from.profilePhoto || avatarPresets[0]} alt={req.from.username} />
+                                                <div className="req-info">
+                                                    <span className="req-name">{req.from.username}</span>
+                                                    <span className="req-lvl">Lv.{req.from.level}</span>
+                                                </div>
+                                            </div>
+                                            <div className="req-btns">
+                                                <button className="req-btn accept" onClick={() => handleRespondToRequest(req._id, 'accept')}><Check size={16} /></button>
+                                                <button className="req-btn reject" onClick={() => handleRespondToRequest(req._id, 'reject')}><X size={16} /></button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="user-search-section">
+                            <h3>Find Agents</h3>
+                            <div className="search-box">
+                                <Search className="search-icon" size={18} />
+                                <input
+                                    type="text"
+                                    placeholder="Search by username..."
+                                    value={searchTerm}
+                                    onChange={handleUserSearch}
+                                />
+                            </div>
+                            <div className="search-results">
+                                {searchResults.map(res => (
+                                    <div key={res._id} className="search-result-card" onClick={() => navigate(`/profile/${res._id}`)}>
+                                        <div className="res-profile">
+                                            <img src={res.profilePhoto || avatarPresets[0]} alt={res.username} />
+                                            <div className="res-info">
+                                                <span className="res-name">{res.username}</span>
+                                                <span className="res-meta">Lv.{res.level} • {res.country}</span>
+                                            </div>
+                                        </div>
+                                        <UserPlus size={16} className="add-hint" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="friends-list-section">
+                        <h3>Agent Network ({friends.length})</h3>
+                        <div className="friends-grid">
+                            {friends.length === 0 ? (
+                                <div className="no-friends">
+                                    <User size={48} />
+                                    <p>Your network is empty. Connect with other agents to build your team!</p>
+                                </div>
+                            ) : (
+                                friends.map(friend => (
+                                    <div key={friend._id} className="friend-card" onClick={() => navigate(`/profile/${friend._id}`)}>
+                                        <img className="friend-avatar" src={friend.profilePhoto || avatarPresets[0]} alt={friend.username} />
+                                        <div className="friend-info">
+                                            <span className="friend-name">{friend.username}</span>
+                                            <span className="friend-rank">{getRank(friend.level).title}</span>
+                                            <div className="friend-stats">
+                                                <span><Zap size={10} /> {friend.score}</span>
+                                                <span><Target size={10} /> {friend.level}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </div>
                 </div>

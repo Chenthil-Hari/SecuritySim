@@ -84,10 +84,27 @@ const userSchema = new mongoose.Schema({
         awardedAt: { type: Date, default: Date.now }
     }],
     customization: {
-        activeBanner: { type: String, default: 'default' },
-        matrixEnabled: { type: Boolean, default: false },
         auraEnabled: { type: Boolean, default: true }
-    }
+    },
+    friends: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    friendRequests: [{
+        from: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        status: {
+            type: String,
+            enum: ['pending'],
+            default: 'pending'
+        },
+        timestamp: {
+            type: Date,
+            default: Date.now
+        }
+    }]
 });
 
 const User = mongoose.model('User', userSchema);

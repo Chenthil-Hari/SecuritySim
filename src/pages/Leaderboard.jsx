@@ -146,7 +146,9 @@ const Leaderboard = () => {
                                             <div className="agent-name">
                                                 <div className="agent-name-main">
                                                     <span title={getRank(entry.level).title}>{getRank(entry.level).icon}</span>
-                                                    <strong>{entry.username}</strong>
+                                                    <Link to={`/profile/${entry.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                                                        <strong>{entry.username}</strong>
+                                                    </Link>
                                                     {user && user.id === entry.id && <span className="you-tag">YOU</span>}
 
                                                     {entry.seasonalMedals && entry.seasonalMedals.length > 0 && (

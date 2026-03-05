@@ -45,7 +45,7 @@ function AppContent() {
           <Route path="/threat-map" element={<ThreatMap />} />
           <Route path="/scenarios/:id" element={<ScenarioPlay />} />
           <Route path="/achievements" element={<Achievements />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:userId?" element={<Profile />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/contact" element={<Contact />} />

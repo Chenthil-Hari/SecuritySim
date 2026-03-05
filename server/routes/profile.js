@@ -40,7 +40,13 @@ router.get('/:userId', async (req, res) => {
     try {
         const user = await User.findById(req.params.userId).select('-password -email');
         if (!user) return res.status(404).json({ message: 'User not found' });
-        res.json(user);
+
+        // Calculate global rank
+        const rank = await User.countDocuments({ score: { $gt: user.score } }) + 1;
+        const userData = user.toObject();
+        userData.rank = rank;
+
+        res.json(userData);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching profile', error: error.message });
     }
@@ -109,6 +115,21 @@ router.put('/edit', authMiddleware, async (req, res) => {
         res.json({ message: 'Profile updated successfully', user });
     } catch (error) {
         res.status(500).json({ message: 'Error updating profile', error: error.message });
+    }
+});
+
+// GET /api/profile/search/:username — search users by username
+router.get('/search/:username', authMiddleware, async (req, res) => {
+    try {
+        const users = await User.find({
+            username: { $regex: req.params.username, $options: 'i' },
+            _id: { $ne: req.userId }
+        })
+            .select('username profilePhoto level country score')
+            .limit(10);
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: 'Error searching users', error: error.message });
     }
 });
 

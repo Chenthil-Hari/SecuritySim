@@ -9,6 +9,7 @@ import aiRoutes from '../server/routes/ai.js';
 import teamsRoutes from '../server/routes/teams.js';
 import challengesRoutes from '../server/routes/challenges.js';
 import threatsRoutes from '../server/routes/threats.js';
+import friendsRoutes from '../server/routes/friends.js';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/teams', teamsRoutes);
 app.use('/api/challenges', challengesRoutes);
 app.use('/api/threats', threatsRoutes);
+app.use('/api/friends', friendsRoutes);
 
 app.get('/api', (req, res) => {
     res.json({ message: 'SecuritySim API is running' });
