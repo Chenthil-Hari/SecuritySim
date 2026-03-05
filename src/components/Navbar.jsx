@@ -80,11 +80,6 @@ export default function Navbar() {
                                         <Search size={16} /> Forensics
                                     </NavLink>
                                 </li>
-                                <li>
-                                    <NavLink to="/campaign" onClick={handleNavClick}>
-                                        <Crosshair size={16} /> Campaign
-                                    </NavLink>
-                                </li>
                             </ul>
                         </li>
                         <li

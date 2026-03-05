@@ -10,7 +10,6 @@ import Character from '../components/Character';
 import { useTypewriter, useStaggeredReveal } from '../hooks/useAnimations';
 import badgesList from '../data/badges';
 import scenariosData from '../data/scenarios';
-import { campaignData } from '../data/campaign';
 import characters from '../data/characters';
 import Timer from '../components/Timer';
 import DesktopSim from '../components/DesktopSim';
@@ -182,8 +181,6 @@ export default function ScenarioPlay() {
     const { id } = useParams();
     const [searchParams] = useSearchParams();
     const challengeId = searchParams.get('challengeId');
-    const campaignMode = searchParams.get('campaignMode') === 'true';
-    const stageId = parseInt(searchParams.get('stageId'));
     const navigate = useNavigate();
     const state = useGame();
     const dispatch = useGameDispatch();
@@ -294,8 +291,6 @@ export default function ScenarioPlay() {
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ receiverAccuracy: accuracy, receiverXp: xpEarned })
                 });
-            } else if (campaignMode && stageId) {
-                dispatch({ type: 'COMPLETE_CAMPAIGN_STAGE', payload: { stageId, accuracy, xpEarned, scenarioId: scenario.id, category: scenario.category } });
             } else {
                 dispatch({ type: 'COMPLETE_SCENARIO', payload: { scenarioId: scenario.id, category: scenario.category, accuracy, xpEarned } });
             }
@@ -353,12 +348,6 @@ export default function ScenarioPlay() {
             <div className="scenario-play">
                 <Character character={character} reaction={charReaction} />
                 <div className="scenario-summary">
-                    {campaignMode && stageId && accuracy >= 60 && (
-                        <div className="campaign-story-outro animate-fadeInUp">
-                            <h3>Mission Update</h3>
-                            <p>{campaignData.stages.find(s => s.id === stageId)?.storyOutro}</p>
-                        </div>
-                    )}
                     <div className="scenario-summary-card">
                         <div className={`summary-icon ${grade}`}>{grade === 'great' ? <Trophy size={40} /> : <Star size={40} />}</div>
                         <h2 className="summary-title">{grade === 'great' ? 'Excellent Work!' : grade === 'ok' ? 'Good Effort!' : 'Keep Practicing!'}</h2>
@@ -372,8 +361,8 @@ export default function ScenarioPlay() {
                 </div>
                 <div className="summary-actions">
                     <button className="btn-outline" onClick={() => { setCurrentStepIndex(0); setSelectedOption(null); setStepResults([]); setFinished(false); setTimeBonusTotal(0); setActiveConsequence(null); }}><RotateCcw size={16} /> Try Again</button>
-                    <Link to={challengeId ? "/challenges" : campaignMode ? "/campaign" : "/scenarios"} className="btn-primary">
-                        {campaignMode ? "Return to Map" : "Continue"} <ArrowRight size={16} />
+                    <Link to={challengeId ? "/challenges" : "/scenarios"} className="btn-primary">
+                        Continue <ArrowRight size={16} />
                     </Link>
                 </div>
             </div>

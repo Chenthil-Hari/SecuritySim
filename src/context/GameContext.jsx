@@ -17,11 +17,6 @@ const defaultState = {
     badges: [],
     completedScenarios: [],
     difficulty: 1,
-    campaignState: {
-        currentStage: 1,
-        stagesCompleted: [],
-        decisions: {}
-    },
     settings: {
         highContrast: false,
         voiceGuidance: false,
@@ -69,8 +64,7 @@ function syncToDatabase(state) {
                 unlockedSkills: state.unlockedSkills,
                 weeklyCompleted: state.weeklyCompleted,
                 badges: state.badges,
-                completedScenarios: state.completedScenarios,
-                campaignState: state.campaignState
+                completedScenarios: state.completedScenarios
             })
         }).catch(err => console.warn('Background sync failed:', err));
     } catch (e) {
@@ -217,66 +211,6 @@ function gameReducer(state, action) {
             };
             break;
         }
-        case 'COMPLETE_CAMPAIGN_STAGE': {
-            const { stageId, accuracy, xpEarned, scenarioId, category } = action.payload;
-
-            // 1. Update Campaign Specific State
-            const newStagesCompleted = [...state.campaignState.stagesCompleted];
-            if (!newStagesCompleted.includes(stageId)) {
-                newStagesCompleted.push(stageId);
-            }
-            const nextStage = Math.max(state.campaignState.currentStage, stageId + 1);
-
-            // 2. Update Global Scenario History (for score and profile)
-            const existingIndex = state.completedScenarios.findIndex(s => s.scenarioId === scenarioId);
-            let newCompleted = [...state.completedScenarios];
-            let activeXpEarned = xpEarned;
-
-            if (existingIndex !== -1) {
-                const existing = state.completedScenarios[existingIndex];
-                if (accuracy > existing.accuracy) {
-                    newCompleted[existingIndex] = { ...existing, accuracy, timestamp: Date.now() };
-                    const accuracyDiff = accuracy - existing.accuracy;
-                    activeXpEarned = Math.round(accuracyDiff * 0.5);
-                } else {
-                    activeXpEarned = 0; // No extra XP if accuracy didn't improve
-                }
-            } else {
-                newCompleted.push({ scenarioId, category, accuracy, timestamp: Date.now() });
-            }
-
-            const newXp = state.xp + activeXpEarned;
-            const newLevel = calculateLevel(newXp);
-            const newScore = calculateScore(newCompleted, state.badges);
-
-            newState = {
-                ...state,
-                xp: newXp,
-                level: newLevel,
-                completedScenarios: newCompleted,
-                score: newScore,
-                campaignState: {
-                    ...state.campaignState,
-                    stagesCompleted: newStagesCompleted,
-                    currentStage: nextStage <= 10 ? nextStage : 10
-                }
-            };
-            break;
-        }
-        case 'RECORD_CAMPAIGN_DECISION': {
-            const { key, value } = action.payload;
-            newState = {
-                ...state,
-                campaignState: {
-                    ...state.campaignState,
-                    decisions: {
-                        ...state.campaignState.decisions,
-                        [key]: value
-                    }
-                }
-            };
-            break;
-        }
         default:
             return state;
     }
@@ -320,8 +254,7 @@ export function GameProvider({ children }) {
                                     xp: data.xp ?? 0,
                                     level: data.level ?? 1,
                                     badges: data.badges ?? [],
-                                    completedScenarios: data.completedScenarios ?? [],
-                                    campaignState: data.campaignState ?? defaultState.campaignState
+                                    completedScenarios: data.completedScenarios ?? []
                                 }
                             });
                         }
