@@ -1,12 +1,13 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useGame, useGameDispatch } from '../context/GameContext';
 import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin, Upload, UserPlus, UserCheck, UserMinus, Search, MessageSquare } from 'lucide-react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { buildApiUrl } from '../utils/api';
 import { getRank } from '../utils/ranks';
 import badges from '../data/badges';
-import { Link } from 'react-router-dom';
 import Loader from '../components/Loader';
 import customizations from '../data/customizations';
-import { useGameDispatch } from '../context/GameContext';
 import { Medal, Crown, Palette, Layout, Sparkles } from 'lucide-react';
 import './Profile.css';
 
@@ -119,9 +120,9 @@ const Profile = () => {
     };
 
     const openEditModal = () => {
-        setEditUsername(user.username);
+        setEditUsername(user?.username || '');
         setEditAvatar(profileData?.profilePhoto || '');
-        setEditCountry(user.country || 'Global');
+        setEditCountry(user?.country || 'Global');
         setEditError('');
         setIsEditing(true);
     };
@@ -155,9 +156,9 @@ const Profile = () => {
                     Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    username: editUsername !== user.username ? editUsername : undefined,
+                    username: editUsername !== user?.username ? editUsername : undefined,
                     profilePhoto: editAvatar !== profileData?.profilePhoto ? editAvatar : undefined,
-                    country: editCountry !== (user.country || 'Global') ? editCountry : undefined
+                    country: editCountry !== (user?.country || 'Global') ? editCountry : undefined
                 })
             });
 
@@ -280,7 +281,7 @@ const Profile = () => {
         earned: earnedBadges.includes(b.id)
     }));
 
-    const activeBanner = customizations.banners.find(b => b.id === (gameState.customization?.activeBanner || 'default'));
+    const activeBanner = customizations.banners.find(b => b.id === (gameState?.customization?.activeBanner || 'default'));
     const auraConfig = gameState.customization?.auraEnabled ? (
         profileData?.rank === 1 ? customizations.auras.rank1 :
             profileData?.rank <= 10 ? customizations.auras.top10 :
@@ -308,7 +309,7 @@ const Profile = () => {
                 </div>
                 <div className="profile-info">
                     <div className="profile-title-row">
-                        <h1>{profileData?.username || user.username}</h1>
+                        <h1>{profileData?.username || user?.username}</h1>
                         {profileData?.unlockedTitles?.length > 0 && (
                             <span className="agent-title-display">{profileData.unlockedTitles[profileData.unlockedTitles.length - 1]}</span>
                         )}
@@ -334,7 +335,7 @@ const Profile = () => {
                             </div>
                         )}
                     </div>
-                    <p className="profile-email">{isOwnProfile ? user.email : 'Classified Agent'}</p>
+                    <p className="profile-email">{isOwnProfile ? user?.email : 'Classified Agent'}</p>
                     <div className="profile-meta">
                         <span className="rank-badge" style={{ color: getRank(profileData?.level || level).color }}>{getRank(profileData?.level || level).icon} {getRank(profileData?.level || level).title}</span>
                         <span><MapPin size={14} /> {profileData?.country || 'Global'}</span>
