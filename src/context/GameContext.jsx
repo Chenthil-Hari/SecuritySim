@@ -104,18 +104,29 @@ function gameReducer(state, action) {
         case 'COMPLETE_SCENARIO': {
             const { scenarioId, category, accuracy, xpEarned } = action.payload;
 
-            // Check if already completed to prevent duplicate score/XP
-            if (state.completedScenarios.some(s => s.scenarioId === scenarioId)) {
-                return state;
+            const existingIndex = state.completedScenarios.findIndex(s => s.scenarioId === scenarioId);
+            let newCompleted = [...state.completedScenarios];
+            let activeXpEarned = xpEarned;
+
+            if (existingIndex !== -1) {
+                const existing = state.completedScenarios[existingIndex];
+                // Only update if current accuracy is better than previous best
+                if (accuracy > existing.accuracy) {
+                    newCompleted[existingIndex] = { ...existing, accuracy, timestamp: Date.now() };
+                    // For re-plays, only award the "improvement" XP based on accuracy increase
+                    // This prevents farming but rewards betterment
+                    const accuracyDiff = accuracy - existing.accuracy;
+                    activeXpEarned = Math.round(accuracyDiff * 0.5);
+                } else {
+                    return state; // No improvement, no change
+                }
+            } else {
+                newCompleted.push({ scenarioId, category, accuracy, timestamp: Date.now() });
             }
 
-            const newXp = state.xp + xpEarned;
+            const newXp = state.xp + activeXpEarned;
             const newLevel = calculateLevel(newXp);
             const newSkillPoints = state.skillPoints + (newLevel > state.level ? newLevel - state.level : 0);
-            const newCompleted = [
-                ...state.completedScenarios,
-                { scenarioId, category, accuracy, timestamp: Date.now() }
-            ];
             const newScore = calculateScore(newCompleted, state.badges);
             const newDifficulty = calculateDifficulty(newScore, newLevel);
 

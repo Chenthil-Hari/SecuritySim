@@ -89,7 +89,7 @@ export default function Navbar() {
                             onClick={() => setMultiplayerOpen(!multiplayerOpen)}
                         >
                             <button className="dropdown-trigger" type="button">
-                                <Gamepad2 size={16} /> Multiplayer <ChevronDown size={14} className={multiplayerOpen ? 'rotate' : ''} />
+                                <Globe size={16} /> Multiplayer <ChevronDown size={14} className={multiplayerOpen ? 'rotate' : ''} />
                             </button>
                             <ul className="dropdown-menu">
                                 <li>

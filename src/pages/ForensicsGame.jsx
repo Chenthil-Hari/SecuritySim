@@ -451,10 +451,15 @@ export default function ForensicsGame() {
     // ========== SUCCESS / FAILED ==========
     if (gameState === 'success' || gameState === 'failed') {
         const isSuccess = gameState === 'success';
-        const isAlreadyCompleted = state.completedScenarios.some(s => s.scenarioId === selectedMission?.id);
+        const existingAttempt = state.completedScenarios.find(s => s.scenarioId === selectedMission?.id);
+        const isAlreadyCompleted = !!existingAttempt;
+
         const timeBonus = isSuccess ? Math.round(timeLeft * 0.5) : 0;
         const accuracyPenalty = wrongGuesses.length * 5;
         const totalXp = isSuccess ? Math.max(0, selectedMission.xpReward + timeBonus - accuracyPenalty) : 0;
+
+        // Since Forensics is all-or-nothing (100% accuracy to win), "improvement" 
+        // usually means first-time completion in this specific UI context.
         const displayXp = isAlreadyCompleted ? 0 : totalXp;
 
         return (
@@ -463,9 +468,9 @@ export default function ForensicsGame() {
                     <div className="result-icon">
                         {isSuccess ? <CheckCircle size={64} /> : <Skull size={64} />}
                     </div>
-                    <h1>{isSuccess ? 'System Secured!' : 'Investigation Failed'}</h1>
+                    <h1>{isSuccess ? (isAlreadyCompleted ? 'Mission Secured Again!' : 'System Secured!') : 'Investigation Failed'}</h1>
                     <p>{isSuccess
-                        ? 'You found and quarantined all malicious files before time ran out.'
+                        ? (isAlreadyCompleted ? 'You re-secured the system. Great review of forensics procedures!' : 'You found and quarantined all malicious files before time ran out.')
                         : 'Time expired. The attacker covered their tracks and the malware persists.'
                     }</p>
 
