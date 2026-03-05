@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useGame } from '../context/GameContext';
-import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin } from 'lucide-react';
+import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin, Upload } from 'lucide-react';
 import { buildApiUrl } from '../utils/api';
 import { getRank } from '../utils/ranks';
 import badges from '../data/badges';
@@ -62,6 +62,22 @@ const Profile = () => {
         setEditCountry(user.country || 'Global');
         setEditError('');
         setIsEditing(true);
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                setEditError('Image size must be less than 2MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setEditAvatar(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     const handleSaveProfile = async () => {
@@ -227,6 +243,23 @@ const Profile = () => {
                                     >
                                         <div className="avatar-placeholder sm"><User size={24} /></div>
                                         {editAvatar === '' && <Check className="avatar-check" size={16} />}
+                                    </div>
+                                    <div className={`avatar-option ${editAvatar && !avatarPresets.includes(editAvatar) ? 'selected' : ''}`} onClick={() => document.getElementById('avatar-upload').click()}>
+                                        {editAvatar && !avatarPresets.includes(editAvatar) ? (
+                                            <img src={editAvatar} alt="Custom upload" />
+                                        ) : (
+                                            <div className="avatar-placeholder sm" style={{ background: 'rgba(255, 255, 255, 0.05)', border: '2px dashed var(--border-color)' }}>
+                                                <Upload size={20} />
+                                            </div>
+                                        )}
+                                        <input
+                                            id="avatar-upload"
+                                            type="file"
+                                            hidden
+                                            accept="image/*"
+                                            onChange={handleFileChange}
+                                        />
+                                        {editAvatar && !avatarPresets.includes(editAvatar) && <Check className="avatar-check" size={16} />}
                                     </div>
                                     {avatarPresets.map((preset, idx) => (
                                         <div

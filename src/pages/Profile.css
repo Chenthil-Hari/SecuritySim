@@ -450,6 +450,14 @@
     height: 100%;
 }
 
+.avatar-option .avatar-placeholder.sm svg {
+    color: var(--text-muted);
+}
+
+.avatar-option:hover .avatar-placeholder.sm svg {
+    color: var(--primary);
+}
+
 .edit-modal-footer {
     padding: 1.5rem;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
