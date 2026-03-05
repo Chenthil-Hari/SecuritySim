@@ -1,5 +1,5 @@
 import express from 'express';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
@@ -19,20 +19,16 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// INITIALIZE GEMINI SDK
+// INITIALIZE GROQ SDK
 // We initialize it lazily inside the route so it doesn't crash the server if the key is initially missing
-const getAIModel = () => {
-    if (!process.env.GEMINI_API_KEY) {
-        throw new Error("GEMINI_API_KEY is not configured in the environment.");
+const getGroqClient = () => {
+    if (!process.env.GROQ_API_KEY) {
+        throw new Error("GROQ_API_KEY is not configured in the environment.");
     }
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // Use gemini-2.5-flash for fastest conversational responses
-    return genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
-        systemInstruction: "You are an elite, highly knowledgeable cybersecurity specialist named 'Cipher' assisting a user on the interactive SecuritySim platform. The user is learning about cyber threats, phishing, social engineering, encryption, and safe digital practices. Keep your responses concise, professional, encouraging, and directly relevant to cybersecurity or the concepts they are learning. Do not answer questions outside the scope of cybersecurity, technology, or the SecuritySim platform. Format your responses using clean markdown (bolding, lists, code blocks) to make them highly readable."
-    });
+    return new Groq({ apiKey: process.env.GROQ_API_KEY });
 };
 
+const systemInstruction = "You are an elite, highly knowledgeable cybersecurity specialist named 'Cipher' assisting a user on the interactive SecuritySim platform. The user is learning about cyber threats, phishing, social engineering, encryption, and safe digital practices. Keep your responses concise, professional, encouraging, and directly relevant to cybersecurity or the concepts they are learning. Do not answer questions outside the scope of cybersecurity, technology, or the SecuritySim platform. Format your responses using clean markdown (bolding, lists, code blocks) to make them highly readable.";
 
 /**
  * POST: Send a message to the AI
@@ -46,28 +42,31 @@ router.post('/message', authenticateToken, async (req, res) => {
             return res.status(400).json({ message: 'Message text cannot be empty.' });
         }
 
-        // Format history for Gemini SDK
-        // Gemini expects history in format: { role: 'user' | 'model', parts: [{ text: "..." }] }
+        // Format history for Groq SDK
+        // Groq expects history in format: { role: 'system' | 'user' | 'assistant', content: "..." }
         // We only pass the last 20 messages to save tokens and prevent huge payload errors
         const formattedHistory = history.slice(-20).map(msg => ({
-            role: msg.role === 'user' ? 'user' : 'model',
-            parts: [{ text: msg.text }]
+            role: msg.role === 'user' ? 'user' : 'assistant',
+            content: msg.text
         }));
 
-        // Initialize Gemini Chat Session
-        const model = getAIModel();
-        const chatSession = model.startChat({
-            history: formattedHistory,
-            // Configure generation parameters for safer, conciser answers
-            generationConfig: {
-                maxOutputTokens: 1000,
-                temperature: 0.7,
-            },
+        // Prepend system instruction
+        const messages = [
+            { role: "system", content: systemInstruction },
+            ...formattedHistory,
+            { role: "user", content: text }
+        ];
+
+        // Initialize Groq chat Completion
+        const groq = getGroqClient();
+        const chatCompletion = await groq.chat.completions.create({
+            messages: messages,
+            model: "llama3-8b-8192", // Fast model for chat
+            max_tokens: 1000,
+            temperature: 0.7,
         });
 
-        // Send message and await AI response
-        const result = await chatSession.sendMessage(text);
-        const aiResponseText = result.response.text();
+        const aiResponseText = chatCompletion.choices[0]?.message?.content || "I'm sorry, I couldn't formulate a response.";
 
         // Return the new message to the frontend UI
         res.json({ message: { role: 'model', text: aiResponseText, _id: Date.now().toString() } });
