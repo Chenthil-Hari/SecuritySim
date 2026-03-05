@@ -8,6 +8,24 @@
 */
 
 const characters = {
+    'default': {
+        name: 'Cyber Guard',
+        role: 'Security Assistant',
+        ageGroup: 'adult',
+        device: 'desktop',
+        skinColor: '#4a90e2',
+        hairColor: '#1a1a2e',
+        shirtColor: '#2c3e50',
+        accessory: 'badge',
+        dialogues: {
+            idle: "I'm here to help you navigate this security scenario.",
+            thinking: "Let's analyze the situation carefully...",
+            confused: "This doesn't look right. We should double-check.",
+            panic: "Alert! This could be a serious security threat!",
+            relief: "Great job staying safe!",
+            confident: "You've got this security thing down!"
+        }
+    },
     'phishing-1': {
         name: 'Priya',
         role: 'College Student',

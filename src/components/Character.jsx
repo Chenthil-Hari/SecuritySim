@@ -183,7 +183,7 @@ export default function Character({ character, reaction = 'idle' }) {
     const [displayedDialogue, setDisplayedDialogue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
 
-    const dialogue = character.dialogues[reaction] || character.dialogues.idle;
+    const dialogue = character?.dialogues?.[reaction] || character?.dialogues?.idle || "Let's focus on the task at hand.";
 
     // Typewriter effect for dialogue changes
     useEffect(() => {

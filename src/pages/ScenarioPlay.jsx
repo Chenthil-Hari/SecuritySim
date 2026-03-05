@@ -78,7 +78,7 @@ function AnimatedChat({ vd }) {
             <div className="chat-messages">
                 {vd.messages?.map((m, i) => (
                     <div key={i} className={`chat-message ${m.sender === 'System' ? 'system' : 'user'}`} style={{ animationDelay: `${i * 0.8}s` }}>
-                        <span className="sender">{m.sender}:</span> {m.text}
+                        <span className="sender">{m.sender || vd.sender || 'Unknown'}:</span> {m.text || m}
                     </div>
                 ))}
             </div>

@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import { Mail, Phone, Bug, Users, CheckCircle } from 'lucide-react';
+import { Mail, Phone, Bug, Users, Video, Wifi, Briefcase, Shield, QrCode, UserPlus, HardDrive, Gamepad, Instagram, AlertOctagon, Heart, ShoppingBag, CheckCircle } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import './ScenarioCard.css';
 
 const iconMap = {
-    Mail, Phone, Bug, Users
+    Mail, Phone, Bug, Users, Video, Wifi, Briefcase, Shield, QrCode, UserPlus, HardDrive, Gamepad, Instagram, AlertOctagon, Heart, ShoppingBag
 };
 
 export default function ScenarioCard({ scenario }) {
