@@ -341,18 +341,21 @@ export default function ScenarioPlay() {
         const xpEarned = Math.round(accuracy * 0.5 * scenario.difficulty) + timeBonusTotal;
         const grade = accuracy >= 80 ? 'great' : accuracy >= 50 ? 'ok' : 'poor';
 
+        const isAlreadyCompleted = state.completedScenarios.some(s => s.scenarioId === scenario.id);
+        const displayXp = isAlreadyCompleted ? 0 : xpEarned;
+
         return (
             <div className="scenario-play">
                 <Character character={character} reaction={charReaction} />
                 <div className="scenario-summary">
-                    <div className="summary-card">
+                    <div className="scenario-summary-card">
                         <div className={`summary-icon ${grade}`}>{grade === 'great' ? <Trophy size={40} /> : <Star size={40} />}</div>
                         <h2 className="summary-title">{grade === 'great' ? 'Excellent Work!' : grade === 'ok' ? 'Good Effort!' : 'Keep Practicing!'}</h2>
                         <div className={`summary-accuracy ${grade}`}>{accuracy}%</div>
                         <div className="summary-stats">
                             <div className="summary-stat"><div className="summary-stat-value" style={{ color: 'var(--success)' }}>{correctCount}</div><div className="summary-stat-label">Correct</div></div>
                             <div className="summary-stat"><div className="summary-stat-value" style={{ color: 'var(--danger)' }}>{totalSteps - correctCount}</div><div className="summary-stat-label">Incorrect</div></div>
-                            <div className="summary-stat"><div className="summary-stat-value" style={{ color: 'var(--warning)' }}>+{xpEarned}</div><div className="summary-stat-label">XP</div></div>
+                            <div className="summary-stat"><div className="summary-stat-value" style={{ color: 'var(--warning)' }}>+{displayXp}</div><div className="summary-stat-label">XP {isAlreadyCompleted && <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>(Already Done)</span>}</div></div>
                         </div>
                     </div>
                 </div>

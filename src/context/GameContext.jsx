@@ -103,6 +103,12 @@ function gameReducer(state, action) {
     switch (action.type) {
         case 'COMPLETE_SCENARIO': {
             const { scenarioId, category, accuracy, xpEarned } = action.payload;
+
+            // Check if already completed to prevent duplicate score/XP
+            if (state.completedScenarios.some(s => s.scenarioId === scenarioId)) {
+                return state;
+            }
+
             const newXp = state.xp + xpEarned;
             const newLevel = calculateLevel(newXp);
             const newSkillPoints = state.skillPoints + (newLevel > state.level ? newLevel - state.level : 0);

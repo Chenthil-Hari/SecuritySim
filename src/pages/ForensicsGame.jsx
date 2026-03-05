@@ -316,6 +316,21 @@ export default function ForensicsGame() {
         if (quarantined.length === allThreats.length) {
             clearInterval(timerRef.current);
             setGameState('success');
+
+            // Record completion and earn XP
+            const timeBonus = Math.round(timeLeft * 0.5);
+            const accuracyPenalty = wrongGuesses.length * 5;
+            const totalXp = Math.max(0, selectedMission.xpReward + timeBonus - accuracyPenalty);
+
+            dispatch({
+                type: 'COMPLETE_SCENARIO',
+                payload: {
+                    scenarioId: selectedMission.id,
+                    category: 'Forensics',
+                    accuracy: 100, // Always 100% if all threats found
+                    xpEarned: totalXp
+                }
+            });
         }
     }, [quarantined, gameState, selectedMission]);
 
@@ -405,22 +420,29 @@ export default function ForensicsGame() {
 
                 <h2 className="missions-title"><ShieldAlert size={20} /> Select Mission</h2>
                 <div className="mission-grid">
-                    {MISSIONS.map(m => (
-                        <div className="mission-card" key={m.id} onClick={() => startMission(m)}>
-                            <div className="mission-card-header">
-                                <span className="mission-difficulty">
-                                    {'★'.repeat(m.difficulty)}{'☆'.repeat(3 - m.difficulty)}
-                                </span>
-                                <span className="mission-xp"><Zap size={12} /> {m.xpReward} XP</span>
+                    {MISSIONS.map(m => {
+                        const isCompleted = state?.completedScenarios?.some(s => s.scenarioId === m.id);
+                        return (
+                            <div className={`mission-card ${isCompleted ? 'completed' : ''}`} key={m.id} onClick={() => startMission(m)}>
+                                <div className="mission-card-header">
+                                    <span className="mission-difficulty">
+                                        {'★'.repeat(m.difficulty)}{'☆'.repeat(3 - m.difficulty)}
+                                    </span>
+                                    {isCompleted ? (
+                                        <span className="mission-completed-badge"><CheckCircle size={12} /> SECURED</span>
+                                    ) : (
+                                        <span className="mission-xp"><Zap size={12} /> {m.xpReward} XP</span>
+                                    )}
+                                </div>
+                                <h3>{m.title}</h3>
+                                <p>{m.briefing}</p>
+                                <div className="mission-meta">
+                                    <span><Clock size={12} /> {m.timeLimit}s</span>
+                                    <span><AlertTriangle size={12} /> {m.totalThreats} threats</span>
+                                </div>
                             </div>
-                            <h3>{m.title}</h3>
-                            <p>{m.briefing}</p>
-                            <div className="mission-meta">
-                                <span><Clock size={12} /> {m.timeLimit}s</span>
-                                <span><AlertTriangle size={12} /> {m.totalThreats} threats</span>
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         );
@@ -429,9 +451,11 @@ export default function ForensicsGame() {
     // ========== SUCCESS / FAILED ==========
     if (gameState === 'success' || gameState === 'failed') {
         const isSuccess = gameState === 'success';
+        const isAlreadyCompleted = state.completedScenarios.some(s => s.scenarioId === selectedMission?.id);
         const timeBonus = isSuccess ? Math.round(timeLeft * 0.5) : 0;
-        const accuracyPenalty = wrongGuesses * 5;
+        const accuracyPenalty = wrongGuesses.length * 5;
         const totalXp = isSuccess ? Math.max(0, selectedMission.xpReward + timeBonus - accuracyPenalty) : 0;
+        const displayXp = isAlreadyCompleted ? 0 : totalXp;
 
         return (
             <div className="forensics-page">
@@ -460,8 +484,9 @@ export default function ForensicsGame() {
                         </div>
                         <div className="result-stat">
                             <span className="stat-label">XP Earned</span>
-                            <span className="stat-value xp-earned">+{totalXp}</span>
+                            <span className="stat-value xp-earned">+{displayXp}</span>
                         </div>
+                        {isAlreadyCompleted && <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '-10px', marginBottom: '10px' }}>Mission Already Completed: No Additional XP Awarded</div>}
                     </div>
 
                     <div className="forensics-report">
