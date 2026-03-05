@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import ScoreRing from '../components/ScoreRing';
 import StatCard from '../components/StatCard';
 import ScenarioCard from '../components/ScenarioCard';
-import ThreatFeed from '../components/ThreatFeed';
+
 import scenarios from '../data/scenarios';
 import { getRank } from '../utils/ranks';
 import './Dashboard.css';
@@ -180,7 +180,7 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <ThreatFeed />
+
 
             {recommended.length > 0 && (
                 <div className="recommended">
