@@ -2,7 +2,7 @@ import express from 'express';
 
 const router = express.Router();
 
-const OTX_API_KEY = 'bd991e8391149e4abc85d266d993c72eaca9b7f9cf6096f4e82fa5a853fa3f63';
+const OTX_API_KEY = process.env.OTX_API_KEY;
 const OTX_URL = 'https://otx.alienvault.com/api/v1/pulses/subscribed?limit=20';
 
 router.get('/live', async (req, res) => {
