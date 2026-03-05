@@ -135,9 +135,11 @@ export default function Teams() {
 
     return (
         <div className="teams-page">
-            <button className="back-btn" onClick={() => navigate('/dashboard')}>
-                <ArrowLeft size={18} /> Back to Dashboard
-            </button>
+            <div className="page-top-nav">
+                <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                    <ArrowLeft size={18} /> Back to Dashboard
+                </button>
+            </div>
             <header className="teams-header">
                 <div className="teams-title">
                     <Users size={32} />

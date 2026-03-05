@@ -41,9 +41,11 @@ export default function Achievements() {
 
     return (
         <div className="achievements-page">
-            <button className="back-btn" onClick={() => navigate('/dashboard')}>
-                <ArrowLeft size={18} /> Back to Dashboard
-            </button>
+            <div className="page-top-nav">
+                <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                    <ArrowLeft size={18} /> Back to Dashboard
+                </button>
+            </div>
             <div className="achievements-header">
                 <h1>Achievements</h1>
                 <p>Track your progress and earn badges by mastering cyber defense skills</p>

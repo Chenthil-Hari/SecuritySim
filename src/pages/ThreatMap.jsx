@@ -32,9 +32,11 @@ export default function ThreatMap() {
 
     return (
         <div className="threat-map-page">
-            <button className="back-btn" onClick={() => navigate('/dashboard')}>
-                <ArrowLeft size={18} /> Back to Dashboard
-            </button>
+            <div className="page-top-nav">
+                <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                    <ArrowLeft size={18} /> Back to Dashboard
+                </button>
+            </div>
             <header className="map-header">
                 <div className="map-title">
                     <Globe size={28} className="text-primary" />

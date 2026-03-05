@@ -138,9 +138,11 @@ export default function Challenges() {
 
     return (
         <div className="challenges-page">
-            <button className="back-btn" onClick={() => navigate('/dashboard')}>
-                <ArrowLeft size={18} /> Back to Dashboard
-            </button>
+            <div className="page-top-nav">
+                <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                    <ArrowLeft size={18} /> Back to Dashboard
+                </button>
+            </div>
             <header className="challenges-header">
                 <div className="title-row">
                     <div className="title-left">

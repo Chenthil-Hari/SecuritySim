@@ -41,9 +41,11 @@ export default function Scenarios() {
 
     return (
         <div className="scenarios-page">
-            <button className="back-btn" onClick={() => navigate('/dashboard')}>
-                <ArrowLeft size={18} /> Back to Dashboard
-            </button>
+            <div className="page-top-nav">
+                <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                    <ArrowLeft size={18} /> Back to Dashboard
+                </button>
+            </div>
             <div className="scenarios-header">
                 <h1>Threat Scenarios</h1>
                 <p>Choose a scenario and test your cyber defense skills</p>

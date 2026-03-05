@@ -28,9 +28,11 @@ export default function Settings() {
 
     return (
         <div className="settings-page">
-            <button className="back-btn" onClick={() => navigate('/dashboard')}>
-                <ArrowLeft size={18} /> Back to Dashboard
-            </button>
+            <div className="page-top-nav">
+                <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                    <ArrowLeft size={18} /> Back to Dashboard
+                </button>
+            </div>
             <div className="settings-header">
                 <h1>Settings</h1>
                 <p>Customize your SecuritySim:Cyber Survival experience</p>

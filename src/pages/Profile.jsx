@@ -292,9 +292,11 @@ const Profile = () => {
 
     return (
         <div className="profile-container">
-            <button className="back-btn" onClick={() => navigate(-1)}>
-                <ArrowLeft size={18} /> Back
-            </button>
+            <div className="page-top-nav">
+                <button className="back-btn" onClick={() => navigate(-1)}>
+                    <ArrowLeft size={18} /> Back
+                </button>
+            </div>
             {/* Banner Background */}
             <div className="profile-banner-bg" style={activeBanner?.style}></div>
 

@@ -76,9 +76,11 @@ const Leaderboard = () => {
 
     return (
         <div className="leaderboard-container">
-            <button className="back-btn" onClick={() => navigate('/dashboard')}>
-                <ArrowLeft size={18} /> Back to Dashboard
-            </button>
+            <div className="page-top-nav">
+                <button className="back-btn" onClick={() => navigate('/dashboard')}>
+                    <ArrowLeft size={18} /> Back to Dashboard
+                </button>
+            </div>
             <div className="leaderboard-header">
                 <Trophy size={32} className="leaderboard-icon" />
                 <h1>{tab === 'regional' ? 'Regional Leaderboard' : 'Global Leaderboard'}</h1>
