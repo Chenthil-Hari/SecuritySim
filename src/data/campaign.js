@@ -97,7 +97,7 @@ export const campaignData = {
             id: 10,
             title: "Shutdown: Black Byte",
             description: "The final stand against the ransomware master node.",
-            scenarioId: "phishing-2", // Reusing a hard one for now, or I'll create a custom one later
+            scenarioId: "final-black-byte",
             storyIntro: "We're in their house now. This is the master node. They're throwing everything at us—every trick in the book. Hold the line, Analyst. Shutdown Black Byte for good.",
             storyOutro: "Connection terminated. The master node is down. 'Operation Black Byte' is a success. You've protected the city's infrastructure and proven yourself as a Master Analyst. Level Up!",
             position: { x: 145, y: 50 },

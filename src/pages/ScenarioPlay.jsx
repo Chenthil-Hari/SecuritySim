@@ -295,7 +295,7 @@ export default function ScenarioPlay() {
                     body: JSON.stringify({ receiverAccuracy: accuracy, receiverXp: xpEarned })
                 });
             } else if (campaignMode && stageId) {
-                dispatch({ type: 'COMPLETE_CAMPAIGN_STAGE', payload: { stageId, accuracy, xpEarned } });
+                dispatch({ type: 'COMPLETE_CAMPAIGN_STAGE', payload: { stageId, accuracy, xpEarned, scenarioId: scenario.id, category: scenario.category } });
             } else {
                 dispatch({ type: 'COMPLETE_SCENARIO', payload: { scenarioId: scenario.id, category: scenario.category, accuracy, xpEarned } });
             }

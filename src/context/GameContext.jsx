@@ -218,21 +218,43 @@ function gameReducer(state, action) {
             break;
         }
         case 'COMPLETE_CAMPAIGN_STAGE': {
-            const { stageId, accuracy, xpEarned } = action.payload;
+            const { stageId, accuracy, xpEarned, scenarioId, category } = action.payload;
+
+            // 1. Update Campaign Specific State
             const newStagesCompleted = [...state.campaignState.stagesCompleted];
             if (!newStagesCompleted.includes(stageId)) {
                 newStagesCompleted.push(stageId);
             }
-
             const nextStage = Math.max(state.campaignState.currentStage, stageId + 1);
 
-            const newXp = state.xp + xpEarned;
+            // 2. Update Global Scenario History (for score and profile)
+            const existingIndex = state.completedScenarios.findIndex(s => s.scenarioId === scenarioId);
+            let newCompleted = [...state.completedScenarios];
+            let activeXpEarned = xpEarned;
+
+            if (existingIndex !== -1) {
+                const existing = state.completedScenarios[existingIndex];
+                if (accuracy > existing.accuracy) {
+                    newCompleted[existingIndex] = { ...existing, accuracy, timestamp: Date.now() };
+                    const accuracyDiff = accuracy - existing.accuracy;
+                    activeXpEarned = Math.round(accuracyDiff * 0.5);
+                } else {
+                    activeXpEarned = 0; // No extra XP if accuracy didn't improve
+                }
+            } else {
+                newCompleted.push({ scenarioId, category, accuracy, timestamp: Date.now() });
+            }
+
+            const newXp = state.xp + activeXpEarned;
             const newLevel = calculateLevel(newXp);
+            const newScore = calculateScore(newCompleted, state.badges);
 
             newState = {
                 ...state,
                 xp: newXp,
                 level: newLevel,
+                completedScenarios: newCompleted,
+                score: newScore,
                 campaignState: {
                     ...state.campaignState,
                     stagesCompleted: newStagesCompleted,
