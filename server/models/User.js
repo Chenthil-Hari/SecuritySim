@@ -82,7 +82,12 @@ const userSchema = new mongoose.Schema({
         type: { type: String }, // 'gold', 'silver', 'bronze'
         season: String,
         awardedAt: { type: Date, default: Date.now }
-    }]
+    }],
+    customization: {
+        activeBanner: { type: String, default: 'default' },
+        matrixEnabled: { type: Boolean, default: false },
+        auraEnabled: { type: Boolean, default: true }
+    }
 });
 
 const User = mongoose.model('User', userSchema);

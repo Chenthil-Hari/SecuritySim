@@ -2,6 +2,7 @@ import { createContext, useContext, useReducer, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { buildApiUrl } from '../utils/api';
 import titles from '../data/titles';
+import MatrixBackground from '../components/MatrixBackground';
 
 const GameContext = createContext(null);
 const GameDispatchContext = createContext(null);
@@ -23,6 +24,11 @@ const defaultState = {
         highContrast: false,
         voiceGuidance: false,
         soundEffects: true
+    },
+    customization: {
+        activeBanner: 'default',
+        matrixEnabled: false,
+        auraEnabled: true
     }
 };
 
@@ -67,7 +73,8 @@ function syncToDatabase(state) {
                 weeklyCompleted: state.weeklyCompleted,
                 badges: state.badges,
                 unlockedTitles: state.unlockedTitles,
-                completedScenarios: state.completedScenarios
+                completedScenarios: state.completedScenarios,
+                customization: state.customization
             })
         }).catch(err => console.warn('Background sync failed:', err));
     } catch (e) {
@@ -197,6 +204,7 @@ function gameReducer(state, action) {
                 badges: action.payload.badges,
                 unlockedTitles: action.payload.unlockedTitles || [],
                 seasonalMedals: action.payload.seasonalMedals || [],
+                customization: action.payload.customization || state.customization,
                 completedScenarios: action.payload.completedScenarios,
                 campaignState: action.payload.campaignState || state.campaignState
             };
@@ -229,6 +237,13 @@ function gameReducer(state, action) {
                 level: newLevel,
                 skillPoints: newSkillPoints,
                 weeklyCompleted: [...state.weeklyCompleted, weekId]
+            };
+            break;
+        }
+        case 'UPDATE_CUSTOMIZATION': {
+            newState = {
+                ...state,
+                customization: { ...state.customization, ...action.payload }
             };
             break;
         }
@@ -288,6 +303,7 @@ export function GameProvider({ children }) {
     return (
         <GameContext.Provider value={state}>
             <GameDispatchContext.Provider value={dispatch}>
+                {state?.customization?.matrixEnabled && <MatrixBackground />}
                 {children}
             </GameDispatchContext.Provider>
         </GameContext.Provider>

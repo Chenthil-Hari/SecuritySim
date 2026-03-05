@@ -627,3 +627,261 @@
     color: var(--text-muted);
     letter-spacing: 0.5px;
 }
+
+/* Customization & Premium UI */
+.profile-container {
+    position: relative;
+    z-index: 1;
+}
+
+.profile-banner-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 300px;
+    z-index: -1;
+    border-radius: 0 0 2rem 2rem;
+    opacity: 0.6;
+    transition: all 0.5s ease;
+}
+
+.profile-header {
+    background: rgba(15, 23, 42, 0.8) !important;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Aura Effect */
+.profile-avatar.has-aura::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50%;
+    border: 2px solid var(--aura-color);
+    box-shadow: 0 0 var(--aura-blur) var(--aura-color);
+    animation: auraPulse 2s infinite alternate ease-in-out;
+    z-index: -1;
+}
+
+@keyframes auraPulse {
+    from {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}
+
+/* Tabs */
+.profile-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+    color: var(--primary);
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.6rem;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary);
+    box-shadow: 0 0 10px var(--primary);
+}
+
+/* Customization Panel */
+.customization-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    animation: fadeIn 0.4s ease;
+}
+
+.cust-section {
+    background: var(--surface-light);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+.cust-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.cust-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 0.75rem;
+}
+
+.toggle-row.locked {
+    opacity: 0.5;
+}
+
+.toggle-switch {
+    width: 48px;
+    height: 24px;
+    background: #334155;
+    border-radius: 12px;
+    position: relative;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.toggle-switch.on {
+    background: var(--primary);
+    box-shadow: 0 0 10px var(--primary);
+}
+
+.switch-handle {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+.toggle-switch.on .switch-handle {
+    transform: translateX(24px);
+}
+
+.switch-lock {
+    position: absolute;
+    right: -20px;
+    top: 6px;
+    color: #ef4444;
+}
+
+/* Banners Grid */
+.banners-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.banner-option-card {
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.banner-option-card:hover:not(.locked) {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.banner-option-card.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+}
+
+.banner-preview {
+    height: 80px;
+    width: 100%;
+}
+
+.banner-opt-info {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.banner-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.banner-req {
+    font-size: 0.75rem;
+    color: #ef4444;
+    font-weight: 700;
+}
+
+.banner-option-card.locked {
+    opacity: 0.6;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+}
+
+.active-check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--primary);
+    color: var(--bg-dark);
+    border-radius: 50%;
+    padding: 2px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-banner-bg {
+        height: 200px;
+    }
+
+    .banners-grid {
+        grid-template-columns: 1fr;
+    }
+}

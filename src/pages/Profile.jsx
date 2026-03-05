@@ -7,6 +7,9 @@ import { getRank } from '../utils/ranks';
 import badges from '../data/badges';
 import { Link } from 'react-router-dom';
 import Loader from '../components/Loader';
+import customizations from '../data/customizations';
+import { useGameDispatch } from '../context/GameContext';
+import { Medal, Crown, Palette, Layout, Sparkles } from 'lucide-react';
 import './Profile.css';
 
 const avatarPresets = [
@@ -21,8 +24,10 @@ const avatarPresets = [
 const Profile = () => {
     const { user, updateUser } = useAuth();
     const gameState = useGame();
+    const dispatch = useGameDispatch();
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'customization'
 
     // Edit Profile State
     const [isEditing, setIsEditing] = useState(false);
@@ -121,6 +126,13 @@ const Profile = () => {
         }
     };
 
+    const handleUpdateCustomization = (update) => {
+        dispatch({
+            type: 'UPDATE_CUSTOMIZATION',
+            payload: update
+        });
+    };
+
     if (!user) {
         return (
             <div className="profile-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', textAlign: 'center' }}>
@@ -159,11 +171,23 @@ const Profile = () => {
         earned: earnedBadges.includes(b.id)
     }));
 
+    const activeBanner = customizations.banners.find(b => b.id === (gameState.customization?.activeBanner || 'default'));
+    const auraConfig = gameState.customization?.auraEnabled ? (
+        profileData?.rank === 1 ? customizations.auras.rank1 :
+            profileData?.rank <= 10 ? customizations.auras.top10 :
+                profileData?.rank <= 50 ? customizations.auras.top50 :
+                    customizations.auras.default
+    ) : customizations.auras.default;
+
     return (
         <div className="profile-container">
+            {/* Banner Background */}
+            <div className="profile-banner-bg" style={activeBanner?.style}></div>
+
             {/* Profile Header */}
             <div className="profile-header">
-                <div className="profile-avatar">
+                <div className={`profile-avatar ${gameState.customization?.auraEnabled ? 'has-aura' : ''}`}
+                    style={{ '--aura-color': auraConfig.color, '--aura-blur': auraConfig.blur }}>
                     {profileData?.profilePhoto ? (
                         <img src={profileData.profilePhoto} alt="Profile" />
                     ) : (
@@ -292,77 +316,153 @@ const Profile = () => {
                 </div>
             )}
 
-            {/* Stats Grid */}
-            <div className="profile-stats-grid">
-                <div className="profile-stat-card stat-score">
-                    <Shield size={24} />
-                    <div className="stat-value">{score}</div>
-                    <div className="stat-label">Cyber Score</div>
-                </div>
-                <div className="profile-stat-card stat-xp">
-                    <Zap size={24} />
-                    <div className="stat-value">{xp}</div>
-                    <div className="stat-label">Total XP</div>
-                </div>
-                <div className="profile-stat-card stat-scenarios">
-                    <Target size={24} />
-                    <div className="stat-value">{completedScenarios.length}</div>
-                    <div className="stat-label">Scenarios Done</div>
-                </div>
-                <div className="profile-stat-card stat-badges">
-                    <Award size={24} />
-                    <div className="stat-value">{earnedBadges.length}</div>
-                    <div className="stat-label">Badges Earned</div>
-                </div>
+            {/* Tabs */}
+            <div className="profile-tabs">
+                <button
+                    className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('overview')}
+                >
+                    <Layout size={18} /> Overview
+                </button>
+                <button
+                    className={`tab-btn ${activeTab === 'customization' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('customization')}
+                >
+                    <Palette size={18} /> Customization
+                </button>
             </div>
 
-            {/* Trophy Room & Medals */}
-            {gameState.seasonalMedals?.length > 0 && (
-                <div className="trophy-room-section">
-                    <h2><Medal size={20} /> Trophy Room</h2>
-                    <div className="medals-grid">
-                        {gameState.seasonalMedals.map((medal, idx) => (
-                            <div key={idx} className={`medal-item ${medal.type}`}>
-                                <Crown size={32} />
-                                <div className="medal-info">
-                                    <div className="medal-name">Season Winner: {medal.season}</div>
-                                    <div className="medal-type">{medal.type.toUpperCase()} MEDAL</div>
-                                </div>
+            {activeTab === 'overview' ? (
+                <>
+                    {/* Stats Grid */}
+                    <div className="profile-stats-grid">
+                        <div className="profile-stat-card stat-score">
+                            <Shield size={24} />
+                            <div className="stat-value">{score}</div>
+                            <div className="stat-label">Cyber Score</div>
+                        </div>
+                        <div className="profile-stat-card stat-xp">
+                            <Zap size={24} />
+                            <div className="stat-value">{xp}</div>
+                            <div className="stat-label">Total XP</div>
+                        </div>
+                        <div className="profile-stat-card stat-scenarios">
+                            <Target size={24} />
+                            <div className="stat-value">{completedScenarios.length}</div>
+                            <div className="stat-label">Scenarios Done</div>
+                        </div>
+                        <div className="profile-stat-card stat-badges">
+                            <Award size={24} />
+                            <div className="stat-value">{earnedBadges.length}</div>
+                            <div className="stat-label">Badges Earned</div>
+                        </div>
+                    </div>
+
+                    {/* Trophy Room & Medals */}
+                    {gameState.seasonalMedals?.length > 0 && (
+                        <div className="trophy-room-section">
+                            <h2><Medal size={20} /> Trophy Room</h2>
+                            <div className="medals-grid">
+                                {gameState.seasonalMedals.map((medal, idx) => (
+                                    <div key={idx} className={`medal-item ${medal.type}`}>
+                                        <Crown size={32} />
+                                        <div className="medal-info">
+                                            <div className="medal-name">Season Winner: {medal.season}</div>
+                                            <div className="medal-type">{medal.type.toUpperCase()} MEDAL</div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
+                        </div>
+                    )}
+
+                    {/* XP Progress */}
+                    <div className="xp-section">
+                        <div className="xp-header">
+                            <span>Level {level}</span>
+                            <span>{xpToNext} XP to Level {level + 1}</span>
+                        </div>
+                        <div className="xp-bar">
+                            <div className="xp-fill" style={{ width: `${xpProgress}%` }}></div>
+                        </div>
+                    </div>
+
+                    {/* Badges Section */}
+                    <div className="badges-section">
+                        <h2><Star size={20} /> Badges & Achievements</h2>
+                        <div className="badges-grid">
+                            {allBadges.map(badge => (
+                                <div key={badge.id} className={`badge-card ${badge.earned ? 'earned' : 'locked'}`}>
+                                    <div className="badge-icon">
+                                        <Award size={28} />
+                                    </div>
+                                    <div className="badge-info">
+                                        <h3>{badge.name}</h3>
+                                        <p>{badge.description}</p>
+                                    </div>
+                                    {!badge.earned && <div className="badge-lock">🔒</div>}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </>
+            ) : (
+                <div className="customization-panel">
+                    <div className="cust-section">
+                        <h3><Sparkles size={18} /> Profile Aura</h3>
+                        <p className="cust-desc">Project a holographic neon field around your agent avatar based on your global rank.</p>
+                        <div className="toggle-row">
+                            <span>Enable Cyber-Glow Aura</span>
+                            <button
+                                className={`toggle-switch ${gameState.customization?.auraEnabled ? 'on' : ''}`}
+                                onClick={() => handleUpdateCustomization({ auraEnabled: !gameState.customization?.auraEnabled })}
+                            >
+                                <div className="switch-handle"></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="cust-section">
+                        <h3><Crown size={18} /> Matrix Protocol</h3>
+                        <p className="cust-desc">Activate the falling code sequence across your entire terminal. (Exclusive to Top 10 Agents)</p>
+                        <div className={`toggle-row ${profileData?.rank > 10 ? 'locked' : ''}`}>
+                            <span>Enable Matrix Background</span>
+                            <button
+                                className={`toggle-switch ${gameState.customization?.matrixEnabled ? 'on' : ''}`}
+                                onClick={() => profileData?.rank <= 10 && handleUpdateCustomization({ matrixEnabled: !gameState.customization?.matrixEnabled })}
+                                disabled={profileData?.rank > 10}
+                            >
+                                <div className="switch-handle"></div>
+                                {profileData?.rank > 10 && <X size={12} className="switch-lock" />}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="cust-section">
+                        <h3><Palette size={18} /> Agent Banners</h3>
+                        <p className="cust-desc">Customize your profile header with exclusive tactical patterns.</p>
+                        <div className="banners-grid">
+                            {customizations.banners.map(banner => {
+                                const isUnlocked = banner.id === 'default' || banner.condition?.(gameState) || (banner.id === 'matrix-elite' && profileData?.rank <= 10) || (banner.id === 'gold-champion' && profileData?.rank === 1);
+                                return (
+                                    <div
+                                        key={banner.id}
+                                        className={`banner-option-card ${gameState.customization?.activeBanner === banner.id ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}`}
+                                        onClick={() => isUnlocked && handleUpdateCustomization({ activeBanner: banner.id })}
+                                    >
+                                        <div className="banner-preview" style={banner.style}></div>
+                                        <div className="banner-opt-info">
+                                            <span className="banner-name">{banner.name}</span>
+                                            {!isUnlocked && <span className="banner-req">{banner.requirement}</span>}
+                                        </div>
+                                        {gameState.customization?.activeBanner === banner.id && <Check size={16} className="active-check" />}
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             )}
-
-            {/* XP Progress */}
-            <div className="xp-section">
-                <div className="xp-header">
-                    <span>Level {level}</span>
-                    <span>{xpToNext} XP to Level {level + 1}</span>
-                </div>
-                <div className="xp-bar">
-                    <div className="xp-fill" style={{ width: `${xpProgress}%` }}></div>
-                </div>
-            </div>
-
-            {/* Badges Section */}
-            <div className="badges-section">
-                <h2><Star size={20} /> Badges & Achievements</h2>
-                <div className="badges-grid">
-                    {allBadges.map(badge => (
-                        <div key={badge.id} className={`badge-card ${badge.earned ? 'earned' : 'locked'}`}>
-                            <div className="badge-icon">
-                                <Award size={28} />
-                            </div>
-                            <div className="badge-info">
-                                <h3>{badge.name}</h3>
-                                <p>{badge.description}</p>
-                            </div>
-                            {!badge.earned && <div className="badge-lock">🔒</div>}
-                        </div>
-                    ))}
-                </div>
-            </div>
         </div>
     );
 };

@@ -22,7 +22,14 @@ router.get('/me', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.userId).select('-password');
         if (!user) return res.status(404).json({ message: 'User not found' });
-        res.json(user);
+
+        // Calculate global rank
+        const rank = await User.countDocuments({ score: { $gt: user.score } }) + 1;
+
+        const userData = user.toObject();
+        userData.rank = rank;
+
+        res.json(userData);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching profile', error: error.message });
     }
@@ -42,7 +49,7 @@ router.get('/:userId', async (req, res) => {
 // PUT /api/profile/sync — sync game state from frontend to DB
 router.put('/sync', authMiddleware, async (req, res) => {
     try {
-        const { score, xp, level, badges, completedScenarios, skillPoints, unlockedSkills, weeklyCompleted, teamId } = req.body;
+        const { score, xp, level, badges, completedScenarios, skillPoints, unlockedSkills, weeklyCompleted, teamId, customization, unlockedTitles, seasonalMedals } = req.body;
         const updateData = {};
 
         if (score !== undefined) updateData.score = score;
@@ -54,6 +61,9 @@ router.put('/sync', authMiddleware, async (req, res) => {
         if (unlockedSkills !== undefined) updateData.unlockedSkills = unlockedSkills;
         if (weeklyCompleted !== undefined) updateData.weeklyCompleted = weeklyCompleted;
         if (teamId !== undefined) updateData.teamId = teamId;
+        if (customization !== undefined) updateData.customization = customization;
+        if (unlockedTitles !== undefined) updateData.unlockedTitles = unlockedTitles;
+        if (seasonalMedals !== undefined) updateData.seasonalMedals = seasonalMedals;
 
         const user = await User.findByIdAndUpdate(
             req.userId,
