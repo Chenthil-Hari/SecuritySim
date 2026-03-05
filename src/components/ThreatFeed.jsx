@@ -1,3 +1,8 @@
+import { useState, useEffect, useRef } from 'react';
+import {
+    AlertTriangle, ShieldAlert, Zap, Globe, Database, Lock, Wifi,
+    Server, ExternalLink, Radio, RefreshCw, Bug, Mail
+} from 'lucide-react';
 import { buildApiUrl } from '../utils/api';
 
 /* ====================================================
@@ -115,16 +120,16 @@ export default function ThreatFeed() {
             const data = await res.json();
 
             // Mapped OTX Pulse logic
-            const mapped = data.map(p => ({
+            const mapped = Array.isArray(data) ? data.map(p => ({
                 id: p.id,
-                title: p.type, // OTX Pulse Name
-                description: p.description,
-                timestamp: p.timestamp,
+                title: p.type || 'Unknown Threat', // OTX Pulse Name
+                description: p.description || '',
+                timestamp: p.timestamp || new Date().toISOString(),
                 source: 'AlienVault OTX'
-            }));
+            })) : [];
 
             setThreats(mapped);
-            setNewIds(mapped.slice(0, 2).map(m => m.id));
+            setNewIds(mapped.length > 0 ? mapped.slice(0, 2).map(m => m.id) : []);
         } catch (err) {
             console.error("Failed to fetch OTX threats:", err);
         } finally {
