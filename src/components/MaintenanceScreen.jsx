@@ -1,4 +1,5 @@
 import { Shield, Lock, ExternalLink } from 'lucide-react';
+import maintenanceImg from '../assets/Gemini_Generated_Image_cejcaacejcaacejc.png';
 import './MaintenanceScreen.css';
 
 export default function MaintenanceScreen() {
@@ -12,7 +13,7 @@ export default function MaintenanceScreen() {
                     </div>
                     
                     <div className="maintenance-image-container">
-                        <img src={`/Gemini_Generated_Image_cejcaacejcaacejc.png?t=${Date.now()}`} alt="Maintenance Illustration" className="premium-image" />
+                        <img src={maintenanceImg} alt="Maintenance Illustration" className="premium-image" />
                     </div>
 
                     <div className="maintenance-body">
