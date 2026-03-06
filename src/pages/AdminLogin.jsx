@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Lock, ArrowRight, AlertOctagon } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { buildApiUrl } from '../utils/api';
 import './AdminLogin.css';
 
 export default function AdminLogin() {
@@ -16,20 +16,27 @@ export default function AdminLogin() {
         setError('');
         setLoading(true);
 
-        const res = await login(credentials.email, credentials.password);
-        if (res.success) {
-            // Check if user is actually an admin
-            // We get this from localstorage or context since login updates it
-            const storedUser = JSON.parse(localStorage.getItem('user'));
-            if (storedUser?.role === 'admin') {
+        try {
+            const response = await fetch(buildApiUrl('/api/auth/admin-login'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(credentials),
+            });
+            const data = await response.json();
+            
+            if (response.ok) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                // Force a reload or update context if necessary, but navigate is enough for basic role protection
                 navigate('/admin/dashboard');
             } else {
-                setError('Access denied. You do not have administrator privileges.');
+                setError(data.message || 'Login failed');
             }
-        } else {
-            setError(res.error);
+        } catch (err) {
+            setError('System error connecting to secure terminal.');
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (

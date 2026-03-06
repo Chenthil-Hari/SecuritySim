@@ -34,13 +34,14 @@ function AppContent() {
   const isLoggedIn = !!user;
   const location = useLocation();
 
-  // Hide chat widget if the user is in the /scenarios section
+  // Hide UI elements on admin routes
+  const isAdminRoute = location.pathname.startsWith('/admin');
   const isScenarioRoute = location.pathname.startsWith('/scenarios');
 
   return (
     <div className="app">
-      <Navbar />
-      <main className="app-main">
+      {!isAdminRoute && <Navbar />}
+      <main className={`app-main ${isAdminRoute ? 'admin-isolated' : ''}`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -64,7 +65,7 @@ function AppContent() {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>
       </main>
-      {!isScenarioRoute && <ChatWidget isLoggedIn={isLoggedIn} />}
+      {!isScenarioRoute && !isAdminRoute && <ChatWidget isLoggedIn={isLoggedIn} />}
     </div>
   );
 }

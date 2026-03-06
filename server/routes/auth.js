@@ -111,6 +111,40 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Secure Admin Login with single fixed credentials
+router.post('/admin-login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        // Single admin credentials
+        const ADMIN_EMAIL = 'admin@hari07.tech';
+        const ADMIN_PASS = 'CyberSecurity2026!'; // User should change this later
+
+        if (email !== ADMIN_EMAIL || password !== ADMIN_PASS) {
+            return res.status(401).json({ message: 'Invalid administrative credentials' });
+        }
+
+        // We create a special JWT for the super admin
+        const token = jwt.sign(
+            { userId: 'SUPER_ADMIN_ID', username: 'Headquarters', role: 'admin' },
+            process.env.JWT_SECRET || 'fallback_secret',
+            { expiresIn: '2h' } // Short duration for high-security sessions
+        );
+
+        res.json({
+            token,
+            user: {
+                id: 'SUPER_ADMIN_ID',
+                username: 'Headquarters',
+                email: ADMIN_EMAIL,
+                role: 'admin'
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Temporary Admin Promotion (Delete in production)
 router.post('/make-admin', async (req, res) => {
     try {
