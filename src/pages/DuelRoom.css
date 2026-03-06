@@ -1,0 +1,299 @@
+.duel-room-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #0a0e17;
+    color: #fff;
+    overflow: hidden;
+}
+
+.duel-header {
+    height: 60px;
+    background: rgba(16, 22, 36, 0.9);
+    border-bottom: 1px solid rgba(0, 255, 136, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.exit-btn {
+    background: transparent;
+    border: 1px solid #ff4757;
+    color: #ff4757;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Rajdhani', sans-serif;
+}
+
+.duel-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.duel-icon {
+    color: #00ff88;
+}
+
+.duel-info h1 {
+    font-size: 1.2rem;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+}
+
+.status-pill {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid #00ff88;
+    color: #00ff88;
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.duel-main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.player-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    position: relative;
+}
+
+.own-pane {
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.opponent-pane {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.pane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.player-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #90caf9;
+}
+
+.player-badge.opp {
+    color: #ffbd2e;
+}
+
+.score-display {
+    font-family: 'Orbitron', sans-serif;
+    color: #00ff88;
+}
+
+/* Custom Terminal for Duel */
+.duel-terminal {
+    flex: 1;
+    background: #000;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 1rem;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    overflow-y: auto;
+    font-size: 0.85rem;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 1);
+}
+
+.prompt {
+    color: #00ff88;
+    opacity: 0.7;
+    margin-top: 0.5rem;
+}
+
+.txt-prev {
+    color: #b0bec5;
+    margin-bottom: 0.5rem;
+}
+
+.txt-choice {
+    color: #00ff88;
+    margin-bottom: 1rem;
+}
+
+.txt-current {
+    color: #fff;
+    line-height: 1.5;
+}
+
+.cursor {
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+.duel-controls {
+    height: 180px;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.duel-opt-btn {
+    background: rgba(16, 22, 36, 0.6);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    color: #fff;
+    padding: 0.8rem;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
+}
+
+.duel-opt-btn:hover {
+    background: rgba(0, 255, 136, 0.1);
+    border-color: #00ff88;
+    padding-left: 1.2rem;
+}
+
+.opt-idx {
+    background: #00ff88;
+    color: #000;
+    min-width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+    font-weight: 900;
+}
+
+/* Opponent Visualizer */
+.opponent-visualizer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.opp-status-icon {
+    filter: drop-shadow(0 0 15px currentColor);
+}
+
+.opp-meta {
+    text-align: center;
+    width: 80%;
+}
+
+.opp-meta h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    letter-spacing: 2px;
+}
+
+.progress-bar-container {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ff88, #0088ff);
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.finish-wait {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.finish-wait h3 {
+    margin-top: 1rem;
+    color: #00ff88;
+}
+
+/* Victory Result Card */
+.final-result-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    background: #1a1f2e;
+    border: 2px solid #ffbd2e;
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+    z-index: 100;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+}
+
+.final-scores {
+    margin: 1.5rem 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+}
+
+.return-btn {
+    background: #ffbd2e;
+    color: #000;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 4px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* Animations */
+.pulse {
+    animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+}
+
+.animate-pop {
+    animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pop {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}

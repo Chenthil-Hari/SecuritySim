@@ -16,6 +16,7 @@ import ugcScenariosRoutes from '../server/routes/ugcScenarios.js';
 import warroomsRoutes from '../server/routes/warrooms.js';
 import usersRoutes from '../server/routes/users.js';
 import adminRoutes from '../server/routes/admin.js';
+import pvpRoutes from '../server/routes/pvp.js';
 
 dotenv.config();
 
@@ -99,6 +100,22 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('User disconnected');
     });
+
+    // PvP Duel Handlers
+    socket.on('join_duel', (matchId) => {
+        socket.join(matchId);
+        console.log(`User ${socket.id} joined duel ${matchId}`);
+    });
+
+    socket.on('duel_score_update', (data) => {
+        // data: { matchId, userId, score, currentNodeId }
+        socket.to(data.matchId).emit('opponent_score_update', data);
+    });
+
+    socket.on('duel_finish', (data) => {
+        // data: { matchId, userId, finalScore }
+        socket.to(data.matchId).emit('opponent_finished', data);
+    });
 });
 
 app.use('/api/auth', authRoutes);
@@ -113,6 +130,7 @@ app.use('/api/ugc-scenarios', ugcScenariosRoutes);
 app.use('/api/warrooms', warroomsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/pvp', pvpRoutes);
 
 app.get('/api', (req, res) => {
     res.json({ 

@@ -61,6 +61,10 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    pvpWins: {
+        type: Number,
+        default: 0
+    },
     unlockedSkills: {
         type: [String],
         default: []

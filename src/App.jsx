@@ -24,6 +24,8 @@ import GlobalAlert from './components/GlobalAlert';
 import AdminDashboard from './pages/AdminDashboard';
 import TerminalLocked from './pages/TerminalLocked';
 import InteractiveScenarios from './pages/InteractiveScenarios';
+import PvPLobby from './pages/PvPLobby';
+import DuelRoom from './pages/DuelRoom';
 import './App.css';
 
 import { useAuth } from './context/AuthContext';
@@ -69,6 +71,8 @@ function AppContent() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/forensics" element={<ForensicsGame />} />
           <Route path="/interactive-scenarios" element={<InteractiveScenarios />} />
+          <Route path="/multiplayer/pvp" element={<PvPLobby />} />
+          <Route path="/duel/:matchId" element={<DuelRoom />} />
           <Route path="/warroom/:id" element={<WarRoom />} />
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLogin />} />

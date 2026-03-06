@@ -97,6 +97,11 @@ export default function Navbar() {
                                         <Users size={16} /> Teams
                                     </NavLink>
                                 </li>
+                                <li>
+                                    <NavLink to="/multiplayer/pvp" onClick={handleNavClick}>
+                                        <Swords size={16} /> 1v1 Duel
+                                    </NavLink>
+                                </li>
                             </ul>
                         </li>
                         <li>
