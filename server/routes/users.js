@@ -1,5 +1,6 @@
 import express from 'express';
 import User from '../models/User.js';
+import Team from '../models/Team.js';
 import { authenticateToken, isAdmin } from '../middleware/auth.js';
 import bcrypt from 'bcryptjs';
 
@@ -22,7 +23,7 @@ router.patch('/admin/:id/freeze', authenticateToken, isAdmin, async (req, res) =
     try {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: 'User not found' });
-        
+
         // Prevent admin from freezing themselves
         if (user.role === 'admin') {
             return res.status(403).json({ message: 'Cannot freeze an administrator' });
@@ -30,7 +31,7 @@ router.patch('/admin/:id/freeze', authenticateToken, isAdmin, async (req, res) =
 
         user.isFrozen = !user.isFrozen;
         await user.save();
-        
+
         res.json({ message: `User ${user.isFrozen ? 'frozen' : 'unfrozen'} successfully`, isFrozen: user.isFrozen });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -47,11 +48,11 @@ router.post('/admin/:id/reset-password', authenticateToken, isAdmin, async (req,
         const tempPassword = Math.random().toString(36).slice(-8);
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(tempPassword, salt);
-        
+
         await user.save();
-        
-        res.json({ 
-            message: 'Password reset successful', 
+
+        res.json({
+            message: 'Password reset successful',
             tempPassword // In a real app, this should be sent via email
         });
     } catch (error) {

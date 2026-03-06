@@ -1,6 +1,7 @@
 import express from 'express';
 import User from '../models/User.js';
 import UgcScenario from '../models/UgcScenario.js';
+import Team from '../models/Team.js';
 import AuditLog from '../models/AuditLog.js';
 import SystemSetting from '../models/SystemSetting.js';
 import { authenticateToken, isAdmin } from '../middleware/auth.js';
@@ -28,24 +29,28 @@ router.get('/stats', authenticateToken, isAdmin, async (req, res) => {
         // 1. User registrations last 7 days
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        
+
         const registrations = await User.aggregate([
             { $match: { createdAt: { $gte: sevenDaysAgo } } },
-            { $group: {
-                _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-                count: { $sum: 1 }
-            }},
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    count: { $sum: 1 }
+                }
+            },
             { $sort: { "_id": 1 } }
         ]);
 
         // 2. Popular Categories & Kill-Chain Stats (Accuracy)
         const categoryStats = await User.aggregate([
             { $unwind: "$completedScenarios" },
-            { $group: {
-                _id: "$completedScenarios.category",
-                avgAccuracy: { $avg: "$completedScenarios.accuracy" },
-                totalAttempts: { $sum: 1 }
-            }},
+            {
+                $group: {
+                    _id: "$completedScenarios.category",
+                    avgAccuracy: { $avg: "$completedScenarios.accuracy" },
+                    totalAttempts: { $sum: 1 }
+                }
+            },
             { $sort: { totalAttempts: -1 } }
         ]);
 
@@ -85,13 +90,13 @@ router.post('/broadcast', authenticateToken, isAdmin, async (req, res) => {
         // Emission is handled by the main app instance via req.app.get('io')
         const io = req.app.get('io');
         if (io) {
-            io.emit('system_broadcast', { 
-                message, 
-                type, 
+            io.emit('system_broadcast', {
+                message,
+                type,
                 sender: 'Headquarters',
-                timestamp: new Date() 
+                timestamp: new Date()
             });
-            
+
             await logAction(req.user, 'broadcast', `Sent global alert: "${message.substring(0, 30)}..."`);
             res.json({ message: "Broadcast deployed successfully" });
         } else {
@@ -106,11 +111,11 @@ router.post('/broadcast', authenticateToken, isAdmin, async (req, res) => {
 router.post('/maintenance', authenticateToken, isAdmin, async (req, res) => {
     try {
         const { enabled } = req.body;
-        
+
         await SystemSetting.findOneAndUpdate(
             { key: 'maintenance_mode' },
-            { 
-                value: enabled, 
+            {
+                value: enabled,
                 updatedBy: req.user.username,
                 updatedAt: new Date()
             },
@@ -118,12 +123,12 @@ router.post('/maintenance', authenticateToken, isAdmin, async (req, res) => {
         );
 
         await logAction(req.user, 'toggle_maintenance', `Set Maintenance Mode to ${enabled}`);
-        
+
         const io = req.app.get('io');
         if (io) {
             io.emit('maintenance_toggle', { enabled });
         }
-        
+
         res.json({ message: `System status set to ${enabled ? 'MAINTENANCE' : 'OPERATIONAL'}`, enabled });
     } catch (error) {
         res.status(500).json({ message: error.message });

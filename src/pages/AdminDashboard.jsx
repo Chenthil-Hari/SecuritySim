@@ -16,6 +16,7 @@ export default function AdminDashboard() {
     const [broadcast, setBroadcast] = useState({ message: '', type: 'info' });
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [stats, setStats] = useState({ pending: 0, totalUsers: 0 });
     const [activeScenario, setActiveScenario] = useState(null);
     const [moderationView, setModerationView] = useState('pending'); // 'pending' or 'live'
@@ -162,11 +163,14 @@ export default function AdminDashboard() {
                 const data = await res.json();
                 setUsers(data);
                 setStats(prev => ({ ...prev, totalUsers: data.length }));
+                setError(null);
             } else {
                 console.error("Failed to fetch users:", res.status, res.statusText);
+                setError(`API Connection Issue (${res.status})`);
             }
         } catch (err) {
             console.error("Error fetching users:", err);
+            setError("Platform Link Offline");
         } finally {
             setLoading(false);
         }
@@ -467,48 +471,61 @@ export default function AdminDashboard() {
                     </tr>
                 </thead>
                 <tbody>
-                    {Array.isArray(users) && users.filter(u => u.username?.toLowerCase().includes(searchQuery.toLowerCase())).map(u => (
-                        <tr key={u._id}>
-                            <td>
-                                <div className="user-cell">
-                                    <div className="user-avatar">{u.username[0]}</div>
-                                    <div className="user-text">
-                                        <span className="username">{u.username}</span>
-                                        <span className="user-id">{u._id}</span>
+                    {Array.isArray(users) && users.length > 0 ? (
+                        users.filter(u => u.username?.toLowerCase().includes(searchQuery.toLowerCase())).map(u => (
+                            <tr key={u._id}>
+                                <td>
+                                    <div className="user-cell">
+                                        <div className="user-avatar">{u.username ? u.username[0] : '?'}</div>
+                                        <div className="user-text">
+                                            <span className="username">{u.username || 'Terminated Account'}</span>
+                                            <span className="user-id">{u._id}</span>
+                                        </div>
                                     </div>
+                                </td>
+                                <td>
+                                    <div className="xp-cell">
+                                        Lvl {u.level || 0}
+                                        <span className="xp-pills">{u.xp || 0} XP</span>
+                                    </div>
+                                </td>
+                                <td>{u.teamId?.name || <span className="text-muted">No Team</span>}</td>
+                                <td>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'Unknown'}</td>
+                                <td>
+                                    <span className={`status-badge ${u.isFrozen ? 'frozen' : 'active'}`}>
+                                        {u.isFrozen ? 'Terminal Locked' : 'Active'}
+                                    </span>
+                                </td>
+                                <td className="actions-cell">
+                                    <button
+                                        className={`action-btn ${u.isFrozen ? 'unfreeze' : 'freeze'}`}
+                                        onClick={() => handleFreeze(u._id)}
+                                        title={u.isFrozen ? 'Unfreeze' : 'Freeze'}
+                                    >
+                                        <AlertCircle size={16} />
+                                    </button>
+                                    <button
+                                        className="action-btn reset"
+                                        onClick={() => handleResetPassword(u._id)}
+                                        title="Reset Password"
+                                    >
+                                        <Lock size={16} />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="6" style={{ textAlign: 'center', padding: '100px 0', color: '#8b949e' }}>
+                                <div className="queue-empty">
+                                    <Search size={48} className="text-muted" style={{ marginBottom: '20px' }} />
+                                    <h2>{error ? error : "No Investigators Registered"}</h2>
+                                    <p>{error ? "Headquarters is having trouble retrieving records." : "The investigator directory is currently empty. New recruits will appear here."}</p>
                                 </div>
-                            </td>
-                            <td>
-                                <div className="xp-cell">
-                                    Lvl {u.level}
-                                    <span className="xp-pills">{u.xp} XP</span>
-                                </div>
-                            </td>
-                            <td>{u.teamId?.name || <span className="text-muted">No Team</span>}</td>
-                            <td>{new Date(u.createdAt).toLocaleDateString()}</td>
-                            <td>
-                                <span className={`status-badge ${u.isFrozen ? 'frozen' : 'active'}`}>
-                                    {u.isFrozen ? 'Terminal Locked' : 'Active'}
-                                </span>
-                            </td>
-                            <td className="actions-cell">
-                                <button
-                                    className={`action-btn ${u.isFrozen ? 'unfreeze' : 'freeze'}`}
-                                    onClick={() => handleFreeze(u._id)}
-                                    title={u.isFrozen ? 'Unfreeze' : 'Freeze'}
-                                >
-                                    <AlertCircle size={16} />
-                                </button>
-                                <button
-                                    className="action-btn reset"
-                                    onClick={() => handleResetPassword(u._id)}
-                                    title="Reset Password"
-                                >
-                                    <Lock size={16} />
-                                </button>
                             </td>
                         </tr>
-                    ))}
+                    )
+                    }
                 </tbody>
             </table>
         </div>
