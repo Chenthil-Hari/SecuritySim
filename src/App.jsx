@@ -26,16 +26,34 @@ import TerminalLocked from './pages/TerminalLocked';
 import InteractiveScenarios from './pages/InteractiveScenarios';
 import PvPLobby from './pages/PvPLobby';
 import DuelRoom from './pages/DuelRoom';
+import Maintenance from './pages/Maintenance';
 import './App.css';
+import { buildApiUrl } from './utils/api';
 
 import { useAuth } from './context/AuthContext';
 import { useGame } from './context/GameContext';
 
 function AppContent() {
   const { user, checkFreezeStatus } = useAuth();
+  const [maintenance, setMaintenance] = useState(false);
   const gameState = useGame();
   const isLoggedIn = !!user;
   const location = useLocation();
+
+  useEffect(() => {
+    const fetchMaintenance = async () => {
+      try {
+        const res = await fetch(buildApiUrl('/api/maintenance/status'));
+        if (res.ok) {
+          const data = await res.json();
+          setMaintenance(data.maintenance);
+        }
+      } catch (err) {
+        console.error("Maintenance check failed:", err);
+      }
+    };
+    fetchMaintenance();
+  }, [location.pathname]);
 
   // Check for account freeze on every navigation
   useEffect(() => {
@@ -49,8 +67,12 @@ function AppContent() {
     return <TerminalLocked />;
   }
 
-  // Hide UI elements on admin routes
+  // Handle Maintenance Redirect
+  const isAdmin = user?.role === 'admin';
   const isAdminRoute = location.pathname.startsWith('/admin');
+  if (maintenance && !isAdmin && !isAdminRoute) {
+    return <Maintenance />;
+  }
 
   return (
     <div className="app">

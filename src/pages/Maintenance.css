@@ -1,0 +1,124 @@
+.maintenance-page {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0d1117;
+    color: white;
+    padding: 2rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.maintenance-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(0, 240, 255, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.maintenance-container {
+    max-width: 500px;
+    text-align: center;
+    animation: fadeInScale 0.6s ease-out;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.maintenance-icon {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 2rem;
+}
+
+.shield-glow {
+    color: var(--primary);
+    filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.4));
+}
+
+.warning-overlay {
+    position: absolute;
+    bottom: -5px;
+    right: -10px;
+    color: #ffbd2e;
+    background: #0d1117;
+    border-radius: 50%;
+    padding: 2px;
+}
+
+.maintenance-container h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    letter-spacing: -1px;
+}
+
+.status-badge {
+    display: inline-block;
+    background: rgba(255, 189, 46, 0.1);
+    color: #ffbd2e;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    border: 1px solid rgba(255, 189, 46, 0.2);
+    margin-bottom: 2rem;
+}
+
+.maintenance-container p {
+    color: #8b949e;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.maintenance-details {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 3rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: white;
+    font-weight: 600;
+}
+
+.maintenance-footer {
+    font-size: 0.85rem;
+    color: #484f58;
+}
+
+.progress-mini {
+    width: 100px;
+    height: 2px;
+    background: #161b22;
+    margin: 1rem auto 0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    width: 30%;
+    height: 100%;
+    background: var(--primary);
+    animation: scan 2s infinite ease-in-out;
+}
+
+@keyframes scan {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(300%); }
+}

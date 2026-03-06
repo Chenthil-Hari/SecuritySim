@@ -295,4 +295,43 @@ router.patch('/scenarios/:id/feature', authenticateToken, isAdmin, async (req, r
     }
 });
 
+// Global Settings Routes
+router.get('/settings/maintenance', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        let setting = await SystemSetting.findOne({ key: 'maintenance_mode' });
+        if (!setting) {
+            setting = await SystemSetting.create({ 
+                key: 'maintenance_mode', 
+                value: false, 
+                description: 'Global site maintenance status' 
+            });
+        }
+        res.json({ isActive: setting.value });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.patch('/settings/maintenance', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { isActive } = req.body;
+        const setting = await SystemSetting.findOneAndUpdate(
+            { key: 'maintenance_mode' },
+            { value: isActive, updatedAt: new Date(), updatedBy: req.user.id },
+            { upsert: true, new: true }
+        );
+
+        await AuditLog.create({
+            userId: req.user.id,
+            action: isActive ? 'SET_MAINTENANCE_ON' : 'SET_MAINTENANCE_OFF',
+            details: `Maintenance mode toggled to ${isActive ? 'ACTIVE' : 'INACTIVE'}`,
+            timestamp: new Date()
+        });
+
+        res.json({ message: `Maintenance mode ${isActive ? 'activated' : 'deactivated'}`, isActive: setting.value });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 export default router;

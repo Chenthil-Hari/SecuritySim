@@ -24,6 +24,7 @@ export default function AdminDashboard() {
     const [moderationView, setModerationView] = useState('pending'); // 'pending' or 'live'
     const [liveScenarios, setLiveScenarios] = useState([]);
     const [assets, setAssets] = useState([]);
+    const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
 
     useEffect(() => {
         if (user?.role !== 'admin') {
@@ -41,6 +42,7 @@ export default function AdminDashboard() {
             else if (activeTab === 'operations') {
                 fetchLogs();
                 fetchEvents();
+                fetchMaintenanceStatus();
             }
             else if (activeTab === 'evidence') {
                 fetchAssets();
@@ -59,6 +61,21 @@ export default function AdminDashboard() {
             if (res.ok) setEvents(await res.json());
         } catch (err) {
             console.error("Failed to fetch events:", err);
+        }
+    };
+
+    const fetchMaintenanceStatus = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/settings/maintenance'), {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setIsMaintenanceMode(data.isActive);
+            }
+        } catch (err) {
+            console.error("Failed to fetch maintenance status:", err);
         }
     };
 
@@ -427,6 +444,32 @@ export default function AdminDashboard() {
             }
         } catch (err) {
             alert("Error pinning scenario: " + err.message);
+        }
+    };
+
+    const handleToggleMaintenance = async () => {
+        const action = !isMaintenanceMode ? 'ACTIVATE' : 'DEACTIVATE';
+        if (!confirm(`Are you sure you want to ${action} Global Maintenance Mode? Non-admin users will be blocked.`)) return;
+        
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/settings/maintenance'), {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ isActive: !isMaintenanceMode })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setIsMaintenanceMode(data.isActive);
+                alert(`Maintenance mode ${data.isActive ? 'ENABLED' : 'DISABLED'}`);
+                fetchLogs();
+            }
+        } catch (err) {
+            alert("Error toggling maintenance: " + err.message);
         }
     };
 
@@ -807,7 +850,23 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="ops-card">
-                    <h3><Radio size={18} /> Emergency Broadcast</h3>
+                    <h3><Radio size={18} /> Tactical Controls</h3>
+                    <div className="control-groups">
+                        <div className="control-item">
+                            <div className="control-text">
+                                <strong>Maintenance Mode</strong>
+                                <p>Redirect all non-admin traffic to the lockdown page.</p>
+                            </div>
+                            <button 
+                                className={`toggle-btn ${isMaintenanceMode ? 'active' : ''}`}
+                                onClick={handleToggleMaintenance}
+                            >
+                                {isMaintenanceMode ? 'SYSTEM LOCKED' : 'SYSTEM LIVE'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <h3 style={{ marginTop: '2rem' }}><Radio size={18} /> Emergency Broadcast</h3>
                     <form onSubmit={handleBroadcast}>
                         <textarea
                             placeholder="Immediate transmission to all agents..."

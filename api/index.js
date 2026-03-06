@@ -18,6 +18,9 @@ import usersRoutes from '../server/routes/users.js';
 import adminRoutes from '../server/routes/admin.js';
 import pvpRoutes from '../server/routes/pvp.js';
 import eventsRoutes from '../server/routes/events.js';
+import { maintenanceMiddleware } from '../server/middleware/maintenance.js';
+import SystemSetting from '../server/models/SystemSetting.js';
+import eventsRoutes from '../server/routes/events.js';
 
 dotenv.config();
 
@@ -86,6 +89,8 @@ app.use(async (req, res, next) => {
 // Socket.io Logic
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
+    
+    // Check maintenance for sockets if needed, but primarily we'll handle at the route level
 
     socket.on('join_warroom', (roomId) => {
         socket.join(roomId);
@@ -167,6 +172,31 @@ app.use('/api/ugc-scenarios', ugcScenariosRoutes);
 app.use('/api/warrooms', warroomsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/admin', adminRoutes);
+
+// Maintenance Status (Public)
+app.get('/api/maintenance/status', async (req, res) => {
+    try {
+        const setting = await SystemSetting.findOne({ key: 'maintenance_mode' });
+        res.json({ maintenance: setting ? setting.value : false });
+    } catch (err) {
+        res.json({ maintenance: false });
+    }
+});
+
+// Apply Maintenance Middleware to specific User/Public routes
+app.use('/api/profile', authenticateToken, maintenanceMiddleware);
+app.use('/api/leaderboard', maintenanceMiddleware);
+app.use('/api/ai', authenticateToken, maintenanceMiddleware);
+app.use('/api/teams', authenticateToken, maintenanceMiddleware);
+app.use('/api/challenges', maintenanceMiddleware);
+app.use('/api/threats', maintenanceMiddleware);
+app.use('/api/friends', authenticateToken, maintenanceMiddleware);
+app.use('/api/ugc-scenarios', maintenanceMiddleware);
+app.use('/api/warrooms', authenticateToken, maintenanceMiddleware);
+app.use('/api/users', maintenanceMiddleware);
+app.use('/api/pvp', authenticateToken, maintenanceMiddleware);
+app.use('/api/events', maintenanceMiddleware);
+
 app.use('/api/pvp', pvpRoutes);
 app.use('/api/events', eventsRoutes);
 
