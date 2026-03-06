@@ -1,5 +1,6 @@
 import { CheckCircle, XCircle, ShieldAlert } from 'lucide-react';
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { speakFeedback } from '../utils/voiceGuidance';
 import { useGame } from '../context/GameContext';
 import './FeedbackModal.css';
@@ -13,9 +14,16 @@ export default function FeedbackModal({ isCorrect, feedback, defenseTip, xpEarne
         } catch (e) {
             console.error("Feedback voice error:", e);
         }
+
+        // Prevent scroll when modal is open
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
     }, [feedback, settings]);
 
-    return (
+    return createPortal(
         <div className="feedback-perfect-overlay" onClick={onContinue}>
             <div className={`feedback-perfect-modal ${isCorrect ? 'correct' : 'incorrect'}`} onClick={e => e.stopPropagation()}>
                 <div className="feedback-perfect-header">
@@ -43,6 +51,7 @@ export default function FeedbackModal({ isCorrect, feedback, defenseTip, xpEarne
                     Continue Mission
                 </button>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

@@ -426,37 +426,37 @@ export default function ScenarioPlay() {
 
     return (
         <div className="perfect-scenario-container">
-            <div className="scenario-play-header">
+            <header className="scenario-play-header">
                 <div className="scenario-top-line">
                     <button className="back-link" onClick={() => navigate('/scenarios')}>
-                        <ArrowLeft size={16} /> Exit Scenario
+                        <ArrowLeft size={14} /> EXIT SIMULATION
                     </button>
-                    <div className="scenario-play-meta">
-                        <span className={`scenario-card-badge ${scenario.category.toLowerCase()}`}>
-                            {scenario.category}
-                        </span>
-                    </div>
+                    <span className={`scenario-card-badge ${scenario.category.toLowerCase()}`}>
+                        {scenario.category}
+                    </span>
                 </div>
+
                 <div className="scenario-progress-container">
                     <div className="progress-bar">
                         <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
                     </div>
-                    <span className="progress-value">{Math.round(progress)}% Complete</span>
+                    <span className="progress-value">{Math.round(progress)}% SYNCHRONIZED</span>
                 </div>
-                <h1>{scenario.title}</h1>
-            </div>
 
-            <div className="scenario-main-layout">
-                <div className="scenario-character-column">
+                <h1>{scenario.title}</h1>
+            </header>
+
+            <main className="scenario-main-layout">
+                <aside className="scenario-character-column">
                     <Character character={character} reaction={charReaction} />
-                </div>
+                </aside>
 
                 <div className="scenario-content-column">
-                    <div className="scenario-visual-box step-transition-enter" key={currentStepIndex}>
+                    <section className="scenario-visual-box" key={currentStepIndex}>
                         {renderVisual()}
-                    </div>
+                    </section>
 
-                    <div className="scenario-options-box">
+                    <section className="scenario-options-box">
                         {step.title && <p className="step-subtitle">{step.title}</p>}
                         <h3>{step.prompt || 'What do you do?'} {timedOut && <span className="text-danger">(Timed Out)</span>}</h3>
 
@@ -468,15 +468,15 @@ export default function ScenarioPlay() {
                                     onClick={() => handleOptionSelect(option, i)}
                                     disabled={selectedOption !== null}
                                 >
-                                    <span className="option-number">{i + 1}</span>
-                                    <span className="option-text">{option.text}</span>
-                                    <ChevronRight size={18} className="option-arrow" />
+                                    <div className="option-number">{i + 1}</div>
+                                    <div className="option-text">{option.text}</div>
+                                    <ChevronRight size={20} className="option-arrow" />
                                 </button>
                             ))}
                         </div>
-                    </div>
+                    </section>
                 </div>
-            </div>
+            </main>
 
             {showFeedback && selectedOption !== null && (
                 <FeedbackModal
