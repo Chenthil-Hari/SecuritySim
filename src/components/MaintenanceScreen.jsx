@@ -1,5 +1,5 @@
 import { Shield, Lock, ExternalLink } from 'lucide-react';
-import maintenanceImg from '../assets/Gemini_Generated_Image_cejcaacejcaacejc.png';
+import maintenanceImg from '../assets/Gemini_Generated_Image_cejcaacejcaacejc_small.png';
 import './MaintenanceScreen.css';
 
 export default function MaintenanceScreen() {
