@@ -27,14 +27,20 @@ const Leaderboard = () => {
                 }
 
                 const response = await fetch(buildApiUrl(url));
-                const data = await response.json();
+                const contentType = response.headers.get("content-type");
+                
+                let data;
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    throw new Error(`Server returned non-JSON response (${response.status}): ${text.substring(0, 50)}...`);
+                }
 
                 if (response.ok) {
                     setLeaderboard(data);
                 } else {
-                    // Try to show specific server error message if available
                     setError(data.message || data.error || 'Failed to load leaderboard');
-                    console.error('Leaderboard error data:', data);
                 }
             } catch (err) {
                 console.error('Error fetching leaderboard:', err);

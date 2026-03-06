@@ -108,7 +108,35 @@ app.use('/api/ugc-scenarios', ugcScenariosRoutes);
 app.use('/api/warrooms', warroomsRoutes);
 
 app.get('/api', (req, res) => {
-    res.json({ message: 'SecuritySim API is running' });
+    res.json({ 
+        message: 'SecuritySim API is running',
+        env: process.env.NODE_ENV,
+        dbState: mongoose.connection.readyState 
+    });
+});
+
+app.get('/api/health', async (req, res) => {
+    const health = {
+        status: 'ok',
+        uptime: process.uptime(),
+        timestamp: Date.now(),
+        mongodb: {
+            connected: mongoose.connection.readyState === 1,
+            state: mongoose.connection.readyState,
+            hasUri: !!process.env.MONGODB_URI
+        }
+    };
+    
+    try {
+        if (mongoose.connection.readyState !== 1) {
+            await connectToDatabase();
+        }
+        res.json(health);
+    } catch (err) {
+        health.status = 'error';
+        health.error = err.message;
+        res.status(500).json(health);
+    }
 });
 
 if (process.env.NODE_ENV !== 'production') {
