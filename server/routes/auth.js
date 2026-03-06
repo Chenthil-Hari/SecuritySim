@@ -48,7 +48,8 @@ router.post('/signup', async (req, res) => {
                 username: newUser.username,
                 email: newUser.email,
                 country: newUser.country,
-                role: newUser.role || 'user'
+                role: newUser.role || 'user',
+                isFrozen: newUser.isFrozen || false
             }
         });
     } catch (error) {
@@ -105,7 +106,8 @@ router.post('/login', async (req, res) => {
                 username: user.username,
                 email: user.email,
                 country: user.country,
-                role: user.role || 'user'
+                role: user.role || 'user',
+                isFrozen: user.isFrozen || false
             }
         });
     } catch (error) {

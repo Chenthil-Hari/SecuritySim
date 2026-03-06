@@ -1,0 +1,161 @@
+.terminal-locked-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #050505;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+    overflow: hidden;
+}
+
+.locked-container {
+    background: rgba(13, 13, 13, 0.95);
+    border: 1px solid #ff3e3e;
+    padding: 3rem;
+    max-width: 600px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(255, 62, 62, 0.15), inset 0 0 20px rgba(255, 62, 62, 0.05);
+    position: relative;
+    border-radius: 4px;
+}
+
+.locked-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #ff3e3e;
+    box-shadow: 0 0 10px #ff3e3e;
+}
+
+.lock-icon {
+    color: #ff3e3e;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 0 10px rgba(255, 62, 62, 0.5));
+}
+
+.glitch-text {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.1em;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.security-notice {
+    background: rgba(255, 62, 62, 0.05);
+    border: 1px solid rgba(255, 62, 62, 0.2);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.notice-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ff3e3e;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.notice-body {
+    color: #d1d1d1;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.status-code {
+    font-size: 0.75rem;
+    color: #666;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 0.5rem;
+}
+
+.locked-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.support-btn,
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.support-btn {
+    background: #ff3e3e;
+    color: white;
+    border: none;
+}
+
+.support-btn:hover {
+    background: #ff5555;
+    box-shadow: 0 0 15px rgba(255, 62, 62, 0.4);
+}
+
+.logout-btn {
+    background: transparent;
+    color: #666;
+    border: 1px solid #333;
+}
+
+.logout-btn:hover {
+    color: #fff;
+    border-color: #666;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.terminal-footer {
+    border-top: 1px solid #222;
+    padding-top: 1.5rem;
+}
+
+.footer-line {
+    font-size: 0.75rem;
+    color: #444;
+    letter-spacing: 0.2em;
+    margin-bottom: 0.25rem;
+}
+
+.footer-line.secondary {
+    font-size: 0.65rem;
+    color: #333;
+}
+
+.locked-bg-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 4px, 3px 100%;
+    pointer-events: none;
+    z-index: 10000;
+    opacity: 0.3;
+}

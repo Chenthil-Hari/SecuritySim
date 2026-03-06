@@ -26,6 +26,7 @@ import AdminLogin from './pages/AdminLogin';
 import { io } from 'socket.io-client';
 import GlobalAlert from './components/GlobalAlert';
 import AdminDashboard from './pages/AdminDashboard';
+import TerminalLocked from './pages/TerminalLocked';
 import './App.css';
 
 import { useAuth } from './context/AuthContext';
@@ -36,6 +37,11 @@ function AppContent() {
   const gameState = useGame();
   const isLoggedIn = !!user;
   const location = useLocation();
+
+  // Redirect frozen users IMMEDIATELY
+  if (user && user.isFrozen) {
+    return <TerminalLocked />;
+  }
 
   // Hide UI elements on admin routes
   const isAdminRoute = location.pathname.startsWith('/admin');

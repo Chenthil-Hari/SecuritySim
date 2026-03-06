@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'Administrative login failed');
-            
+
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
             setUser(data.user);
@@ -83,6 +83,8 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
+        // Force refresh to clear any cached states
+        window.location.href = '/login';
     };
 
     const updateUser = (newUserData) => {
