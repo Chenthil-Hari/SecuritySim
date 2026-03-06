@@ -1,73 +1,228 @@
-.scenario-play {
-    max-width: 800px;
+/* ====================================================
+   PERFECT SCENARIO CONTAINER
+   ==================================================== */
+
+.perfect-scenario-container {
+    max-width: 1300px;
     margin: 0 auto;
-    padding: var(--space-2xl) var(--space-lg);
+    padding: var(--space-2xl);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+    position: relative;
+    animation: fadeIn 0.8s ease;
 }
 
-
+/* Header Section */
 .scenario-play-header {
-    margin-bottom: var(--space-xl);
-    animation: fadeInDown 0.5s ease;
+    margin-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--space-xl);
 }
 
-.scenario-play-header .back-link {
-    display: inline-flex;
+.scenario-top-line {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: var(--space-xs);
+    margin-bottom: var(--space-lg);
+}
+
+.back-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     color: var(--text-muted);
-    font-size: 0.85rem;
-    margin-bottom: var(--space-md);
-    cursor: pointer;
-    background: none;
-    border: none;
-    padding: 0;
-    transition: color var(--transition-fast);
+    font-weight: 600;
+    transition: all var(--transition-fast);
 }
 
-.scenario-play-header .back-link:hover {
+.back-link:hover {
     color: var(--primary);
-}
-
-.scenario-play-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-    margin-bottom: var(--space-sm);
-}
-
-.scenario-play-header h1 {
-    font-size: 1.7rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-}
-
-.scenario-play-progress {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    margin-top: var(--space-md);
+    transform: translateX(-4px);
 }
 
 .progress-bar {
-    flex: 1;
-    height: 6px;
-    background: var(--border-color);
+    height: 8px;
+    background: var(--bg-tertiary);
     border-radius: var(--radius-full);
+    margin-bottom: var(--space-sm);
     overflow: hidden;
 }
 
 .progress-bar-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--primary), var(--secondary));
-    border-radius: var(--radius-full);
-    transition: width 0.5s ease;
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 15px var(--primary-glow);
 }
 
-.progress-text {
+.progress-value {
     font-size: 0.75rem;
+    font-weight: 700;
     color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.scenario-play-header h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin-top: var(--space-md);
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, white, var(--text-secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Main Layout: Grid system */
+.scenario-main-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: var(--space-2xl);
+    align-items: start;
+}
+
+.scenario-character-column {
+    position: sticky;
+    top: var(--space-2xl);
+}
+
+.scenario-content-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+    min-width: 0;
+    /* Prevent grid blowout */
+}
+
+/* Visual Box */
+.scenario-visual-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    position: relative;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Options Box */
+.scenario-options-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.scenario-options-box h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: var(--space-xl);
+    line-height: 1.4;
+}
+
+.step-subtitle {
+    color: var(--primary);
+    font-weight: 800;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: var(--space-xs);
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+}
+
+/* Redefined Option Button */
+.option-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-lg) var(--space-xl);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    text-align: left;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.option-btn:hover:not(:disabled) {
+    background: rgba(0, 240, 255, 0.05);
+    border-color: rgba(0, 240, 255, 0.3);
+    transform: translateX(8px);
+}
+
+.option-btn:disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+
+.option-number {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    font-weight: 800;
+    color: white;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.option-text {
+    flex: 1;
+    font-size: 1.05rem;
     font-weight: 500;
-    white-space: nowrap;
+    color: var(--text-primary);
+}
+
+.option-arrow {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+    color: var(--primary);
+}
+
+.option-btn:hover .option-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.option-btn.selected-correct {
+    border-color: var(--success) !important;
+    background: rgba(16, 185, 129, 0.1) !important;
+}
+
+.option-btn.selected-incorrect {
+    border-color: var(--danger) !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* ====================================================
+   LEGACY VISUALS ADAPTATION
+   ==================================================== */
+/* Ensure visuals stay contained in the new box */
+.email-visual,
+.browser-visual,
+.phone-visual,
+.chat-visual,
+.popup-visual,
+.sf-visual,
+.fe-visual {
+    flex: 1;
+    width: 100%;
 }
 
 /* Timer Bar */
@@ -394,58 +549,6 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-}
-
-.step-subtitle {
-    font-size: 0.75rem;
-    color: var(--primary);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-    opacity: 0.8;
-}
-
-.option-btn {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: var(--space-md) var(--space-lg);
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    line-height: 1.5;
-    transition: all var(--transition-fast);
-    cursor: pointer;
-}
-
-.option-btn:hover {
-    border-color: var(--primary);
-    background: var(--primary-bg);
-    transform: translateX(4px);
-}
-
-.option-btn:active {
-    transform: translateX(2px);
-}
-
-.option-btn.selected-correct {
-    border-color: var(--success);
-    background: var(--success-bg);
-    color: var(--success);
-}
-
-.option-btn.selected-incorrect {
-    border-color: var(--danger);
-    background: var(--danger-bg);
-    color: var(--danger);
-}
-
-.option-btn:disabled {
-    cursor: default;
-    opacity: 0.6;
 }
 
 /* Summary Screen */
@@ -1665,7 +1768,52 @@
     animation: popupFlashAnim 0.7s ease-in-out 3;
 }
 
+/* ====================================================
+   RESPONSIVE OVERRIDES
+   ==================================================== */
+
+@media (max-width: 1100px) {
+    .scenario-main-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .scenario-character-column {
+        position: static;
+        width: 100%;
+    }
+}
+
 @media (max-width: 768px) {
+    .perfect-scenario-container {
+        padding: var(--space-lg);
+    }
+
+    .scenario-play-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .scenario-visual-box {
+        padding: var(--space-md);
+        min-height: 300px;
+    }
+
+    .scenario-options-box {
+        padding: var(--space-lg);
+    }
+
+    .scenario-options-box h3 {
+        font-size: 1.25rem;
+    }
+
+    .option-btn {
+        padding: var(--space-md) var(--space-lg);
+        gap: var(--space-md);
+    }
+
+    .option-text {
+        font-size: 0.95rem;
+    }
+
     .scenario-play {
         padding: var(--space-xl) var(--space-md);
     }

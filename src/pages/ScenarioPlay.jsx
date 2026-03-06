@@ -425,24 +425,67 @@ export default function ScenarioPlay() {
     }
 
     return (
-        <div className="scenario-play">
+        <div className="perfect-scenario-container">
             <div className="scenario-play-header">
-                <button className="back-link" onClick={() => navigate('/scenarios')}><ArrowLeft size={16} /> Back</button>
-                <div className="scenario-play-meta"><span className={`scenario-card-badge ${scenario.category.toLowerCase()}`}>{scenario.category}</span></div>
+                <div className="scenario-top-line">
+                    <button className="back-link" onClick={() => navigate('/scenarios')}>
+                        <ArrowLeft size={16} /> Exit Scenario
+                    </button>
+                    <div className="scenario-play-meta">
+                        <span className={`scenario-card-badge ${scenario.category.toLowerCase()}`}>
+                            {scenario.category}
+                        </span>
+                    </div>
+                </div>
+                <div className="scenario-progress-container">
+                    <div className="progress-bar">
+                        <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
+                    </div>
+                    <span className="progress-value">{Math.round(progress)}% Complete</span>
+                </div>
                 <h1>{scenario.title}</h1>
-                <div className="scenario-play-progress"><div className="progress-bar"><div className="progress-bar-fill" style={{ width: `${progress}%` }} /></div></div>
             </div>
-            <Character character={character} reaction={charReaction} />
-            <div className="scenario-visual step-transition-enter" key={currentStepIndex}>{renderVisual()}</div>
-            <div className="scenario-options">
-                {step.title && <p className="step-subtitle">{step.title}</p>}
-                <h3>{step.prompt || 'What do you do?'} {timedOut && <span className="text-danger">(Timed Out)</span>}</h3>
-                {step.options.map((option, i) => (
-                    <button key={i} className={`option-btn ${selectedOption === i ? (option.isCorrect ? 'selected-correct' : 'selected-incorrect') : ''}`} onClick={() => handleOptionSelect(option, i)} disabled={selectedOption !== null}>{option.text}</button>
-                ))}
+
+            <div className="scenario-main-layout">
+                <div className="scenario-character-column">
+                    <Character character={character} reaction={charReaction} />
+                </div>
+
+                <div className="scenario-content-column">
+                    <div className="scenario-visual-box step-transition-enter" key={currentStepIndex}>
+                        {renderVisual()}
+                    </div>
+
+                    <div className="scenario-options-box">
+                        {step.title && <p className="step-subtitle">{step.title}</p>}
+                        <h3>{step.prompt || 'What do you do?'} {timedOut && <span className="text-danger">(Timed Out)</span>}</h3>
+
+                        <div className="options-grid">
+                            {step.options.map((option, i) => (
+                                <button
+                                    key={i}
+                                    className={`option-btn ${selectedOption === i ? (option.isCorrect ? 'selected-correct' : 'selected-incorrect') : ''}`}
+                                    onClick={() => handleOptionSelect(option, i)}
+                                    disabled={selectedOption !== null}
+                                >
+                                    <span className="option-number">{i + 1}</span>
+                                    <span className="option-text">{option.text}</span>
+                                    <ChevronRight size={18} className="option-arrow" />
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </div>
+
             {showFeedback && selectedOption !== null && (
-                <FeedbackModal isCorrect={step.options[selectedOption].isCorrect} feedback={step.options[selectedOption].feedback} defenseTip={step.options[selectedOption].defenseTip} onContinue={handleContinue} />
+                <FeedbackModal
+                    isCorrect={step.options[selectedOption].isCorrect}
+                    feedback={step.options[selectedOption].feedback}
+                    defenseTip={step.options[selectedOption].defenseTip}
+                    xpEarned={step.results?.xp || 0}
+                    onContinue={handleContinue}
+                />
             )}
         </div>
     );

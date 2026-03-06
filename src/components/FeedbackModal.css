@@ -1,35 +1,40 @@
-.feedback-master-overlay {
-    position: fixed !important;
+.feedback-perfect-overlay {
+    position: absolute !important;
     top: 0 !important;
     left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    background: rgba(0, 0, 0, 0.9) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    z-index: 2147483647 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(4, 4, 15, 0.95) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    z-index: 99999 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    padding: 20px !important;
+    padding: var(--space-xl) !important;
 }
 
-.feedback-master-modal {
-    background: #0f1120 !important;
-    border: 2px solid rgba(0, 240, 255, 0.4) !important;
-    border-radius: 24px !important;
+.feedback-perfect-modal {
+    background: #0d0d21 !important;
+    border: 1px solid rgba(0, 240, 255, 0.3) !important;
+    border-radius: 28px !important;
     width: 100% !important;
-    max-width: 500px !important;
-    padding: 40px !important;
-    box-shadow: 0 0 50px rgba(0, 240, 255, 0.25) !important;
-    animation: masterPopIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+    max-width: 540px !important;
+    padding: var(--space-2xl) !important;
+    box-shadow:
+        0 0 60px rgba(0, 0, 0, 0.8),
+        0 0 30px rgba(0, 240, 255, 0.2) !important;
+    animation: perfectEntrance 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+    position: relative !important;
+    overflow: hidden !important;
 }
 
-@keyframes masterPopIn {
+@keyframes perfectEntrance {
     from {
         opacity: 0;
-        transform: scale(0.9) translateY(20px);
+        transform: scale(0.9) translateY(30px);
     }
 
     to {
@@ -38,88 +43,112 @@
     }
 }
 
-.feedback-master-header {
+.feedback-perfect-header {
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: var(--space-xl);
 }
 
-.feedback-master-icon {
+.feedback-perfect-icon {
     display: inline-flex;
-    padding: 16px;
+    padding: var(--space-lg);
     border-radius: 50%;
-    margin-bottom: 16px;
+    margin-bottom: var(--space-md);
 }
 
-.feedback-master-icon.correct {
+.feedback-perfect-icon.correct {
     background: rgba(16, 185, 129, 0.1);
-    color: #10b981;
+    color: var(--success);
+    box-shadow: 0 0 20px var(--success-glow);
 }
 
-.feedback-master-icon.incorrect {
+.feedback-perfect-icon.incorrect {
     background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+    color: var(--danger);
+    box-shadow: 0 0 20px var(--danger-glow);
 }
 
-.feedback-master-title {
-    font-size: 1.8rem;
-    font-weight: 800;
+.feedback-perfect-result {
+    font-size: 2.2rem;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: var(--space-md);
+    letter-spacing: -1px;
 }
 
-.feedback-master-modal.correct .feedback-master-title {
-    color: #10b981;
+.feedback-perfect-modal.correct .feedback-perfect-result {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.feedback-master-modal.incorrect .feedback-master-title {
-    color: #ef4444;
+.feedback-perfect-modal.incorrect .feedback-perfect-result {
+    background: linear-gradient(135deg, #ef4444, #fb7185);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.feedback-main-text {
-    font-size: 1rem;
-    color: #d1d5db;
+.feedback-perfect-text {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
     line-height: 1.6;
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: var(--space-2xl);
 }
 
-.feedback-master-tip {
+.feedback-perfect-tip {
     background: rgba(0, 240, 255, 0.05);
     border: 1px solid rgba(0, 240, 255, 0.2);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 24px;
+    border-radius: 16px;
+    padding: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+    border-left: 4px solid var(--primary);
 }
 
-.tip-header {
+.tip-perfect-header {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: 0.75rem;
+    font-weight: 800;
     text-transform: uppercase;
-    color: #00f0ff;
-    margin-bottom: 8px;
+    color: var(--primary);
+    margin-bottom: var(--space-sm);
+    letter-spacing: 1px;
 }
 
-.feedback-master-tip p {
-    font-size: 0.9rem;
-    color: #9ca3af;
+.tip-perfect-text {
+    font-size: 0.95rem;
+    color: #e2e8f0;
     line-height: 1.5;
 }
 
-.feedback-master-button {
+.feedback-perfect-btn {
     width: 100%;
-    padding: 16px;
-    border-radius: 12px;
-    background: #00f0ff;
-    color: #000;
-    font-weight: 700;
-    font-size: 1rem;
+    padding: 18px;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 1.1rem;
     border: none;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.feedback-master-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 240, 255, 0.4);
+.feedback-perfect-btn.correct {
+    background: var(--success);
+    color: white;
+}
+
+.feedback-perfect-btn.incorrect {
+    background: var(--primary);
+    color: var(--bg-primary);
+}
+
+.feedback-perfect-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    filter: brightness(1.1);
+    box-shadow: 0 8px 25px rgba(0, 240, 255, 0.4);
 }
