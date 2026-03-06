@@ -66,7 +66,7 @@ function AppContent() {
   const isScenarioRoute = location.pathname.startsWith('/scenarios');
   
   // Enforce maintenance screen for non-admins
-  const isExcludedFromMaintenance = isAdminRoute || (user && user.role === 'admin');
+  const isExcludedFromMaintenance = isAdminRoute;
   if (isMaintenance && !isExcludedFromMaintenance) {
     return <MaintenanceScreen />;
   }
