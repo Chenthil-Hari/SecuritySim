@@ -16,6 +16,7 @@ import friendsRoutes from '../server/routes/friends.js';
 import ugcScenariosRoutes from '../server/routes/ugcScenarios.js';
 import warroomsRoutes from '../server/routes/warrooms.js';
 import usersRoutes from '../server/routes/users.js';
+import adminRoutes from '../server/routes/admin.js';
 
 dotenv.config();
 
@@ -27,6 +28,9 @@ const io = new Server(httpServer, {
         methods: ["GET", "POST"]
     }
 });
+
+// Make io accessible to routes
+app.set('io', io);
 
 app.use(cors());
 app.use(express.json());
@@ -109,6 +113,7 @@ app.use('/api/friends', friendsRoutes);
 app.use('/api/ugc-scenarios', ugcScenariosRoutes);
 app.use('/api/warrooms', warroomsRoutes);
 app.use('/api/users', usersRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/api', (req, res) => {
     res.json({ 

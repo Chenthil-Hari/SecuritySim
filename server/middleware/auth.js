@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-
 import User from '../models/User.js';
+import SystemSetting from '../models/SystemSetting.js';
 
 export const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -31,5 +31,37 @@ export const isAdmin = (req, res, next) => {
     next();
   } else {
     res.status(403).json({ message: 'Access denied. Admin privileges required.' });
+  }
+};
+
+export const maintenanceCheck = async (req, res, next) => {
+  try {
+    const maintenance = await SystemSetting.findOne({ key: 'maintenance_mode' });
+    
+    if (maintenance && maintenance.value === true) {
+      // Check if user is an admin
+      const authHeader = req.headers['authorization'];
+      const token = authHeader && authHeader.split(' ')[1];
+      
+      if (token) {
+        try {
+          const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+          if (decoded.role === 'admin') {
+            return next(); // Admins bypass maintenance
+          }
+        } catch (err) {
+          // Token invalid
+        }
+      }
+      
+      return res.status(503).json({ 
+        message: 'System Under Maintenance',
+        details: 'Headquarters is currently undergoing scheduled updates. Please stand by.',
+        isMaintenance: true 
+      });
+    }
+    next();
+  } catch (err) {
+    next();
   }
 };
