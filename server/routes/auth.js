@@ -120,10 +120,10 @@ router.post('/admin-login', async (req, res) => {
         let { email, password } = req.body;
         email = email?.trim().toLowerCase();
         password = password?.trim();
-        
+
         // Single admin credentials (ensure lowercase comparison)
         const ADMIN_EMAIL = 'admin@hari07.tech';
-        const ADMIN_PASS = 'CyberSecurity2026!'; 
+        const ADMIN_PASS = 'CyberSecurity2026!';
 
         if (email !== ADMIN_EMAIL || password !== ADMIN_PASS) {
             console.log(`[DEBUG] Login attempt failed. Target: ${ADMIN_EMAIL}. Received: ${email}`);
@@ -133,12 +133,12 @@ router.post('/admin-login', async (req, res) => {
 
         // We create a special JWT for the super admin
         // Use a valid BSON hex string (24 chars) to satisfy Mongoose ObjectId validation
-        const SUPER_ADMIN_ID = '000000000000000000000001'; 
+        const SUPER_ADMIN_ID = '000000000000000000000001';
 
         const token = jwt.sign(
             { userId: SUPER_ADMIN_ID, username: 'Headquarters', role: 'admin' },
             process.env.JWT_SECRET || 'fallback_secret',
-            { expiresIn: '2h' } // Short duration for high-security sessions
+            { expiresIn: '24h' } // Increased duration for better UX
         );
 
         res.json({
@@ -160,10 +160,10 @@ router.post('/make-admin', async (req, res) => {
     try {
         const { email, secret } = req.body;
         if (secret !== 'admin_secret_123') return res.status(403).json({ message: 'Invalid secret' });
-        
+
         const user = await User.findOneAndUpdate({ email }, { role: 'admin' }, { new: true });
         if (!user) return res.status(404).json({ message: 'User not found' });
-        
+
         res.json({ message: 'User promoted to admin successfully', user: { username: user.username, role: user.role } });
     } catch (error) {
         res.status(500).json({ message: error.message });

@@ -58,6 +58,10 @@ export default function AdminDashboard() {
                 setAnalytics(await res.json());
                 setError(null);
             } else {
+                if (res.status === 401) {
+                    setError("Session expired. Please log out and back in.");
+                    return;
+                }
                 const text = await res.text().catch(() => '');
                 let msg = `Intelligence Error (${res.status})`;
                 try {
@@ -87,6 +91,10 @@ export default function AdminDashboard() {
                 setLogs(await res.json());
                 setError(null);
             } else {
+                if (res.status === 401) {
+                    setError("Session expired. Please log out and back in.");
+                    return;
+                }
                 const text = await res.text().catch(() => '');
                 let msg = `Ops Log Error (${res.status})`;
                 try {
@@ -142,6 +150,10 @@ export default function AdminDashboard() {
                 setStats(prev => ({ ...prev, pending: data.length }));
                 setError(null);
             } else {
+                if (res.status === 401) {
+                    setError("Session expired. Please log out and back in.");
+                    return;
+                }
                 const text = await res.text().catch(() => '');
                 let msg = `Queue Error (${res.status})`;
                 try {
@@ -186,6 +198,10 @@ export default function AdminDashboard() {
                 setAssets(await res.json());
                 setError(null);
             } else {
+                if (res.status === 401) {
+                    setError("Session expired. Please log out and back in.");
+                    return;
+                }
                 const text = await res.text().catch(() => '');
                 let msg = `Evidence Error (${res.status})`;
                 try {
@@ -217,6 +233,10 @@ export default function AdminDashboard() {
                 setStats(prev => ({ ...prev, totalUsers: data.length }));
                 setError(null);
             } else {
+                if (res.status === 401) {
+                    setError("Session expired. Please log out and back in.");
+                    return;
+                }
                 const text = await res.text().catch(() => '');
                 let msg = `API Connection Issue (${res.status})`;
                 try {
