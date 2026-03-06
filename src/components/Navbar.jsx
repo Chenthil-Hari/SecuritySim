@@ -114,6 +114,13 @@ export default function Navbar() {
                                 <User size={16} /> Profile
                             </NavLink>
                         </li>
+                        {user.role === 'admin' && (
+                            <li>
+                                <NavLink to="/admin/dashboard" className="hq-link-special" onClick={handleNavClick}>
+                                    <Crown size={16} /> HQ
+                                </NavLink>
+                            </li>
+                        )}
                     </>
                 )}
                 <li>
@@ -153,11 +160,6 @@ export default function Navbar() {
             <div className="navbar-right">
                 {user ? (
                     <>
-                        {user.role === 'admin' && (
-                            <Link to="/admin/dashboard" className="hq-navbar-btn" onClick={playNavSound}>
-                                <Crown size={16} /> Headquarters
-                            </Link>
-                        )}
                         <div className="user-greeting">
                             <span title={getRank(level).title}>{getRank(level).icon}</span>
                             <span>{user.username}</span>
