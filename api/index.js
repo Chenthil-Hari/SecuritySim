@@ -20,7 +20,7 @@ import pvpRoutes from '../server/routes/pvp.js';
 import eventsRoutes from '../server/routes/events.js';
 import { maintenanceMiddleware } from '../server/middleware/maintenance.js';
 import SystemSetting from '../server/models/SystemSetting.js';
-import eventsRoutes from '../server/routes/events.js';
+import { authenticateToken } from '../server/middleware/auth.js';
 
 dotenv.config();
 
