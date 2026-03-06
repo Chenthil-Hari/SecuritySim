@@ -29,14 +29,10 @@ export default function Home() {
                     </p>
 
                     <div className="hero-actions">
-                        <Link to="/scenarios" className="btn-primary">
-                            <Crosshair size={18} />
-                            Start Training
-                            <ArrowRight size={16} />
-                        </Link>
-                        <Link to="/dashboard" className="btn-outline">
+                        <Link to="/dashboard" className="btn-primary">
                             <LayoutDashboard size={18} />
                             View Dashboard
+                            <ArrowRight size={16} />
                         </Link>
                     </div>
                 </div>
@@ -53,13 +49,6 @@ export default function Home() {
                 </div>
 
                 <div className="features-grid stagger">
-                    <div className="feature-card">
-                        <div className="feature-icon cyan">
-                            <Crosshair size={24} />
-                        </div>
-                        <h3>Realistic Scenarios</h3>
-                        <p>Face true-to-life phishing emails, AI voice clone scams, fake antivirus popups, and social engineering attacks.</p>
-                    </div>
 
                     <div className="feature-card">
                         <div className="feature-icon purple">
@@ -87,48 +76,15 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* How It Works */}
-            <section className="how-it-works">
-                <div className="section-header">
-                    <span className="section-tag">How It Works</span>
-                    <h2 className="section-title">Three Steps to Cyber Safety</h2>
-                </div>
-
-                <div className="steps-container stagger">
-                    <div className="step-item">
-                        <div className="step-number">1</div>
-                        <div className="step-content">
-                            <h3>Choose a Scenario</h3>
-                            <p>Browse realistic cyber threat scenarios across four categories: Phishing, Scam Calls, Malware, and Social Engineering.</p>
-                        </div>
-                    </div>
-
-                    <div className="step-item">
-                        <div className="step-number">2</div>
-                        <div className="step-content">
-                            <h3>Make Your Decisions</h3>
-                            <p>React to each threat just like you would in real life. Choose how to respond and get instant feedback on your choices.</p>
-                        </div>
-                    </div>
-
-                    <div className="step-item">
-                        <div className="step-number">3</div>
-                        <div className="step-content">
-                            <h3>Level Up Your Awareness</h3>
-                            <p>Learn practical defense strategies, earn XP and badges, and watch your Cyber Safety Score climb as you master each threat type.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             {/* CTA Section */}
             <section className="cta-section">
                 <div className="cta-box">
                     <Zap size={40} style={{ color: 'var(--primary)', marginBottom: 16 }} />
                     <h2>Ready to Test Your Defenses?</h2>
-                    <p>Start your first scenario and discover how prepared you are against real-world cyber threats.</p>
-                    <Link to="/scenarios" className="btn-primary">
-                        Launch Simulation <ArrowRight size={16} />
+                    <p>Enter the dashboard and discover how prepared you are against real-world cyber threats.</p>
+                    <Link to="/dashboard" className="btn-primary">
+                        Enter Dashboard <ArrowRight size={16} />
                     </Link>
                 </div>
             </section>

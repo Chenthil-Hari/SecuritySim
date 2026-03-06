@@ -18,7 +18,6 @@ const defaultState = {
     weeklyCompleted: [],
     badges: [],
     unlockedTitles: [],
-    completedScenarios: [],
     difficulty: 1,
     settings: {
         highContrast: false,
@@ -73,7 +72,6 @@ function syncToDatabase(state) {
                 weeklyCompleted: state.weeklyCompleted,
                 badges: state.badges,
                 unlockedTitles: state.unlockedTitles,
-                completedScenarios: state.completedScenarios,
                 customization: state.customization
             })
         }).catch(err => console.warn('Background sync failed:', err));
@@ -86,19 +84,9 @@ function calculateLevel(xp) {
     return Math.floor(xp / 100) + 1;
 }
 
-function calculateScore(completedScenarios, badges) {
-    if (completedScenarios.length === 0) return 50 + (badges.length * 100);
-
-    // Base score for completing scenarios + accuracy bonus
-    const scenarioScore = completedScenarios.reduce((sum, s) => {
-        const accuracyMultiplier = s.accuracy / 100;
-        return sum + (100 * accuracyMultiplier); // Up to 100 pts per scenario
-    }, 0);
-
-    // Badge bonus (100 pts per badge)
-    const badgeScore = badges.length * 100;
-
-    return Math.round(50 + scenarioScore + badgeScore);
+function calculateScore(badges) {
+    // Base score (50) + Badge bonus (100 pts per badge)
+    return Math.round(50 + (badges.length * 100));
 }
 
 function calculateDifficulty(score, level) {
@@ -125,51 +113,11 @@ function gameReducer(state, action) {
     };
 
     switch (action.type) {
-        case 'COMPLETE_SCENARIO': {
-            const { scenarioId, category, accuracy, xpEarned } = action.payload;
 
-            const existingIndex = state.completedScenarios.findIndex(s => s.scenarioId === scenarioId);
-            let newCompleted = [...state.completedScenarios];
-            let activeXpEarned = xpEarned;
-
-            if (existingIndex !== -1) {
-                const existing = state.completedScenarios[existingIndex];
-                // Only update if current accuracy is better than previous best
-                if (accuracy > existing.accuracy) {
-                    newCompleted[existingIndex] = { ...existing, accuracy, timestamp: Date.now() };
-                    // For re-plays, only award the "improvement" XP based on accuracy increase
-                    // This prevents farming but rewards betterment
-                    const accuracyDiff = accuracy - existing.accuracy;
-                    activeXpEarned = Math.round(accuracyDiff * 0.5);
-                } else {
-                    return state; // No improvement, no change
-                }
-            } else {
-                newCompleted.push({ scenarioId, category, accuracy, timestamp: Date.now() });
-            }
-
-            const newXp = state.xp + activeXpEarned;
-            const newLevel = calculateLevel(newXp);
-            const newSkillPoints = state.skillPoints + (newLevel > state.level ? newLevel - state.level : 0);
-            const newScore = calculateScore(newCompleted, state.badges);
-            const newDifficulty = calculateDifficulty(newScore, newLevel);
-
-            newState = {
-                ...state,
-                xp: newXp,
-                level: newLevel,
-                skillPoints: newSkillPoints,
-                completedScenarios: newCompleted,
-                score: newScore,
-                difficulty: newDifficulty
-            };
-            newState = checkNewTitles(newState);
-            break;
-        }
         case 'EARN_BADGE': {
             if (state.badges.includes(action.payload)) return state;
             const newBadges = [...state.badges, action.payload];
-            const newScore = calculateScore(state.completedScenarios, newBadges);
+            const newScore = calculateScore(newBadges);
             const newDifficulty = calculateDifficulty(newScore, state.level);
 
             newState = {
@@ -205,7 +153,6 @@ function gameReducer(state, action) {
                 unlockedTitles: action.payload.unlockedTitles || state.unlockedTitles || [],
                 seasonalMedals: action.payload.seasonalMedals || state.seasonalMedals || [],
                 customization: { ...state.customization, ...(action.payload.customization || {}) },
-                completedScenarios: action.payload.completedScenarios,
                 campaignState: action.payload.campaignState || state.campaignState
             };
             break;
@@ -290,7 +237,6 @@ export function GameProvider({ children }) {
                                     xp: data.xp ?? 0,
                                     level: data.level ?? 1,
                                     badges: data.badges ?? [],
-                                    completedScenarios: data.completedScenarios ?? [],
                                     unlockedTitles: data.unlockedTitles ?? [],
                                     seasonalMedals: data.seasonalMedals ?? [],
                                     customization: data.customization ?? {}

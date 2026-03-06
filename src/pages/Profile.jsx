@@ -271,7 +271,6 @@ const Profile = () => {
     const xp = profileData?.xp !== undefined ? profileData.xp : (isOwnProfile ? (gameState?.xp || 0) : 0);
     const level = profileData?.level !== undefined ? profileData.level : (isOwnProfile ? (gameState?.level || 1) : 1);
     const earnedBadges = profileData?.badges || (isOwnProfile ? (gameState?.badges || []) : []);
-    const completedScenarios = profileData?.completedScenarios || (isOwnProfile ? (gameState?.completedScenarios || []) : []);
     const memberSince = profileData?.createdAt ? new Date(profileData.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
     const xpToNext = 100 - (xp % 100);
     const xpProgress = (xp % 100) / 100 * 100;
@@ -489,11 +488,6 @@ const Profile = () => {
                             <Zap size={24} />
                             <div className="stat-value">{xp}</div>
                             <div className="stat-label">Total XP</div>
-                        </div>
-                        <div className="profile-stat-card stat-scenarios">
-                            <Target size={24} />
-                            <div className="stat-value">{completedScenarios.length}</div>
-                            <div className="stat-label">Scenarios Done</div>
                         </div>
                         <div className="profile-stat-card stat-badges">
                             <Award size={24} />

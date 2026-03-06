@@ -60,11 +60,6 @@ export default function Navbar() {
                 </li>
                 {user && (
                     <>
-                        <li>
-                            <NavLink to="/scenarios" onClick={handleNavClick}>
-                                <Crosshair size={16} /> Scenarios
-                            </NavLink>
-                        </li>
                         <li
                             className={`nav-dropdown ${gamesOpen ? 'open' : ''}`}
                             onMouseEnter={() => setGamesOpen(true)}
@@ -95,11 +90,6 @@ export default function Navbar() {
                                 <li>
                                     <NavLink to="/teams" onClick={handleNavClick}>
                                         <Users size={16} /> Teams
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink to="/challenges" onClick={handleNavClick}>
-                                        <Swords size={16} /> PvP Challenge
                                     </NavLink>
                                 </li>
                             </ul>

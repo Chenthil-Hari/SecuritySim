@@ -324,15 +324,8 @@ export default function ForensicsGame() {
             const accuracyPenalty = wrongGuesses.length * 5;
             const totalXp = Math.max(0, selectedMission.xpReward + timeBonus - accuracyPenalty);
 
-            dispatch({
-                type: 'COMPLETE_SCENARIO',
-                payload: {
-                    scenarioId: selectedMission.id,
-                    category: 'Forensics',
-                    accuracy: 100, // Always 100% if all threats found
-                    xpEarned: totalXp
-                }
-            });
+            // Scenario system and COMPLETE_SCENARIO dispatch have been removed.
+            // Local state updates for XP would go here if converted to a standalone game.
         }
     }, [quarantined, gameState, selectedMission]);
 
@@ -425,7 +418,7 @@ export default function ForensicsGame() {
                 <h2 className="missions-title"><ShieldAlert size={20} /> Select Mission</h2>
                 <div className="mission-grid">
                     {MISSIONS.map(m => {
-                        const isCompleted = state?.completedScenarios?.some(s => s.scenarioId === m.id);
+                        const isCompleted = false; // Scenario state removed
                         return (
                             <div className={`mission-card ${isCompleted ? 'completed' : ''}`} key={m.id} onClick={() => startMission(m)}>
                                 <div className="mission-card-header">
@@ -455,8 +448,8 @@ export default function ForensicsGame() {
     // ========== SUCCESS / FAILED ==========
     if (gameState === 'success' || gameState === 'failed') {
         const isSuccess = gameState === 'success';
-        const existingAttempt = state?.completedScenarios?.find(s => s.scenarioId === selectedMission?.id);
-        const isAlreadyCompleted = !!existingAttempt;
+        const existingAttempt = null; // Scenario state removed
+        const isAlreadyCompleted = false;
 
         const timeBonus = isSuccess ? Math.round(timeLeft * 0.5) : 0;
         const accuracyPenalty = wrongGuesses.length * 5;
