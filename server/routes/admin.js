@@ -302,11 +302,16 @@ router.get('/settings/maintenance', authenticateToken, isAdmin, async (req, res)
         if (!setting) {
             setting = await SystemSetting.create({ 
                 key: 'maintenance_mode', 
-                value: false, 
+                value: { isActive: false, expectedReturn: '' }, // Structured value
                 description: 'Global site maintenance status' 
             });
         }
-        res.json({ isActive: setting.value });
+        
+        // Handle both old boolean format and new object format
+        const isActive = typeof setting.value === 'boolean' ? setting.value : setting.value.isActive;
+        const expectedReturn = typeof setting.value === 'object' ? setting.value.expectedReturn : '';
+
+        res.json({ isActive, expectedReturn });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -314,11 +319,9 @@ router.get('/settings/maintenance', authenticateToken, isAdmin, async (req, res)
 
 router.patch('/settings/maintenance', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const { isActive } = req.body;
+        const { isActive, expectedReturn } = req.body;
         
-        // Defensive check for request body
         if (isActive === undefined) {
-            console.error("Maintenance Toggle Failure: isActive is undefined in request body");
             return res.status(400).json({ message: "Payload error: isActive is required." });
         }
 
@@ -326,7 +329,7 @@ router.patch('/settings/maintenance', authenticateToken, isAdmin, async (req, re
             { key: 'maintenance_mode' },
             { 
                 $set: { 
-                    value: isActive, 
+                    value: { isActive, expectedReturn }, 
                     updatedAt: new Date(), 
                     updatedBy: req.user.id 
                 } 
@@ -337,13 +340,16 @@ router.patch('/settings/maintenance', authenticateToken, isAdmin, async (req, re
         await logAction(
             req.user, 
             isActive ? 'maintenance_on' : 'maintenance_off', 
-            `Global Maintenance Mode toggled to ${isActive ? 'ACTIVE' : 'INACTIVE'}`
+            `Global Maintenance Mode toggled to ${isActive ? 'ACTIVE' : 'INACTIVE'}${expectedReturn ? ` (Expected Return: ${expectedReturn})` : ''}`
         );
 
-        res.json({ message: `Maintenance mode ${isActive ? 'activated' : 'deactivated'}`, isActive: setting.value });
+        res.json({ 
+            message: `Maintenance mode ${isActive ? 'activated' : 'deactivated'}`, 
+            isActive,
+            expectedReturn
+        });
     } catch (error) {
-        console.error("CRITICAL ERROR: Maintenance toggle failed:", error);
-        res.status(500).json({ message: "System failure during maintenance toggle: " + error.message });
+        res.status(500).json({ message: error.message });
     }
 });
 

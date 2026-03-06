@@ -177,9 +177,14 @@ app.use('/api/admin', adminRoutes);
 app.get('/api/maintenance/status', async (req, res) => {
     try {
         const setting = await SystemSetting.findOne({ key: 'maintenance_mode' });
-        res.json({ maintenance: setting ? setting.value : false });
+        if (!setting) return res.json({ maintenance: false, expectedReturn: '' });
+
+        const maintenance = typeof setting.value === 'boolean' ? setting.value : setting.value.isActive;
+        const expectedReturn = typeof setting.value === 'object' ? setting.value.expectedReturn : '';
+
+        res.json({ maintenance, expectedReturn });
     } catch (err) {
-        res.json({ maintenance: false });
+        res.json({ maintenance: false, expectedReturn: '' });
     }
 });
 

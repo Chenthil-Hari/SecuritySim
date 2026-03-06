@@ -1,7 +1,23 @@
 import { Shield, AlertTriangle, Clock } from 'lucide-react';
 import './Maintenance.css';
 
-export default function Maintenance() {
+export default function Maintenance({ expectedReturn }) {
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Soon';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleString('en-US', {
+                weekday: 'long',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (e) {
+            return 'Soon';
+        }
+    };
+
     return (
         <div className="maintenance-page">
             <div className="maintenance-container">
@@ -21,7 +37,7 @@ export default function Maintenance() {
                 <div className="maintenance-details">
                     <div className="detail-item">
                         <Clock size={20} />
-                        <span>Expected Return: Soon</span>
+                        <span>Expected Return: {formatDate(expectedReturn)}</span>
                     </div>
                 </div>
 

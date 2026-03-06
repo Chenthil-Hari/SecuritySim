@@ -36,6 +36,7 @@ import { useGame } from './context/GameContext';
 function AppContent() {
   const { user, checkFreezeStatus } = useAuth();
   const [maintenance, setMaintenance] = useState(false);
+  const [expectedReturn, setExpectedReturn] = useState('');
   const gameState = useGame();
   const isLoggedIn = !!user;
   const location = useLocation();
@@ -47,6 +48,7 @@ function AppContent() {
         if (res.ok) {
           const data = await res.json();
           setMaintenance(data.maintenance);
+          setExpectedReturn(data.expectedReturn || '');
         }
       } catch (err) {
         console.error("Maintenance check failed:", err);
@@ -71,7 +73,7 @@ function AppContent() {
   const isAdmin = user?.role === 'admin';
   const isAdminRoute = location.pathname.startsWith('/admin');
   if (maintenance && !isAdmin && !isAdminRoute) {
-    return <Maintenance />;
+    return <Maintenance expectedReturn={expectedReturn} />;
   }
 
   return (

@@ -25,6 +25,7 @@ export default function AdminDashboard() {
     const [liveScenarios, setLiveScenarios] = useState([]);
     const [assets, setAssets] = useState([]);
     const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
+    const [expectedReturn, setExpectedReturn] = useState('');
 
     useEffect(() => {
         if (user?.role !== 'admin') {
@@ -66,20 +67,17 @@ export default function AdminDashboard() {
 
     const fetchMaintenanceStatus = async () => {
         try {
-            console.log("Fetching global maintenance status...");
             const token = localStorage.getItem('token');
             const res = await fetch(buildApiUrl('/api/admin/settings/maintenance'), {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
                 const data = await res.json();
-                console.log("Maintenance status fetched:", data.isActive);
                 setIsMaintenanceMode(data.isActive);
-            } else {
-                console.error("Failed to fetch status:", res.status);
+                setExpectedReturn(data.expectedReturn || '');
             }
         } catch (err) {
-            console.error("Failed to fetch maintenance status error:", err);
+            console.error("Failed to fetch maintenance status:", err);
         }
     };
 
@@ -452,15 +450,12 @@ export default function AdminDashboard() {
     };
 
     const handleToggleMaintenance = async () => {
-        console.log("Maintenance toggle clicked. Current state:", isMaintenanceMode);
         const action = !isMaintenanceMode ? 'ACTIVATE' : 'DEACTIVATE';
         if (!window.confirm(`Are you sure you want to ${action} Global Maintenance Mode? Non-admin users will be blocked.`)) {
-            console.log("Maintenance toggle cancelled by user.");
             return;
         }
         
         try {
-            console.log("Sending maintenance patch. Target state:", !isMaintenanceMode);
             const token = localStorage.getItem('token');
             const res = await fetch(buildApiUrl('/api/admin/settings/maintenance'), {
                 method: 'PATCH',
@@ -468,22 +463,23 @@ export default function AdminDashboard() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ isActive: !isMaintenanceMode })
+                body: JSON.stringify({ 
+                    isActive: !isMaintenanceMode,
+                    expectedReturn: expectedReturn 
+                })
             });
 
             if (res.ok) {
                 const data = await res.json();
-                console.log("Maintenance patch success:", data);
                 setIsMaintenanceMode(data.isActive);
+                setExpectedReturn(data.expectedReturn || '');
                 window.alert(`Maintenance mode ${data.isActive ? 'ENABLED' : 'DISABLED'}`);
                 fetchLogs();
             } else {
                 const errData = await res.json().catch(() => ({}));
-                console.error("Maintenance patch failed:", res.status, errData);
                 window.alert(`Failed to toggle maintenance: ${errData.message || 'Server error'}`);
             }
         } catch (err) {
-            console.error("Maintenance toggle exception:", err);
             window.alert("Error toggling maintenance: " + err.message);
         }
     };
@@ -871,6 +867,24 @@ export default function AdminDashboard() {
                             <div className="control-text">
                                 <strong>Maintenance Mode</strong>
                                 <p>Redirect all non-admin traffic to the lockdown page.</p>
+                                <div className="return-time-input" style={{ marginTop: '12px' }}>
+                                    <label style={{ fontSize: '0.7rem', color: '#8b949e', display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Expected Return</label>
+                                    <input 
+                                        type="datetime-local" 
+                                        value={expectedReturn}
+                                        onChange={(e) => setExpectedReturn(e.target.value)}
+                                        style={{ 
+                                            background: 'rgba(255, 255, 255, 0.05)', 
+                                            border: '1px solid rgba(255, 255, 255, 0.1)', 
+                                            color: 'white', 
+                                            borderRadius: '6px', 
+                                            padding: '6px 10px',
+                                            fontSize: '0.85rem',
+                                            width: '100%',
+                                            outline: 'none'
+                                        }}
+                                    />
+                                </div>
                             </div>
                             <button 
                                 className={`toggle-btn ${isMaintenanceMode ? 'active' : ''}`}
