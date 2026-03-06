@@ -1,5 +1,6 @@
 import { CheckCircle, XCircle, ShieldAlert } from 'lucide-react';
 import { useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { speakFeedback } from '../utils/voiceGuidance';
 import { useGame } from '../context/GameContext';
 import './FeedbackModal.css';
@@ -11,7 +12,7 @@ export default function FeedbackModal({ isCorrect, feedback, defenseTip, xpEarne
         speakFeedback(feedback, settings);
     }, [feedback, settings]);
 
-    return (
+    return ReactDOM.createPortal(
         <div className="feedback-overlay" onClick={onContinue} role="dialog" aria-modal="true" aria-label="Feedback">
             <div className={`feedback-modal ${isCorrect ? 'correct' : 'incorrect'}`} onClick={e => e.stopPropagation()}>
                 <div className="feedback-icon-wrapper">
@@ -44,6 +45,7 @@ export default function FeedbackModal({ isCorrect, feedback, defenseTip, xpEarne
                     Continue
                 </button>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
