@@ -12,7 +12,7 @@ export default function MaintenanceScreen() {
                     </div>
                     
                     <div className="maintenance-image-container">
-                        <img src={`/maintenance-mode.png?t=${Date.now()}`} alt="Maintenance Illustration" className="premium-image" />
+                        <img src={`/Gemini_Generated_Image_cejcaacejcaacejc.png?t=${Date.now()}`} alt="Maintenance Illustration" className="premium-image" />
                     </div>
 
                     <div className="maintenance-body">
