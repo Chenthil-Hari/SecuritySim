@@ -57,6 +57,9 @@ function AppContent() {
           <Route path="/forensics" element={<ForensicsGame />} />
           <Route path="/builder" element={<ScenarioBuilder />} />
           <Route path="/warroom/:id" element={<WarRoom />} />
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>
       </main>
       {!isScenarioRoute && <ChatWidget isLoggedIn={isLoggedIn} />}

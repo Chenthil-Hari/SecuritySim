@@ -1,6 +1,6 @@
 import express from 'express';
 import UgcScenario from '../models/UgcScenario.js';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticateToken, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -16,7 +16,8 @@ router.post('/', authenticateToken, async (req, res) => {
             difficulty,
             description,
             content,
-            published: true // Auto-publish for now
+            published: false, // Must be approved by admin
+            status: 'pending' 
         });
 
         const savedScenario = await newScenario.save();
@@ -29,7 +30,7 @@ router.post('/', authenticateToken, async (req, res) => {
 // Get all published scenarios
 router.get('/', async (req, res) => {
     try {
-        const scenarios = await UgcScenario.find({ published: true })
+        const scenarios = await UgcScenario.find({ status: 'approved', published: true })
             .populate('authorId', 'username profilePhoto')
             .sort({ createdAt: -1 });
         res.json(scenarios);
@@ -45,6 +46,40 @@ router.get('/:id', async (req, res) => {
             .populate('authorId', 'username profilePhoto');
         if (!scenario) return res.status(404).json({ message: 'Scenario not found' });
         res.json(scenario);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// ADMIN ROUTES
+// Get all pending scenarios
+router.get('/admin/pending', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const scenarios = await UgcScenario.find({ status: 'pending' })
+            .populate('authorId', 'username profilePhoto email')
+            .sort({ createdAt: 1 }); // Oldest first for queue
+        res.json(scenarios);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Moderate a scenario (approve/reject)
+router.patch('/:id/moderate', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { status } = req.body;
+        if (!['approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status' });
+        }
+
+        const scenario = await UgcScenario.findById(req.params.id);
+        if (!scenario) return res.status(404).json({ message: 'Scenario not found' });
+
+        scenario.status = status;
+        scenario.published = (status === 'approved');
+        await scenario.save();
+
+        res.json({ message: `Scenario ${status} successfully`, scenario });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

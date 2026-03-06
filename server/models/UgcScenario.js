@@ -40,6 +40,11 @@ const ugcScenarioSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending'
+    },
     plays: {
         type: Number,
         default: 0

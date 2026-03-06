@@ -32,7 +32,7 @@ router.post('/signup', async (req, res) => {
         await newUser.save();
 
         const token = jwt.sign(
-            { userId: newUser._id, username: newUser.username },
+            { userId: newUser._id, username: newUser.username, role: newUser.role || 'user' },
             process.env.JWT_SECRET || 'fallback_secret',
             { expiresIn: '7d' }
         );
@@ -45,6 +45,7 @@ router.post('/signup', async (req, res) => {
                 username: newUser.username,
                 email: newUser.email,
                 country: newUser.country,
+                role: newUser.role || 'user'
             }
         });
     } catch (error) {
@@ -88,7 +89,7 @@ router.post('/login', async (req, res) => {
         }
 
         const token = jwt.sign(
-            { userId: user._id, username: user.username },
+            { userId: user._id, username: user.username, role: user.role || 'user' },
             process.env.JWT_SECRET || 'fallback_secret',
             { expiresIn: '7d' }
         );
@@ -101,11 +102,27 @@ router.post('/login', async (req, res) => {
                 username: user.username,
                 email: user.email,
                 country: user.country,
+                role: user.role || 'user'
             }
         });
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ message: 'Error logging in', error: error.message });
+    }
+});
+
+// Temporary Admin Promotion (Delete in production)
+router.post('/make-admin', async (req, res) => {
+    try {
+        const { email, secret } = req.body;
+        if (secret !== 'admin_secret_123') return res.status(403).json({ message: 'Invalid secret' });
+        
+        const user = await User.findOneAndUpdate({ email }, { role: 'admin' }, { new: true });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        
+        res.json({ message: 'User promoted to admin successfully', user: { username: user.username, role: user.role } });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 });
 
