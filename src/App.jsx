@@ -22,6 +22,7 @@ import WarRoom from './pages/WarRoom';
 import ChatWidget from './components/ChatWidget';
 import MatrixBackground from './components/MatrixBackground';
 import AdminLogin from './pages/AdminLogin';
+import GlobalAlert from './components/GlobalAlert';
 import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
 
@@ -41,6 +42,7 @@ function AppContent() {
   return (
     <div className="app">
       {!isAdminRoute && <Navbar />}
+      <GlobalAlert />
       <main className={`app-main ${isAdminRoute ? 'admin-isolated' : ''}`}>
         <Routes>
           <Route path="/" element={<Home />} />
