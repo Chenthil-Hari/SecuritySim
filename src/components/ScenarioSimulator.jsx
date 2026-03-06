@@ -8,6 +8,7 @@ export default function ScenarioSimulator({ scenario, onClose }) {
   const [history, setHistory] = useState([]);
   const [typing, setTyping] = useState(false);
   const [displayedText, setDisplayedText] = useState("");
+  const [currentScore, setCurrentScore] = useState(0);
   const [scoreAwarded, setScoreAwarded] = useState(false);
   
   const bottomRef = useRef(null);
@@ -43,6 +44,9 @@ export default function ScenarioSimulator({ scenario, onClose }) {
     if (isFinished && !scoreAwarded && currentNode.score !== undefined) {
       const token = localStorage.getItem('token');
       if (token) {
+        // Submit the cumulative score plus the final node bonus score
+        const finalTotalScore = currentScore + (currentNode.score || 0);
+
         // We make a direct API call to add the score. Assuming /api/profile/score exists or similar, 
         // if not, we rely on the visual aspect for now or game context. Let's try GameContext first.
         fetch(buildApiUrl('/api/profile/sync'), {
@@ -55,23 +59,28 @@ export default function ScenarioSimulator({ scenario, onClose }) {
           // This assumes the backend handles incremental score updates if we send it, 
           // or we can prompt the user that their score was recorded locally.
           body: JSON.stringify({
-             incrementalScore: currentNode.score // backend would need to handle this
+             incrementalScore: finalTotalScore // Submit the full cumulative score
           })
         }).catch(err => console.warn('Failed to sync score:', err));
         
         setScoreAwarded(true);
       }
     }
-  }, [isFinished, scoreAwarded, currentNode]);
-
+  }, [isFinished, scoreAwarded, currentNode, currentScore]);
 
   const handleOptionClick = (option) => {
     if (typing) return; // Prevent clicking while text is typing
     
+    // Add points for the choice
+    if (option.points !== undefined) {
+      setCurrentScore(prev => prev + option.points);
+    }
+
     // Record history
     setHistory(prev => [...prev, {
       question: currentNode.text,
-      choice: option.text
+      choice: option.text,
+      points: option.points || 0
     }]);
     
     // Advance to next node
@@ -82,12 +91,15 @@ export default function ScenarioSimulator({ scenario, onClose }) {
     setCurrentNodeId("start");
     setHistory([]);
     setDisplayedText("");
+    setCurrentScore(0);
     setScoreAwarded(false);
   };
 
   if (!currentNode) {
       return <div>Error: Scenario data corrupted. Missing node: {currentNodeId}</div>;
   }
+
+  const finalTotalScore = isFinished ? currentScore + (currentNode.score || 0) : currentScore;
 
   return (
     <div className="simulator-container fade-in">
@@ -100,7 +112,8 @@ export default function ScenarioSimulator({ scenario, onClose }) {
           <Terminal className="sim-icon" />
           <h2>Active Incident: {scenario.title}</h2>
         </div>
-        <div className="sim-status-indicators">
+        <div className="sim-status-indicators" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+          <span style={{ color: '#ffbd2e', fontFamily: 'Orbitron, sans-serif' }}>Score: {finalTotalScore}</span>
           <span className="pulse-indicator"><Activity size={16} /> Live Data</span>
         </div>
       </div>
@@ -169,7 +182,7 @@ export default function ScenarioSimulator({ scenario, onClose }) {
                       {currentNode.isSuccess ? 'Response Successful' : 'Response Failed'}
                     </h3>
                     <div style={{ color: '#ffbd2e', fontWeight: 'bold', marginTop: '0.25rem' }}>
-                       Score: {currentNode.score} / {scenario.maxScore}
+                       Final Score: {finalTotalScore} / {scenario.maxScore}
                     </div>
                  </div>
                </div>

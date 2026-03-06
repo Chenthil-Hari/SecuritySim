@@ -9,67 +9,67 @@ export const interactiveScenarios = [
       "start": {
         text: "You receive an urgent ticket from the Helpdesk: The VP of Finance just wired $50,000 to an unknown vendor after receiving an email from the 'CEO'. What is your immediate first step?",
         options: [
-          { text: "Contact the bank immediately to attempt a wire recall.", nextNodeId: "bank_recall" },
-          { text: "Analyze the email headers of the 'CEO' email.", nextNodeId: "analyze_headers" },
-          { text: "Lock the VP of Finance's account and reset their password.", nextNodeId: "lock_account" }
+          { text: "Contact the bank immediately to attempt a wire recall.", nextNodeId: "bank_recall", points: 30 },
+          { text: "Analyze the email headers of the 'CEO' email.", nextNodeId: "analyze_headers", points: 10 },
+          { text: "Lock the VP of Finance's account and reset their password.", nextNodeId: "lock_account", points: 0 }
         ]
       },
       "bank_recall": {
         text: "You instruct Finance to contact the bank. The bank is processing the recall, but it's a race against time. Meanwhile, what do you do with the IT investigation?",
         options: [
-          { text: "Analyze the malicious email and extract indicators of compromise (IoCs).", nextNodeId: "analyze_headers_2" },
-          { text: "Check email logs to see if anyone else received a similar email.", nextNodeId: "check_logs" }
+          { text: "Analyze the malicious email and extract indicators of compromise (IoCs).", nextNodeId: "analyze_headers_2", points: 20 },
+          { text: "Check email logs to see if anyone else received a similar email.", nextNodeId: "check_logs", points: 15 }
         ]
       },
       "analyze_headers": {
         text: "You pull the headers. The email originated from a look-alike domain (exampIe.com instead of example.com). It bypassed DMARC because the look-alike domain has valid records. The wire transfer completes while you analyze.",
         options: [
-          { text: "Block the look-alike domain on the email gateway.", nextNodeId: "block_domain" },
-          { text: "Contact the bank to recall the wire.", nextNodeId: "bank_recall_late" }
+          { text: "Block the look-alike domain on the email gateway.", nextNodeId: "block_domain", points: 20 },
+          { text: "Contact the bank to recall the wire.", nextNodeId: "bank_recall_late", points: 10 }
         ]
       },
       "analyze_headers_2": {
         text: "You pull the headers. The email originated from a look-alike domain (exampIe.com instead of example.com). It bypassed DMARC because the look-alike domain has valid records.",
         options: [
-          { text: "Block the look-alike domain on the email gateway.", nextNodeId: "block_domain" },
-          { text: "Search the environment for the sender's IP address.", nextNodeId: "search_ip" }
+          { text: "Block the look-alike domain on the email gateway.", nextNodeId: "block_domain", points: 20 },
+          { text: "Search the environment for the sender's IP address.", nextNodeId: "search_ip", points: 10 }
         ]
       },
       "lock_account": {
         text: "You lock the VP's account. They call IT demanding to know why they are locked out during a critical financial operation. They mention the CEO approved the transfer.",
         options: [
-          { text: "Explain it's a suspected phishing attack and analyze the email.", nextNodeId: "analyze_headers" },
-          { text: "Unlock the account immediately to avoid blocking business.", nextNodeId: "unlock_account" }
+          { text: "Explain it's a suspected phishing attack and analyze the email.", nextNodeId: "analyze_headers", points: 10 },
+          { text: "Unlock the account immediately to avoid blocking business.", nextNodeId: "unlock_account", points: -30 }
         ]
       },
       "bank_recall_late": {
         text: "You contact the bank. Unfortunately, due to the delay, the funds have already been moved out of the receiving account. The money is lost. Incident Response focuses on the post-mortem.",
         options: [
-          { text: "Finish Incident", nextNodeId: "end_failure" }
+          { text: "Finish Incident", nextNodeId: "end_failure", points: 0 }
         ]
       },
       "check_logs": {
          text: "You find 12 other users received similar emails. You initiate a purge of these emails from the mailboxes.",
          options: [
-             { text: "Block the sender domain.", nextNodeId: "block_domain" }
+             { text: "Block the sender domain.", nextNodeId: "block_domain", points: 15 }
          ]
       },
       "block_domain": {
         text: "You successfully block exampIe.com on the email gateway, preventing further emails. The bank notifies you that the $50,000 recall was successful!",
         options: [
-          { text: "Finish Incident", nextNodeId: "end_success" }
+          { text: "Finish Incident", nextNodeId: "end_success", points: 30 }
         ]
       },
       "search_ip": {
           text: "You search for the IP. It resolves to a known basic VPN provider. Not much attribution can be made. You decide to block the domain instead.",
           options: [
-              { text: "Block the look-alike domain.", nextNodeId: "block_domain" }
+              { text: "Block the look-alike domain.", nextNodeId: "block_domain", points: 10 }
           ]
       },
       "unlock_account": {
         text: "You unlock the account. The attacker, who also had a credential harvesting link in that email, logs in and begins exfiltrating sensitive financial data. The situation has escalated significantly.",
         options: [
-          { text: "Finish Incident", nextNodeId: "end_disaster" }
+          { text: "Finish Incident", nextNodeId: "end_disaster", points: 0 }
         ]
       },
       "end_success": {
@@ -105,85 +105,85 @@ export const interactiveScenarios = [
        "start": {
            text: "It's 2 AM on a Saturday. Monitoring alerts are going off: multiple file servers are experiencing massive read/modify/write operations. A user on the night shift calls reporting all their files end in '.locked'.",
            options: [
-               { text: "Isolate the affected subnets immediately via the core switch.", nextNodeId: "isolate_network" },
-               { text: "Log into the affected servers to identify the malware process.", nextNodeId: "log_into_servers" },
-               { text: "Check the backup server to ensure backups are running.", nextNodeId: "check_backups" }
+               { text: "Isolate the affected subnets immediately via the core switch.", nextNodeId: "isolate_network", points: 50 },
+               { text: "Log into the affected servers to identify the malware process.", nextNodeId: "log_into_servers", points: -20 },
+               { text: "Check the backup server to ensure backups are running.", nextNodeId: "check_backups", points: 0 }
            ]
        },
        "isolate_network": {
            text: "You isolate the server segment. Services go down globally, but the encryption stops spreading to workstations and other safe zones.",
            options: [
-               { text: "Identify the 'Patient Zero' workstation that initiated the file share encryption.", nextNodeId: "find_patient_zero" },
-               { text: "Begin restoring servers from backups immediately.", nextNodeId: "restore_servers_early" }
+               { text: "Identify the 'Patient Zero' workstation that initiated the file share encryption.", nextNodeId: "find_patient_zero", points: 30 },
+               { text: "Begin restoring servers from backups immediately.", nextNodeId: "restore_servers_early", points: -30 }
            ]
        },
        "log_into_servers": {
            text: "You RDP into the main file server. The server is incredibly slow. You see a process 'sysx.exe' eating 100% CPU. While you watch, the RDP session drops. The server is fully encrypted and unbootable.",
            options: [
-               { text: "Isolate the network.", nextNodeId: "isolate_network_late" },
-               { text: "Declare a major incident and page the entire security team.", nextNodeId: "page_team" }
+               { text: "Isolate the network.", nextNodeId: "isolate_network_late", points: 20 },
+               { text: "Declare a major incident and page the entire security team.", nextNodeId: "page_team", points: 10 }
            ]
        },
        "check_backups": {
            text: "You log into the backup appliance. To your horror, the backup files themselves are currently being encrypted. The ransomware has compromised the backup infrastructure.",
            options: [
-               { text: "Pull the power cables on the backup SAN.", nextNodeId: "pull_power" },
-               { text: "Isolate the backup network segment.", nextNodeId: "isolate_backup_network" }
+               { text: "Pull the power cables on the backup SAN.", nextNodeId: "pull_power", points: -10 },
+               { text: "Isolate the backup network segment.", nextNodeId: "isolate_backup_network", points: 40 }
            ]
        },
        "isolate_network_late": {
            text: "You isolate the network, but it's too late for the core servers, which are now fully encrypted. You need to investigate how it got in.",
            options: [
-               { text: "Check VPN and Firewall logs for recent odd access.", nextNodeId: "check_vpn_logs" }
+               { text: "Check VPN and Firewall logs for recent odd access.", nextNodeId: "check_vpn_logs", points: 20 }
            ]
        },
        "find_patient_zero": {
             text: "Reviewing network traffic from just before the isolation, you identify a workstation 'HR-DESK-04' making thousands of SMB connections.",
             options: [
-                { text: "Isolate HR-DESK-04 and image its drive for forensics.", nextNodeId: "forensics_patient_zero" },
-                { text: "Wipe HR-DESK-04 immediately.", nextNodeId: "wipe_patient_zero" }
+                { text: "Isolate HR-DESK-04 and image its drive for forensics.", nextNodeId: "forensics_patient_zero", points: 50 },
+                { text: "Wipe HR-DESK-04 immediately.", nextNodeId: "wipe_patient_zero", points: -20 }
             ]
        },
        "restore_servers_early": {
            text: "You begin restoring servers. However, because you haven't identified patient zero, the malware wakes up on the restored servers and begins encrypting them again.",
            options: [
-               { text: "Finish Incident", nextNodeId: "end_loop" }
+               { text: "Finish Incident", nextNodeId: "end_loop", points: 0 }
            ]
        },
        "page_team": {
            text: "The team is paged. Valuable minutes are lost while people wake up and log in. The ransomware spreads to 80% of the infrastructure.",
            options: [
-               { text: "Finish Incident", nextNodeId: "end_massive_breach" }
+               { text: "Finish Incident", nextNodeId: "end_massive_breach", points: 0 }
            ]
        },
        "pull_power": {
            text: "You literally pull the power on the SAN. Good news: half the backups are intact. Bad news: the SAN array is corrupted and requires vendor support to rebuild before restoring.",
            options: [
-               { text: "Wait for vendor, then restore.", nextNodeId: "end_long_downtime" }
+               { text: "Wait for vendor, then restore.", nextNodeId: "end_long_downtime", points: 0 }
            ]
        },
        "isolate_backup_network": {
            text: "You isolate the backup segment cleanly. 70% of backups are safe. You can use these to recover.",
            options: [
-               { text: "Find patient zero before restoring.", nextNodeId: "find_patient_zero" }
+               { text: "Find patient zero before restoring.", nextNodeId: "find_patient_zero", points: 30 }
            ]
        },
        "check_vpn_logs": {
            text: "You find a compromised VPN account that didn't have MFA enforced. They used this to pivot.",
            options: [
-               { text: "Finish Incident", nextNodeId: "end_post_mortem" }
+               { text: "Finish Incident", nextNodeId: "end_post_mortem", points: 0 }
            ]
        },
        "forensics_patient_zero": {
            text: "You identify a malicious payload delivered via a compromised software update. You block the indicator of compromise across the EDR.",
            options: [
-               { text: "Begin safe recovery.", nextNodeId: "end_hero" }
+               { text: "Begin safe recovery.", nextNodeId: "end_hero", points: 20 }
            ]
        },
        "wipe_patient_zero": {
            text: "You wipe the machine. You've destroyed the evidence of how they got in. You restore the servers, but the attackers are likely still in the network.",
            options: [
-               { text: "Finish Incident", nextNodeId: "end_lingering_threat" }
+               { text: "Finish Incident", nextNodeId: "end_lingering_threat", points: 0 }
            ]
        },
        "end_loop": {

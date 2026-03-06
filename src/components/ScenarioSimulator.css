@@ -238,8 +238,9 @@
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
-  overflow: hidden;
   width: 100%;
+  height: auto;
+  min-height: max-content;
 }
 
 .action-btn:hover {
