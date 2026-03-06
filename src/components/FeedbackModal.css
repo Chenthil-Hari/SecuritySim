@@ -1,17 +1,17 @@
 .feedback-overlay {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    background: rgba(2, 2, 10, 0.85);
-    backdrop-filter: blur(12px) saturate(160%);
-    -webkit-backdrop-filter: blur(12px) saturate(160%);
-    z-index: 2147483647;
-    display: grid;
-    place-items: center;
-    padding: var(--space-lg);
-    animation: fadeInOverlay 0.3s ease-out;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    background: rgba(2, 2, 10, 0.9) !important;
+    backdrop-filter: blur(12px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+    z-index: 2147483647 !important;
+    display: grid !important;
+    place-items: center !important;
+    padding: var(--space-lg) !important;
+    animation: fadeInOverlay 0.3s ease-out !important;
 }
 
 @keyframes fadeInOverlay {
