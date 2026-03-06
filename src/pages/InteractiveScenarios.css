@@ -59,6 +59,57 @@
   animation: fadeUp 0.6s ease-out backwards;
 }
 
+.scenario-card.completed-card {
+  border-color: rgba(0, 255, 136, 0.4);
+  background: rgba(16, 22, 36, 0.85);
+}
+
+.completed-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.completed-content {
+  text-align: center;
+  color: #00ff88;
+  font-family: 'Orbitron', sans-serif;
+  transform: rotate(-12deg);
+  border: 3px solid #00ff88;
+  padding: 0.8rem 1.2rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+  animation: stamp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes stamp {
+  0% { transform: scale(3) rotate(-12deg); opacity: 0; }
+  100% { transform: scale(1) rotate(-12deg); opacity: 1; }
+}
+
+.completed-icon {
+  margin-bottom: 0.2rem;
+  filter: drop-shadow(0 0 5px #00ff88);
+}
+
+.completed-content span {
+  display: block;
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
 /* Stagger animations for cards */
 .scenarios-grid .scenario-card:nth-child(1) { animation-delay: 0.1s; }
 .scenarios-grid .scenario-card:nth-child(2) { animation-delay: 0.2s; }

@@ -9,6 +9,8 @@ export default function InteractiveScenarios() {
   const [activeScenario, setActiveScenario] = useState(null);
   const { user } = useAuth(); // Assume user must be logged in to view, handled by App.js usually
 
+  const completedIds = user?.completedScenarios?.map(s => s.scenarioId) || [];
+
   const handleStartScenario = (scenario) => {
     setActiveScenario(scenario);
   };
@@ -19,7 +21,8 @@ export default function InteractiveScenarios() {
 
   // If a scenario is active, render the simulator directly
   if (activeScenario) {
-    return <ScenarioSimulator scenario={activeScenario} onClose={handleCloseScenario} />;
+    const isCompleted = completedIds.includes(activeScenario.id);
+    return <ScenarioSimulator scenario={activeScenario} isReplay={isCompleted} onClose={handleCloseScenario} />;
   }
 
   return (
@@ -30,8 +33,18 @@ export default function InteractiveScenarios() {
       </div>
 
       <div className="scenarios-grid">
-        {interactiveScenarios.map((scenario) => (
-          <div key={scenario.id} className="scenario-card">
+        {interactiveScenarios.map((scenario) => {
+          const isCompleted = completedIds.includes(scenario.id);
+          return (
+          <div key={scenario.id} className={`scenario-card ${isCompleted ? 'completed-card' : ''}`}>
+            {isCompleted && (
+               <div className="completed-overlay">
+                 <div className="completed-content">
+                    <CheckCircle2 size={40} className="completed-icon" />
+                    <span>100% Completed</span>
+                 </div>
+               </div>
+            )}
             <div className="scene-card-header">
               <span className={`difficulty-badge ${scenario.difficulty.toLowerCase()}`}>
                 {scenario.difficulty}
@@ -59,7 +72,7 @@ export default function InteractiveScenarios() {
             
             <div className="hologram-effect"></div>
           </div>
-        ))}
+        )})}
       </div>
       
       {/* Background elements */}

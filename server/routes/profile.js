@@ -79,19 +79,22 @@ router.get('/:userId', async (req, res) => {
 // PUT /api/profile/sync — sync game state from frontend to DB
 router.put('/sync', authMiddleware, async (req, res) => {
     try {
-        const { score, incrementalScore, xp, level, badges, completedScenarios, skillPoints, unlockedSkills, weeklyCompleted, teamId, customization, unlockedTitles, seasonalMedals } = req.body;
+        const { score, incrementalScore, xp, level, badges, completedScenarios, newCompletedScenario, skillPoints, unlockedSkills, weeklyCompleted, teamId, customization, unlockedTitles, seasonalMedals } = req.body;
         const updateData = {};
         const incData = {};
+        const pushData = {};
 
         if (score !== undefined) updateData.score = score;
         if (incrementalScore !== undefined) {
-             // Incremental score adds to existing rather than overriding
              incData.score = incrementalScore;
         }
         if (xp !== undefined) updateData.xp = xp;
         if (level !== undefined) updateData.level = level;
         if (badges !== undefined) updateData.badges = badges;
         if (completedScenarios !== undefined) updateData.completedScenarios = completedScenarios;
+        if (newCompletedScenario !== undefined) {
+             pushData.completedScenarios = newCompletedScenario;
+        }
         if (skillPoints !== undefined) updateData.skillPoints = skillPoints;
         if (unlockedSkills !== undefined) updateData.unlockedSkills = unlockedSkills;
         if (weeklyCompleted !== undefined) updateData.weeklyCompleted = weeklyCompleted;
@@ -103,6 +106,7 @@ router.put('/sync', authMiddleware, async (req, res) => {
         const updateOperation = {};
         if (Object.keys(updateData).length > 0) updateOperation.$set = updateData;
         if (Object.keys(incData).length > 0) updateOperation.$inc = incData;
+        if (Object.keys(pushData).length > 0) updateOperation.$push = pushData;
 
         // If nothing to update, return early
         if (Object.keys(updateOperation).length === 0) {

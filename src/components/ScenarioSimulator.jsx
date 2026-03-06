@@ -3,7 +3,7 @@ import { ArrowLeft, Terminal, ShieldAlert, Cpu, Activity, RefreshCw, CheckCircle
 import './ScenarioSimulator.css';
 import { buildApiUrl } from '../utils/api';
 
-export default function ScenarioSimulator({ scenario, onClose }) {
+export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
   const [currentNodeId, setCurrentNodeId] = useState("start");
   const [history, setHistory] = useState([]);
   const [typing, setTyping] = useState(false);
@@ -44,24 +44,32 @@ export default function ScenarioSimulator({ scenario, onClose }) {
     if (isFinished && !scoreAwarded && currentNode.score !== undefined) {
       const token = localStorage.getItem('token');
       if (token) {
-        // Submit the cumulative score plus the final node bonus score
         const finalTotalScore = currentScore + (currentNode.score || 0);
 
-        // We make a direct API call to add the score. Assuming /api/profile/score exists or similar, 
-        // if not, we rely on the visual aspect for now or game context. Let's try GameContext first.
-        fetch(buildApiUrl('/api/profile/sync'), {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          // Note: A robust implementation would have a specific endpoint for adding points.
-          // This assumes the backend handles incremental score updates if we send it, 
-          // or we can prompt the user that their score was recorded locally.
-          body: JSON.stringify({
-             incrementalScore: finalTotalScore // Submit the full cumulative score
-          })
-        }).catch(err => console.warn('Failed to sync score:', err));
+        const payload = {
+          // Only send incremental score if it's NOT a replay
+          ...(isReplay ? {} : { incrementalScore: finalTotalScore }),
+          // Always send completion if it's the first time (though backend should handle idempotency)
+          ...(!isReplay ? { 
+            newCompletedScenario: { 
+              scenarioId: scenario.id, 
+              category: scenario.type,
+              accuracy: Math.max(0, Math.floor((finalTotalScore / scenario.maxScore) * 100)),
+              timestamp: new Date()
+            } 
+          } : {})
+        };
+
+        if (!isReplay || payload.newCompletedScenario) {
+          fetch(buildApiUrl('/api/profile/sync'), {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+          }).catch(err => console.warn('Failed to sync state:', err));
+        }
         
         setScoreAwarded(true);
       }
@@ -116,6 +124,11 @@ export default function ScenarioSimulator({ scenario, onClose }) {
           </div>
         </div>
         <div className="sim-status-indicators" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+          {isReplay && (
+            <span className="replay-tag" style={{ color: '#90caf9', fontSize: '0.7rem', border: '1px solid #90caf9', padding: '2px 6px', borderRadius: '4px' }}>
+              REPLAY: NO SCORE
+            </span>
+          )}
           <span style={{ color: '#ffbd2e', fontFamily: 'Orbitron, sans-serif' }}>Score: {finalTotalScore}</span>
           <span className="pulse-indicator"><Activity size={16} /> Live Data</span>
         </div>
