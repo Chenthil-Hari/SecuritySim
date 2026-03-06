@@ -44,6 +44,11 @@ export const isAdmin = (req, res, next) => {
 };
 
 export const maintenanceCheck = async (req, res, next) => {
+  // Allow the frontend to check the status without being blocked
+  if (req.path === '/api/auth/maintenance-status') {
+      return next();
+  }
+
   try {
     const maintenance = await SystemSetting.findOne({ key: 'maintenance_mode' });
     
