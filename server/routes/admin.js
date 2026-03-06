@@ -134,13 +134,23 @@ router.get('/maintenance/status', authenticateToken, isAdmin, async (req, res) =
     }
 });
 
-// GET /api/admin/logs — Audit Logs
-router.get('/logs', authenticateToken, isAdmin, async (req, res) => {
+// DELETE /api/admin/logs/:id — Remove specific log
+router.delete('/logs/:id', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const logs = await AuditLog.find()
-            .sort({ timestamp: -1 })
-            .limit(100);
-        res.json(logs);
+        await AuditLog.findByIdAndDelete(req.params.id);
+        res.json({ message: "Log entry removed" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// DELETE /api/admin/logs — Clear all logs
+router.delete('/logs', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        await AuditLog.deleteMany({});
+        // Log this destructive action!
+        await logAction(req.user, 'clear_logs', 'All audit logs were cleared from the system.');
+        res.json({ message: "All logs cleared" });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

@@ -200,6 +200,38 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleDeleteLog = async (logId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/admin/logs/${logId}`), {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                setLogs(logs.filter(l => l._id !== logId));
+            }
+        } catch (err) {
+            console.error("Error deleting log:", err);
+        }
+    };
+
+    const handleClearLogs = async () => {
+        if (!confirm("CRITICAL ACTION: Are you sure you want to PERMANENTLY ERASE all audit logs? This cannot be undone.")) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/logs'), {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                fetchLogs(); // Refresh to show the 'clear_logs' action just taken
+                alert("Audit logs cleared successfully.");
+            }
+        } catch (err) {
+            alert("Error clearing logs: " + err.message);
+        }
+    };
+
     const handleModerate = async (id, status) => {
         try {
             const token = localStorage.getItem('token');
@@ -454,7 +486,12 @@ export default function AdminDashboard() {
                     </div>
                 </div>
                 <div className="audit-log-card">
-                    <h3>Audit Logs</h3>
+                    <div className="card-header-with-action">
+                        <h3>Audit Logs</h3>
+                        <button className="btn-clear-logs" onClick={handleClearLogs}>
+                            <XCircle size={14} /> Clear All History
+                        </button>
+                    </div>
                     <div className="log-list">
                         {logs.map(log => (
                             <div key={log._id} className="log-entry">
@@ -462,6 +499,9 @@ export default function AdminDashboard() {
                                 <span className="admin">{log.adminName}</span>
                                 <span className="action">{log.action}</span>
                                 <p className="desc">{log.details}</p>
+                                <button className="btn-delete-log" onClick={() => handleDeleteLog(log._id)} title="Remove Log Entry">
+                                    <X size={14} />
+                                </button>
                             </div>
                         ))}
                     </div>
