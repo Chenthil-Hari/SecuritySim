@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Swords, Shield, Search, Loader2, XCircle, AlertTriangle } from 'lucide-react';
+import { Swords, Shield, Loader2, AlertTriangle, UserPlus, Zap, X, Check } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import { buildApiUrl } from '../utils/api';
@@ -9,27 +9,82 @@ import './PvPLobby.css';
 export default function PvPLobby() {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const [isSearching, setIsSearching] = useState(false);
     const [socket, setSocket] = useState(null);
+    const [friends, setFriends] = useState([]);
+    const [onlineFriends, setOnlineFriends] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [inviteSent, setInviteSent] = useState(null); // { toId, matchId }
+    const [incomingInvite, setIncomingInvite] = useState(null); // { fromId, fromName, matchId }
 
     useEffect(() => {
         const newSocket = io(window.location.origin);
         setSocket(newSocket);
 
-        newSocket.on('match_found', (data) => {
-            setIsSearching(false);
-            navigate(`/duel/${data.matchId}`);
+        if (user) {
+            newSocket.emit('identify', user._id);
+        }
+
+        newSocket.on('incoming_duel_invite', (data) => {
+            setIncomingInvite(data);
         });
 
-        return () => newSocket.close();
-    }, [navigate]);
+        newSocket.on('invite_response', (data) => {
+            if (data.accepted) {
+                navigate(`/duel/${data.matchId}`);
+            } else {
+                setInviteSent(null);
+                alert(data.message || "Invitation declined.");
+            }
+        });
 
-    const handleStartSearch = async () => {
+        fetchFriends();
+        const onlineInterval = setInterval(fetchOnlineFriends, 5000);
+
+        return () => {
+            newSocket.close();
+            clearInterval(onlineInterval);
+        };
+    }, [navigate, user]);
+
+    const fetchFriends = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/friends'), {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setFriends(data);
+                fetchOnlineFriends();
+            }
+        } catch (err) {
+            console.error("Failed to fetch friends:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchOnlineFriends = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/pvp/online-friends'), {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setOnlineFriends(data);
+            }
+        } catch (err) {
+            console.error("Error fetching online friends:", err);
+        }
+    };
+
+    const handleChallenge = async (friend) => {
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl('/api/pvp/queue'), {
+            const res = await fetch(buildApiUrl(`/api/pvp/invite/${friend._id}`), {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -39,29 +94,53 @@ export default function PvPLobby() {
             const data = await res.json();
             
             if (res.ok) {
-                setIsSearching(true);
-                if (data.match.status === 'playing') {
-                    // Already matched (we were the second player)
-                    navigate(`/duel/${data.match._id}`);
-                }
+                setInviteSent({ toId: friend._id, matchId: data.matchId });
+                // Notify via socket
+                socket.emit('send_duel_invite', {
+                    fromId: user._id,
+                    fromName: user.username,
+                    toId: friend._id,
+                    matchId: data.matchId,
+                    scenarioId: data.scenarioId
+                });
             } else {
                 setError(data.message);
             }
         } catch (err) {
-            setError("Failed to connect to matchmaking server.");
+            setError("Failed to send invitation.");
         }
     };
 
-    const handleCancelSearch = async () => {
+    const handleInviteResponse = async (accepted) => {
+        if (!incomingInvite) return;
+        
         try {
             const token = localStorage.getItem('token');
-            await fetch(buildApiUrl('/api/pvp/leave-queue'), {
+            const res = await fetch(buildApiUrl(`/api/pvp/respond/${incomingInvite.matchId}`), {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ accept: accepted })
             });
-            setIsSearching(false);
+
+            if (res.ok) {
+                socket.emit('respond_to_invite', {
+                    fromId: user._id,
+                    toId: incomingInvite.fromId,
+                    matchId: incomingInvite.matchId,
+                    accepted: accepted
+                });
+
+                if (accepted) {
+                    navigate(`/duel/${incomingInvite.matchId}`);
+                } else {
+                    setIncomingInvite(null);
+                }
+            }
         } catch (err) {
-            console.error("Error leaving queue:", err);
+            console.error("Error responding to invite:", err);
         }
     };
 
@@ -69,36 +148,82 @@ export default function PvPLobby() {
         <div className="pvp-lobby-container fade-in">
             <div className="lobby-header">
                 <Swords size={48} className="duel-icon-main" />
-                <h1>1v1 Cyber Duel</h1>
-                <p>Pit your incident response skills against another agent in real-time. First to solve the case with the highest accuracy wins.</p>
+                <h1>Friend Duel</h1>
+                <p>Challenge your network contacts to a real-time cyber security simulation.</p>
             </div>
 
             <div className="lobby-content">
-                {!isSearching ? (
-                    <div className="lobby-start-card">
-                        <div className="duel-stats">
-                            <div className="stat-box">
-                                <Shield size={20} />
-                                <span>Global Rank: {user?.rank || 'Agent'}</span>
-                            </div>
-                            <div className="stat-box">
-                                <Swords size={20} />
-                                <span>PvP Wins: {user?.pvpWins || 0}</span>
+                <div className="friend-list-section">
+                    <h2><UserPlus size={20} /> Online Friends</h2>
+                    {loading ? (
+                        <div className="lobby-loading">
+                            <Loader2 className="spinning-loader" />
+                            <span>Scanning network...</span>
+                        </div>
+                    ) : friends.length > 0 ? (
+                        <div className="friends-grid">
+                            {friends.map(friend => {
+                                const isOnline = onlineFriends.includes(friend._id);
+                                return (
+                                    <div key={friend._id} className={`friend-card ${isOnline ? 'online' : 'offline'}`}>
+                                        <div className="friend-info">
+                                            <div className="friend-avatar">
+                                                {friend.profilePhoto ? <img src={friend.profilePhoto} alt="" /> : <Shield size={24} />}
+                                                {isOnline && <div className="online-indicator"></div>}
+                                            </div>
+                                            <div className="friend-meta">
+                                                <span className="friend-name">{friend.username}</span>
+                                                <span className={`status-text ${isOnline ? 'text-online' : 'text-offline'}`}>
+                                                    {isOnline ? 'AVAILABLE' : 'OFFLINE'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <button 
+                                            className="challenge-btn" 
+                                            onClick={() => handleChallenge(friend)}
+                                            disabled={inviteSent !== null || !isOnline}
+                                        >
+                                            Challenge
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="no-friends">
+                            <Zap size={32} />
+                            <p>No friends found in your network.</p>
+                            <button className="add-btn" onClick={() => navigate('/teams')}>Add Friends in Teams</button>
+                        </div>
+                    )}
+                </div>
+
+                {inviteSent && (
+                    <div className="invite-sent-overlay">
+                        <div className="invite-modal">
+                            <Loader2 className="spinning-loader" />
+                            <h3>Invitation Sent</h3>
+                            <p>Waiting for opponent to accept the simulation request...</p>
+                            <button className="cancel-invite-btn" onClick={() => setInviteSent(null)}>Cancel</button>
+                        </div>
+                    </div>
+                )}
+
+                {incomingInvite && (
+                    <div className="incoming-invite-overlay">
+                        <div className="invite-modal alert">
+                            <AlertTriangle size={32} color="#ffbd2e" />
+                            <h3>INCOMING CHALLENGE</h3>
+                            <p><strong>{incomingInvite.fromName}</strong> has challenged you to a 1v1 Duel!</p>
+                            <div className="modal-actions">
+                                <button className="accept-btn" onClick={() => handleInviteResponse(true)}>
+                                    <Check size={18} /> Accept
+                                </button>
+                                <button className="decline-btn" onClick={() => handleInviteResponse(false)}>
+                                    <X size={18} /> Decline
+                                </button>
                             </div>
                         </div>
-                        
-                        <button className="search-match-btn" onClick={handleStartSearch}>
-                            Find Opponent
-                        </button>
-                    </div>
-                ) : (
-                    <div className="searching-card">
-                        <Loader2 className="spinning-loader" size={64} />
-                        <h2>Interpreting Network Traffic...</h2>
-                        <p>Scanning for nearby agents available for a simulation duel.</p>
-                        <button className="cancel-search-btn" onClick={handleCancelSearch}>
-                            Cancel Search
-                        </button>
                     </div>
                 )}
 
@@ -108,16 +233,6 @@ export default function PvPLobby() {
                         <span>{error}</span>
                     </div>
                 )}
-            </div>
-
-            <div className="pvp-rules-section">
-                <h3><AlertTriangle size={18} /> Duel Protocol</h3>
-                <ul>
-                    <li>Both agents receive the exact same incident scenario.</li>
-                    <li>Points are awarded for speed and correct technical decisions.</li>
-                    <li>Bonus XP is awarded to the victor.</li>
-                    <li>Disconnecting counts as a tactical retreat (Forfeit).</li>
-                </ul>
             </div>
         </div>
     );

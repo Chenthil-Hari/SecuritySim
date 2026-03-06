@@ -1,15 +1,15 @@
 .pvp-lobby-container {
-    max-width: 800px;
-    margin: 4rem auto;
+    max-width: 900px;
+    margin: 2rem auto;
     padding: 2rem;
     background: rgba(16, 22, 36, 0.8);
     border: 1px solid rgba(0, 255, 136, 0.2);
     border-radius: 12px;
     backdrop-filter: blur(10px);
-    text-align: center;
 }
 
 .lobby-header {
+    text-align: center;
     margin-bottom: 3rem;
 }
 
@@ -30,123 +30,246 @@
 .lobby-header p {
     color: #b0bec5;
     font-size: 1.1rem;
-    max-width: 600px;
-    margin: 0 auto;
 }
 
-.lobby-start-card {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 2rem;
-    border-radius: 8px;
-    border: 1px dashed rgba(255, 255, 255, 0.1);
-}
-
-.duel-stats {
+.friend-list-section h2 {
+    font-family: 'Rajdhani', sans-serif;
+    color: #90caf9;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
     display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(144, 202, 249, 0.2);
+    padding-bottom: 0.5rem;
+}
+
+.friends-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.friend-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.friend-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 255, 136, 0.3);
+}
+
+.friend-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.friend-avatar {
+    width: 44px;
+    height: 44px;
+    background: rgba(144, 202, 249, 0.1);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    gap: 2rem;
+    color: #90caf9;
+    border: 1px solid rgba(144, 202, 249, 0.3);
+}
+
+.friend-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 3px;
+}
+
+.online-indicator {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background: #00ff88;
+    border: 2px solid #1a1f2e;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #00ff88;
+}
+
+.friend-meta {
+    display: flex;
+    flex-direction: column;
+}
+
+.friend-name {
+    color: #fff;
+    font-weight: 600;
+}
+
+.status-text {
+    font-size: 0.7rem;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+}
+
+.text-online { color: #00ff88; }
+.text-offline { color: #718096; }
+
+.friend-card.offline {
+    opacity: 0.7;
+    filter: grayscale(0.5);
+}
+
+.friend-card.online {
+    border-color: rgba(0, 255, 136, 0.4);
+}
+
+.challenge-btn {
+    background: #00ff88;
+    color: #000;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.challenge-btn:hover:not(:disabled) {
+    background: #00cc6e;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+}
+
+.challenge-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.no-friends {
+    text-align: center;
+    padding: 3rem;
+    color: #718096;
+}
+
+.add-btn {
+    margin-top: 1rem;
+    background: transparent;
+    border: 1px solid #90caf9;
+    color: #90caf9;
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Modals / Overlays */
+.invite-sent-overlay, .incoming-invite-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.invite-modal {
+    background: #1a1f2e;
+    border: 1px solid #00ff88;
+    padding: 2.5rem;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 0 40px rgba(0, 255, 136, 0.2);
+}
+
+.invite-modal.alert {
+    border-color: #ffbd2e;
+    box-shadow: 0 0 40px rgba(255, 189, 46, 0.2);
+}
+
+.invite-modal h3 {
+    font-family: 'Orbitron', sans-serif;
+    margin: 1.5rem 0 1rem;
+    letter-spacing: 1px;
+}
+
+.invite-modal p {
+    color: #b0bec5;
     margin-bottom: 2rem;
 }
 
-.stat-box {
+.modal-actions {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    color: #90caf9;
+    gap: 1rem;
+    justify-content: center;
 }
 
-.search-match-btn {
-    background: transparent;
-    border: 2px solid #00ff88;
-    color: #00ff88;
-    padding: 1rem 3rem;
-    font-size: 1.2rem;
+.accept-btn, .decline-btn, .cancel-invite-btn {
+    padding: 0.7rem 1.5rem;
+    border-radius: 4px;
     font-family: 'Rajdhani', sans-serif;
     font-weight: 700;
-    text-transform: uppercase;
     cursor: pointer;
-    transition: all 0.3s ease;
-    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.search-match-btn:hover {
-    background: rgba(0, 255, 136, 0.1);
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
-    transform: scale(1.05);
+.accept-btn {
+    background: #00ff88;
+    color: #000;
+    border: none;
 }
 
-.searching-card {
-    padding: 3rem;
-}
-
-.spinning-loader {
-    color: #00ff88;
-    animation: spin 2s linear infinite;
-    margin-bottom: 1.5rem;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.searching-card h2 {
-    font-family: 'Orbitron', sans-serif;
-    color: #fff;
-    margin-bottom: 1rem;
-}
-
-.cancel-search-btn {
+.decline-btn {
     background: transparent;
     border: 1px solid #ff4757;
     color: #ff4757;
-    padding: 0.5rem 1.5rem;
-    margin-top: 2rem;
-    cursor: pointer;
-    border-radius: 4px;
-    font-family: 'Rajdhani', sans-serif;
 }
 
-.pvp-rules-section {
-    margin-top: 4rem;
-    text-align: left;
-    padding: 1.5rem;
-    background: rgba(255, 189, 46, 0.05);
-    border-left: 4px solid #ffbd2e;
+.cancel-invite-btn {
+    background: transparent;
+    border: 1px solid #718096;
+    color: #718096;
+    width: 100%;
 }
 
-.pvp-rules-section h3 {
-    margin-bottom: 1rem;
-    color: #ffbd2e;
+.lobby-loading {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: 1rem;
+    padding: 3rem;
+    color: #00ff88;
 }
 
-.pvp-rules-section ul {
-    list-style: none;
-    padding: 0;
+.spinning-loader {
+    animation: spin 2s linear infinite;
 }
 
-.pvp-rules-section li {
-    margin-bottom: 0.5rem;
-    color: #e2e8f0;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.pvp-rules-section li::before {
-    content: '>>';
-    color: #ffbd2e;
-    font-size: 0.7rem;
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 .lobby-error {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
+    background: rgba(255, 71, 87, 0.1);
     color: #ff4757;
+    padding: 1rem;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;

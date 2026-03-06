@@ -29,6 +29,10 @@ const io = new Server(httpServer, {
     }
 });
 
+// Map to track userId -> socket.id
+const userSockets = new Map();
+app.set('userSockets', userSockets);
+
 // Make io accessible to routes
 app.set('io', io);
 
@@ -97,7 +101,19 @@ io.on('connection', (socket) => {
         socket.to(data.roomId).emit('evidence_updated', data.evidence);
     });
 
+    socket.on('identify', (userId) => {
+        userSockets.set(userId, socket.id);
+        console.log(`User ${userId} identified with socket ${socket.id}`);
+    });
+
     socket.on('disconnect', () => {
+        // Remove from mapping
+        for (const [userId, socketId] of userSockets.entries()) {
+            if (socketId === socket.id) {
+                userSockets.delete(userId);
+                break;
+            }
+        }
         console.log('User disconnected');
     });
 
@@ -115,6 +131,26 @@ io.on('connection', (socket) => {
     socket.on('duel_finish', (data) => {
         // data: { matchId, userId, finalScore }
         socket.to(data.matchId).emit('opponent_finished', data);
+    });
+
+    // Private Invitations
+    socket.on('send_duel_invite', (data) => {
+        // data: { fromId, fromName, toId, matchId, scenarioId }
+        const targetSocketId = userSockets.get(data.toId);
+        if (targetSocketId) {
+            io.to(targetSocketId).emit('incoming_duel_invite', data);
+        } else {
+            // Target is offline
+            socket.emit('invite_response', { accepted: false, message: 'Opponent is offline.' });
+        }
+    });
+
+    socket.on('respond_to_invite', (data) => {
+        // data: { fromId, toId, matchId, accepted }
+        const targetSocketId = userSockets.get(data.toId);
+        if (targetSocketId) {
+            io.to(targetSocketId).emit('invite_response', data);
+        }
     });
 });
 
