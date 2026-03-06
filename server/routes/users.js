@@ -6,6 +6,16 @@ import bcrypt from 'bcryptjs';
 
 const router = express.Router();
 
+// Check current user status (Frozen/Level etc)
+router.get('/status', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('isFrozen role');
+        res.json({ isFrozen: user.isFrozen, role: user.role });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Get all users (Admin only)
 router.get('/admin/all', authenticateToken, isAdmin, async (req, res) => {
     try {

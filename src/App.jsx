@@ -33,10 +33,17 @@ import { useAuth } from './context/AuthContext';
 import { useGame } from './context/GameContext';
 
 function AppContent() {
-  const { user } = useAuth();
+  const { user, checkFreezeStatus } = useAuth();
   const gameState = useGame();
   const isLoggedIn = !!user;
   const location = useLocation();
+
+  // Check for account freeze on every navigation
+  useEffect(() => {
+    if (isLoggedIn && !user.isFrozen) {
+      checkFreezeStatus();
+    }
+  }, [location.pathname, isLoggedIn]);
 
   // Redirect frozen users IMMEDIATELY
   if (user && user.isFrozen) {

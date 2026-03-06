@@ -79,6 +79,35 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const checkFreezeStatus = async () => {
+        if (!user) return;
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(buildApiUrl('/api/users/status'), {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+
+            if (response.status === 403) {
+                // Backend rejected the token due to freeze
+                const updatedUser = { ...user, isFrozen: true };
+                setUser(updatedUser);
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                return;
+            }
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.isFrozen !== user.isFrozen) {
+                    const updatedUser = { ...user, isFrozen: data.isFrozen };
+                    setUser(updatedUser);
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                }
+            }
+        } catch (error) {
+            console.error("Error checking freeze status", error);
+        }
+    };
+
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -94,7 +123,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, adminLogin, signup, logout, updateUser }}>
+        <AuthContext.Provider value={{ user, loading, login, adminLogin, signup, logout, updateUser, checkFreezeStatus }}>
             {loading ? <Loader /> : children}
         </AuthContext.Provider>
     );
