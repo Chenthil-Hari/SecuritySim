@@ -79,10 +79,15 @@ router.get('/:userId', async (req, res) => {
 // PUT /api/profile/sync — sync game state from frontend to DB
 router.put('/sync', authMiddleware, async (req, res) => {
     try {
-        const { score, xp, level, badges, completedScenarios, skillPoints, unlockedSkills, weeklyCompleted, teamId, customization, unlockedTitles, seasonalMedals } = req.body;
+        const { score, incrementalScore, xp, level, badges, completedScenarios, skillPoints, unlockedSkills, weeklyCompleted, teamId, customization, unlockedTitles, seasonalMedals } = req.body;
         const updateData = {};
+        const incData = {};
 
         if (score !== undefined) updateData.score = score;
+        if (incrementalScore !== undefined) {
+             // Incremental score adds to existing rather than overriding
+             incData.score = incrementalScore;
+        }
         if (xp !== undefined) updateData.xp = xp;
         if (level !== undefined) updateData.level = level;
         if (badges !== undefined) updateData.badges = badges;
@@ -95,9 +100,18 @@ router.put('/sync', authMiddleware, async (req, res) => {
         if (unlockedTitles !== undefined) updateData.unlockedTitles = unlockedTitles;
         if (seasonalMedals !== undefined) updateData.seasonalMedals = seasonalMedals;
 
+        const updateOperation = {};
+        if (Object.keys(updateData).length > 0) updateOperation.$set = updateData;
+        if (Object.keys(incData).length > 0) updateOperation.$inc = incData;
+
+        // If nothing to update, return early
+        if (Object.keys(updateOperation).length === 0) {
+             return res.json({ message: 'No updates provided' });
+        }
+
         const user = await User.findByIdAndUpdate(
             req.userId,
-            { $set: updateData },
+            updateOperation,
             { new: true }
         ).select('-password');
 

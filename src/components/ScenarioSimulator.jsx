@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Terminal, ShieldAlert, Cpu, Activity, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Terminal, ShieldAlert, Cpu, Activity, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
 import './ScenarioSimulator.css';
+import { buildApiUrl } from '../utils/api';
 
 export default function ScenarioSimulator({ scenario, onClose }) {
   const [currentNodeId, setCurrentNodeId] = useState("start");
   const [history, setHistory] = useState([]);
   const [typing, setTyping] = useState(false);
   const [displayedText, setDisplayedText] = useState("");
+  const [scoreAwarded, setScoreAwarded] = useState(false);
   
   const bottomRef = useRef(null);
   
@@ -36,6 +38,32 @@ export default function ScenarioSimulator({ scenario, onClose }) {
     return () => clearInterval(intervalId);
   }, [currentNodeId, currentNode]);
 
+  // Handle score awarding on finish
+  useEffect(() => {
+    if (isFinished && !scoreAwarded && currentNode.score !== undefined) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        // We make a direct API call to add the score. Assuming /api/profile/score exists or similar, 
+        // if not, we rely on the visual aspect for now or game context. Let's try GameContext first.
+        fetch(buildApiUrl('/api/profile/sync'), {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          // Note: A robust implementation would have a specific endpoint for adding points.
+          // This assumes the backend handles incremental score updates if we send it, 
+          // or we can prompt the user that their score was recorded locally.
+          body: JSON.stringify({
+             incrementalScore: currentNode.score // backend would need to handle this
+          })
+        }).catch(err => console.warn('Failed to sync score:', err));
+        
+        setScoreAwarded(true);
+      }
+    }
+  }, [isFinished, scoreAwarded, currentNode]);
+
 
   const handleOptionClick = (option) => {
     if (typing) return; // Prevent clicking while text is typing
@@ -54,6 +82,7 @@ export default function ScenarioSimulator({ scenario, onClose }) {
     setCurrentNodeId("start");
     setHistory([]);
     setDisplayedText("");
+    setScoreAwarded(false);
   };
 
   if (!currentNode) {
@@ -129,14 +158,29 @@ export default function ScenarioSimulator({ scenario, onClose }) {
          )}
          
          {isFinished && (
-            <div className="wrap-up-container fade-up">
-               <div className="wrap-up-alert">
-                 <ShieldAlert size={24} />
-                 <h3>Incident Closed</h3>
+            <div className="wrap-up-container fade-up" style={{ textAlign: 'left', alignItems: 'flex-start' }}>
+               <div className="wrap-up-header" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                 {currentNode.isSuccess ? 
+                    <CheckCircle2 size={32} color="#00ff88" /> : 
+                    <XCircle size={32} color="#ff4757" />
+                 }
+                 <div>
+                    <h3 style={{ margin: 0, fontFamily: 'Orbitron, sans-serif', color: currentNode.isSuccess ? '#00ff88' : '#ff4757' }}>
+                      {currentNode.isSuccess ? 'Response Successful' : 'Response Failed'}
+                    </h3>
+                    <div style={{ color: '#ffbd2e', fontWeight: 'bold', marginTop: '0.25rem' }}>
+                       Score: {currentNode.score} / {scenario.maxScore}
+                    </div>
+                 </div>
                </div>
-               <p>The system has logged your responses. Run post-mortem analysis or reset the simulation.</p>
-               <button className="restart-btn" onClick={handleRestart}>
-                 <RefreshCw size={18} /> Restart Scenario
+               
+               <div className="wrap-up-explanation" style={{ backgroundColor: 'rgba(0,0,0,0.4)', padding: '1rem', borderRadius: '6px', borderLeft: `3px solid ${currentNode.isSuccess ? '#00ff88' : '#ff4757'}`, marginBottom: '1.5rem', color: '#e2e8f0', lineHeight: 1.5 }}>
+                 <strong>After Action Report:</strong><br/>
+                 {currentNode.explanation}
+               </div>
+
+               <button className="restart-btn" onClick={handleRestart} style={{ alignSelf: 'center' }}>
+                 <RefreshCw size={18} /> Restart Simulation
                </button>
             </div>
          )}
