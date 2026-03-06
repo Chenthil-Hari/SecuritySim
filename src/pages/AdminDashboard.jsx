@@ -30,7 +30,10 @@ export default function AdminDashboard() {
             if (activeTab === 'moderation') fetchPending();
             else if (activeTab === 'users') fetchUsers();
             else if (activeTab === 'analytics') fetchAnalytics();
-            else if (activeTab === 'operations') fetchLogs();
+            else if (activeTab === 'operations') {
+                fetchLogs();
+                fetchMaintenanceStatus();
+            }
         };
 
         fetchData();
@@ -66,6 +69,21 @@ export default function AdminDashboard() {
         }
     };
 
+    const fetchMaintenanceStatus = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/maintenance/status'), {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setMaintenanceMode(data.enabled);
+            }
+        } catch (err) {
+            console.error("Maintenance Status Error:", err);
+        }
+    };
+
     const handleBroadcast = async (e) => {
         e.preventDefault();
         try {
@@ -81,6 +99,7 @@ export default function AdminDashboard() {
             if (res.ok) {
                 alert("Global Alert Deployed!");
                 setBroadcast({ ...broadcast, message: '' });
+                fetchLogs();
             }
         } catch (err) {
             alert("Broadcast Error: " + err.message);
@@ -102,6 +121,7 @@ export default function AdminDashboard() {
             if (res.ok) {
                 setMaintenanceMode(enabled);
                 alert(`System is now ${enabled ? 'in MAINTENANCE' : 'OPERATIONAL'}`);
+                fetchLogs();
             }
         } catch (err) {
             alert("Maintenance Toggle Error: " + err.message);

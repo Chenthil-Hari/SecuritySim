@@ -124,6 +124,16 @@ router.post('/maintenance', authenticateToken, isAdmin, async (req, res) => {
     }
 });
 
+// GET /api/admin/maintenance/status — Check current mode
+router.get('/maintenance/status', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const maintenance = await SystemSetting.findOne({ key: 'maintenance_mode' });
+        res.json({ enabled: maintenance ? maintenance.value : false });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // GET /api/admin/logs — Audit Logs
 router.get('/logs', authenticateToken, isAdmin, async (req, res) => {
     try {
