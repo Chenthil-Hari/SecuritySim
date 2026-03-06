@@ -118,6 +118,12 @@ router.post('/maintenance', authenticateToken, isAdmin, async (req, res) => {
         );
 
         await logAction(req.user, 'toggle_maintenance', `Set Maintenance Mode to ${enabled}`);
+        
+        const io = req.app.get('io');
+        if (io) {
+            io.emit('maintenance_toggle', { enabled });
+        }
+        
         res.json({ message: `System status set to ${enabled ? 'MAINTENANCE' : 'OPERATIONAL'}`, enabled });
     } catch (error) {
         res.status(500).json({ message: error.message });

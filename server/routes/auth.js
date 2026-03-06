@@ -2,8 +2,11 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { getMaintenanceStatus } from '../middleware/auth.js';
 
 const router = express.Router();
+
+router.get('/maintenance-status', getMaintenanceStatus);
 
 // Signup Route
 router.post('/signup', async (req, res) => {
