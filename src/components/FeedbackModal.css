@@ -1,57 +1,32 @@
-.perfect-feedback-overlay {
+.feedback-master-overlay {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
     height: 100dvh !important;
-    background: rgba(4, 4, 15, 0.95) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
+    background: rgba(0, 0, 0, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
     z-index: 2147483647 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     padding: 20px !important;
-    margin: 0 !important;
 }
 
-@keyframes fadeInOverlay {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-.perfect-feedback-modal {
-    background: #0a0a20 !important;
-    border: 1px solid rgba(0, 240, 255, 0.3) !important;
-    border-radius: 20px !important;
+.feedback-master-modal {
+    background: #0f1120 !important;
+    border: 2px solid rgba(0, 240, 255, 0.4) !important;
+    border-radius: 24px !important;
+    width: 100% !important;
     max-width: 500px !important;
-    width: 95% !important;
-    padding: 30px !important;
-    position: relative !important;
-    z-index: 2147483647 !important;
-    box-shadow: 0 0 50px rgba(0, 240, 255, 0.2) !important;
-    animation: perfectScaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+    padding: 40px !important;
+    box-shadow: 0 0 50px rgba(0, 240, 255, 0.25) !important;
+    animation: masterPopIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
 }
 
-@keyframes perfectScaleIn {
-    from {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-@keyframes cyberScaleIn {
+@keyframes masterPopIn {
     from {
         opacity: 0;
         transform: scale(0.9) translateY(20px);
@@ -63,152 +38,88 @@
     }
 }
 
-.feedback-modal::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-}
-
-.feedback-modal.correct::before {
-    background: linear-gradient(90deg, var(--success), #34d399);
-}
-
-.feedback-modal.incorrect::before {
-    background: linear-gradient(90deg, var(--danger), var(--warning));
-}
-
-.feedback-icon-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-bottom: var(--space-lg);
-}
-
-.feedback-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.feedback-icon.correct {
-    background: var(--success-bg);
-    color: var(--success);
-    box-shadow: 0 0 24px var(--success-glow);
-}
-
-.feedback-icon.incorrect {
-    background: var(--danger-bg);
-    color: var(--danger);
-    box-shadow: 0 0 24px var(--danger-glow);
-}
-
-.feedback-result {
+.feedback-master-header {
     text-align: center;
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: var(--space-sm);
+    margin-bottom: 24px;
 }
 
-.feedback-result.correct {
-    color: var(--success);
+.feedback-master-icon {
+    display: inline-flex;
+    padding: 16px;
+    border-radius: 50%;
+    margin-bottom: 16px;
 }
 
-.feedback-result.incorrect {
-    color: var(--danger);
+.feedback-master-icon.correct {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
 }
 
-.feedback-text {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
+.feedback-master-icon.incorrect {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.feedback-master-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+.feedback-master-modal.correct .feedback-master-title {
+    color: #10b981;
+}
+
+.feedback-master-modal.incorrect .feedback-master-title {
+    color: #ef4444;
+}
+
+.feedback-main-text {
+    font-size: 1rem;
+    color: #d1d5db;
     line-height: 1.6;
     text-align: center;
-    margin-bottom: var(--space-lg);
+    margin-bottom: 24px;
 }
 
-.feedback-tip {
-    background: rgba(0, 240, 255, 0.03);
-    border: 1px solid rgba(0, 240, 255, 0.1);
-    border-left: 3px solid var(--primary);
-    border-radius: var(--radius-sm);
-    padding: var(--space-md);
-    margin-bottom: var(--space-lg);
+.feedback-master-tip {
+    background: rgba(0, 240, 255, 0.05);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
 }
 
-.feedback-tip-label {
-    font-size: 0.7rem;
+.tip-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--primary);
-    margin-bottom: var(--space-xs);
+    color: #00f0ff;
+    margin-bottom: 8px;
 }
 
-.feedback-tip-text {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
+.feedback-master-tip p {
+    font-size: 0.9rem;
+    color: #9ca3af;
     line-height: 1.5;
 }
 
-.feedback-xp {
-    text-align: center;
-    font-size: 0.85rem;
-    color: var(--warning);
-    font-weight: 600;
-    margin-bottom: var(--space-lg);
-}
-
-.feedback-btn {
-    display: block;
+.feedback-master-button {
     width: 100%;
-    padding: 14px;
-    border-radius: var(--radius-md);
-    font-size: 0.95rem;
-    font-weight: 600;
+    padding: 16px;
+    border-radius: 12px;
+    background: #00f0ff;
+    color: #000;
+    font-weight: 700;
+    font-size: 1rem;
     border: none;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform 0.2s;
 }
 
-.feedback-btn.correct {
-    background: var(--success);
-    color: white;
-}
-
-.feedback-btn.correct:hover {
-    background: #0ea572;
-    box-shadow: 0 4px 16px var(--success-glow);
-}
-
-.feedback-btn.incorrect {
-    background: linear-gradient(135deg, var(--primary-dim), var(--primary));
-    color: var(--text-inverse);
-}
-
-.feedback-btn.incorrect:hover {
-    box-shadow: 0 4px 16px var(--primary-glow);
-}
-
-@media (max-width: 768px) {
-    .feedback-modal {
-        padding: var(--space-lg);
-        max-width: 90vw;
-    }
-
-    .feedback-icon {
-        width: 48px;
-        height: 48px;
-    }
-
-    .feedback-result {
-        font-size: 1.1rem;
-    }
-
-    .feedback-text {
-        font-size: 0.85rem;
-    }
+.feedback-master-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 240, 255, 0.4);
 }

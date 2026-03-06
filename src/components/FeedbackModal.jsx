@@ -5,50 +5,51 @@ import { speakFeedback } from '../utils/voiceGuidance';
 import { useGame } from '../context/GameContext';
 import './FeedbackModal.css';
 
-// FeedbackModal v3 - Forced Portal Centering
 export default function FeedbackModal({ isCorrect, feedback, defenseTip, xpEarned, onContinue }) {
     const { settings } = useGame();
 
     useEffect(() => {
-        speakFeedback(feedback, settings);
-        // Prevent scroll when modal is open
+        // Voice guidance
+        try {
+            speakFeedback(feedback, settings);
+        } catch (e) {
+            console.error("Feedback voice error:", e);
+        }
+
+        // Prevent scroll
+        const originalOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
         return () => {
-            document.body.style.overflow = 'auto';
+            document.body.style.overflow = originalOverflow;
         };
     }, [feedback, settings]);
 
+    // Render directly to document.body for ultimate layering
     return createPortal(
-        <div className="perfect-feedback-overlay" onClick={onContinue}>
-            <div className={`perfect-feedback-modal ${isCorrect ? 'correct' : 'incorrect'}`} onClick={e => e.stopPropagation()}>
-                <div className="feedback-icon-wrapper">
-                    <div className={`feedback-icon ${isCorrect ? 'correct' : 'incorrect'}`}>
-                        {isCorrect ? <CheckCircle size={32} /> : <XCircle size={32} />}
+        <div className="feedback-master-overlay" onClick={onContinue}>
+            <div className={`feedback-master-modal ${isCorrect ? 'correct' : 'incorrect'}`} onClick={e => e.stopPropagation()}>
+                <div className="feedback-master-header">
+                    <div className={`feedback-master-icon ${isCorrect ? 'correct' : 'incorrect'}`}>
+                        {isCorrect ? <CheckCircle size={40} /> : <XCircle size={40} />}
                     </div>
+                    <h2 className="feedback-master-title">
+                        {isCorrect ? 'Correct!' : 'Incorrect'}
+                    </h2>
                 </div>
 
-                <div className={`feedback-result ${isCorrect ? 'correct' : 'incorrect'}`}>
-                    {isCorrect ? 'Correct!' : 'Not Quite Right'}
-                </div>
+                <div className="feedback-master-content">
+                    <p className="feedback-main-text">{feedback}</p>
 
-                <p className="feedback-text">{feedback}</p>
-
-                {defenseTip && (
-                    <div className="feedback-tip">
-                        <div className="feedback-tip-label">
-                            <ShieldAlert size={12} style={{ display: 'inline', marginRight: 4 }} />
-                            Defense Tip
+                    {defenseTip && (
+                        <div className="feedback-master-tip">
+                            <div className="tip-header"><ShieldAlert size={16} /> Defense Tip</div>
+                            <p>{defenseTip}</p>
                         </div>
-                        <p className="feedback-tip-text">{defenseTip}</p>
-                    </div>
-                )}
+                    )}
+                </div>
 
-                {xpEarned > 0 && (
-                    <div className="feedback-xp">+{xpEarned} XP earned!</div>
-                )}
-
-                <button className={`feedback-btn ${isCorrect ? 'correct' : 'incorrect'}`} onClick={onContinue}>
-                    Continue
+                <button className="feedback-master-button" onClick={onContinue}>
+                    Continue Scenario
                 </button>
             </div>
         </div>,
