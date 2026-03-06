@@ -346,6 +346,11 @@
     padding: var(--space-xl);
     background: #010409;
     border-top: 1px solid #30363d;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
 .review-section.author-info-section {
     background: rgba(255, 255, 255, 0.02);
     padding: var(--space-lg);
