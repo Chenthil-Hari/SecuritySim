@@ -42,6 +42,25 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const adminLogin = async (email, password) => {
+        try {
+            const response = await fetch(buildApiUrl('/api/auth/admin-login'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Administrative login failed');
+            
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            setUser(data.user);
+            return { success: true };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    };
+
     const signup = async (username, email, password, country) => {
         try {
             const response = await fetch(buildApiUrl('/api/auth/signup'), {
@@ -73,7 +92,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, signup, logout, updateUser }}>
+        <AuthContext.Provider value={{ user, loading, login, adminLogin, signup, logout, updateUser }}>
             {loading ? <Loader /> : children}
         </AuthContext.Provider>
     );

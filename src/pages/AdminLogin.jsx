@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Lock, ArrowRight, AlertOctagon } from 'lucide-react';
-import { buildApiUrl } from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 import './AdminLogin.css';
 
 export default function AdminLogin() {
     const navigate = useNavigate();
+    const { adminLogin } = useAuth();
     const [credentials, setCredentials] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -15,29 +16,12 @@ export default function AdminLogin() {
         setError('');
         setLoading(true);
 
-        try {
-            const trimmedCredentials = {
-                email: credentials.email.trim(),
-                password: credentials.password.trim()
-            };
-            const response = await fetch(buildApiUrl('/api/auth/admin-login'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(trimmedCredentials),
-            });
-            const data = await response.json();
-            
-            if (response.ok) {
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-                // Force a reload or update context if necessary, but navigate is enough for basic role protection
-                navigate('/admin/dashboard');
-            } else {
-                setError(data.message || 'Login failed');
-            }
-        } catch (err) {
-            setError('System error connecting to secure terminal.');
-        } finally {
+        const result = await adminLogin(credentials.email, credentials.password);
+        
+        if (result.success) {
+            navigate('/admin/dashboard');
+        } else {
+            setError(result.error || 'Login failed');
             setLoading(false);
         }
     };

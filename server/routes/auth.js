@@ -115,12 +115,12 @@ router.post('/login', async (req, res) => {
 router.post('/admin-login', async (req, res) => {
     try {
         let { email, password } = req.body;
-        email = email?.trim();
+        email = email?.trim().toLowerCase();
         password = password?.trim();
         
-        // Single admin credentials
+        // Single admin credentials (ensure lowercase comparison)
         const ADMIN_EMAIL = 'admin@hari07.tech';
-        const ADMIN_PASS = 'CyberSecurity2026!'; // User should change this later
+        const ADMIN_PASS = 'CyberSecurity2026!'; 
 
         if (email !== ADMIN_EMAIL || password !== ADMIN_PASS) {
             console.log(`[DEBUG] Login attempt failed. Target: ${ADMIN_EMAIL}. Received: ${email}`);
