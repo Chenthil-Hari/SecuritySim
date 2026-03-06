@@ -15,6 +15,7 @@ import threatsRoutes from '../server/routes/threats.js';
 import friendsRoutes from '../server/routes/friends.js';
 import ugcScenariosRoutes from '../server/routes/ugcScenarios.js';
 import warroomsRoutes from '../server/routes/warrooms.js';
+import usersRoutes from '../server/routes/users.js';
 
 dotenv.config();
 
@@ -107,6 +108,7 @@ app.use('/api/threats', threatsRoutes);
 app.use('/api/friends', friendsRoutes);
 app.use('/api/ugc-scenarios', ugcScenariosRoutes);
 app.use('/api/warrooms', warroomsRoutes);
+app.use('/api/users', usersRoutes);
 
 app.get('/api', (req, res) => {
     res.json({ 

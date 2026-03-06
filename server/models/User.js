@@ -111,6 +111,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['user', 'admin'],
         default: 'user'
+    },
+    isFrozen: {
+        type: Boolean,
+        default: false
     }
 });
 

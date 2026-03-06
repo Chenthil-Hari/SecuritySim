@@ -351,6 +351,125 @@
     gap: 12px;
 }
 
+.admin-main .header-search {
+    flex: 1;
+    max-width: 400px;
+    margin: 0 var(--space-xl);
+    background: #010409;
+    border: 1px solid #30363d;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+}
+
+.header-search input {
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 10px;
+    width: 100%;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #161b22;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid #30363d;
+}
+
+.admin-table th {
+    text-align: left;
+    background: #010409;
+    padding: 16px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #8b949e;
+    letter-spacing: 1px;
+}
+
+.admin-table td {
+    padding: 16px;
+    border-bottom: 1px solid #30363d;
+    vertical-align: middle;
+}
+
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-text .username {
+    font-weight: 600;
+    color: white;
+}
+
+.user-text .user-id {
+    font-size: 0.7rem;
+    color: #8b949e;
+    font-family: var(--font-mono);
+}
+
+.xp-pills {
+    margin-left: 8px;
+    background: rgba(0, 240, 255, 0.1);
+    color: var(--primary);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge.active {
+    background: rgba(46, 160, 67, 0.1);
+    color: #3fb950;
+}
+
+.status-badge.frozen {
+    background: rgba(248, 81, 73, 0.1);
+    color: #f85149;
+}
+
+.actions-cell {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid #30363d;
+    background: #21262d;
+    color: #c9d1d9;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-btn.freeze:hover { color: #f85149; border-color: #f85149; }
+.action-btn.unfreeze { color: #3fb950; border-color: #3fb950; }
+.action-btn.reset:hover { color: var(--primary); border-color: var(--primary); }
+
 .review-section.author-info-section {
     background: rgba(255, 255, 255, 0.02);
     padding: var(--space-lg);

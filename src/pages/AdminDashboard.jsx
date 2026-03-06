@@ -8,19 +8,25 @@ import './AdminDashboard.css';
 export default function AdminDashboard() {
     const navigate = useNavigate();
     const { logout, user } = useAuth();
+    const [activeTab, setActiveTab] = useState('moderation'); // 'moderation' or 'users'
     const [scenarios, setScenarios] = useState([]);
+    const [users, setUsers] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState({ pending: 0, total: 0 });
+    const [stats, setStats] = useState({ pending: 0, totalUsers: 0 });
     const [activeScenario, setActiveScenario] = useState(null);
 
     useEffect(() => {
-        // Redundant check for safety
         if (user?.role !== 'admin') {
             navigate('/admin');
             return;
         }
-        fetchPending();
-    }, [user, navigate]);
+        if (activeTab === 'moderation') {
+            fetchPending();
+        } else {
+            fetchUsers();
+        }
+    }, [user, navigate, activeTab]);
 
     const fetchPending = async () => {
         setLoading(true);
@@ -30,17 +36,67 @@ export default function AdminDashboard() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
-                const data = await res.ok ? await res.json() : [];
+                const data = await res.json();
                 setScenarios(data);
-                setStats({ 
-                    pending: data.length,
-                    total: data.length // This could be improved with more stats
-                });
+                setStats(prev => ({ ...prev, pending: data.length }));
             }
         } catch (err) {
             console.error("Error fetching pending:", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchUsers = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/users/admin/all'), {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setUsers(data);
+                setStats(prev => ({ ...prev, totalUsers: data.length }));
+            }
+        } catch (err) {
+            console.error("Error fetching users:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleFreeze = async (userId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/users/admin/${userId}/freeze`), {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setUsers(users.map(u => u._id === userId ? { ...u, isFrozen: data.isFrozen } : u));
+                alert(data.message);
+            }
+        } catch (err) {
+            alert("Error updating user status: " + err.message);
+        }
+    };
+
+    const handleResetPassword = async (userId) => {
+        if (!confirm("Are you sure you want to reset this user's password? A temporary password will be generated.")) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/users/admin/${userId}/reset-password`), {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                alert(`Password Reset Successful!\nTemporary Password: ${data.tempPassword}\n\nPlease provide this to the user.`);
+            }
+        } catch (err) {
+            alert("Error resetting password: " + err.message);
         }
     };
 
@@ -84,9 +140,18 @@ export default function AdminDashboard() {
                 </div>
                 
                 <nav className="sidebar-nav">
-                    <button className="nav-item active">
+                    <button 
+                        className={`nav-item ${activeTab === 'moderation' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('moderation')}
+                    >
                         <Clock size={18} /> Moderation Queue
-                        <span className="badge">{stats.pending}</span>
+                        {stats.pending > 0 && <span className="badge">{stats.pending}</span>}
+                    </button>
+                    <button 
+                        className={`nav-item ${activeTab === 'users' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('users')}
+                    >
+                        <Shield size={18} /> User Directory
                     </button>
                 </nav>
 
@@ -107,55 +172,131 @@ export default function AdminDashboard() {
             <main className="admin-main">
                 <header className="main-header">
                     <div className="header-title">
-                        <h1>Moderation Queue</h1>
-                        <p>Total pending scenarios awaiting review: {stats.pending}</p>
+                        <h1>{activeTab === 'moderation' ? 'Moderation Queue' : 'User & Security Management'}</h1>
+                        <p>
+                            {activeTab === 'moderation' 
+                                ? `Total pending scenarios awaiting review: ${stats.pending}` 
+                                : `Total registered investigators: ${stats.totalUsers}`}
+                        </p>
                     </div>
-                    <button className="refresh-btn" onClick={fetchPending}>Refresh</button>
+                    {activeTab === 'users' && (
+                        <div className="header-search">
+                            <Search size={18} />
+                            <input 
+                                type="text" 
+                                placeholder="Search by username or ID..." 
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    )}
+                    <button className="refresh-btn" onClick={activeTab === 'moderation' ? fetchPending : fetchUsers}>Refresh</button>
                 </header>
 
                 <div className="dashboard-content">
                     {loading ? (
                         <div className="admin-loading">Initializing Terminal...</div>
-                    ) : scenarios.length > 0 ? (
-                        <div className="scenario-queue">
-                            {scenarios.map(s => (
-                                <div key={s._id} className="queue-card animate-fade-in">
-                                    <div className="queue-card-main">
-                                        <div className="scenario-identity">
-                                            <span className={`cat-tag ${s.category.toLowerCase()}`}>{s.category}</span>
-                                            <h3>{s.title}</h3>
-                                            <p>{s.description}</p>
+                    ) : activeTab === 'moderation' ? (
+                        scenarios.length > 0 ? (
+                            <div className="scenario-queue">
+                                {scenarios.map(s => (
+                                    <div key={s._id} className="queue-card animate-fade-in">
+                                        <div className="queue-card-main">
+                                            <div className="scenario-identity">
+                                                <span className={`cat-tag ${s.category.toLowerCase()}`}>{s.category}</span>
+                                                <h3>{s.title}</h3>
+                                                <p>{s.description}</p>
+                                            </div>
+                                            <div className="scenario-meta">
+                                                <div className="meta-item">
+                                                    <span>Author</span>
+                                                    <strong>{s.authorId?.username || 'Unknown'}</strong>
+                                                </div>
+                                                <div className="meta-item">
+                                                    <span>Difficulty</span>
+                                                    <strong className={s.difficulty.toLowerCase()}>{s.difficulty}</strong>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="scenario-meta">
-                                            <div className="meta-item">
-                                                <span>Author</span>
-                                                <strong>{s.authorId?.username || 'Unknown'}</strong>
-                                            </div>
-                                            <div className="meta-item">
-                                                <span>Difficulty</span>
-                                                <strong className={s.difficulty.toLowerCase()}>{s.difficulty}</strong>
-                                            </div>
+                                        <div className="queue-card-actions">
+                                            <button className="btn-view" onClick={() => setActiveScenario(s)}>
+                                                <Eye size={16} /> Review
+                                            </button>
+                                            <button className="btn-approve" onClick={() => handleModerate(s._id, 'approved')}>
+                                                <CheckCircle size={16} /> Approve
+                                            </button>
+                                            <button className="btn-reject" onClick={() => handleModerate(s._id, 'rejected')}>
+                                                <XCircle size={16} /> Reject
+                                            </button>
                                         </div>
                                     </div>
-                                    <div className="queue-card-actions">
-                                        <button className="btn-view" onClick={() => setActiveScenario(s)}>
-                                            <Eye size={16} /> Review
-                                        </button>
-                                        <button className="btn-approve" onClick={() => handleModerate(s._id, 'approved')}>
-                                            <CheckCircle size={16} /> Approve
-                                        </button>
-                                        <button className="btn-reject" onClick={() => handleModerate(s._id, 'rejected')}>
-                                            <XCircle size={16} /> Reject
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="queue-empty">
+                                <CheckCircle size={48} className="text-success" />
+                                <h2>All Caught Up!</h2>
+                                <p>There are no pending scenarios to moderate at this time.</p>
+                            </div>
+                        )
                     ) : (
-                        <div className="queue-empty">
-                            <CheckCircle size={48} className="text-success" />
-                            <h2>All Caught Up!</h2>
-                            <p>There are no pending scenarios to moderate at this time.</p>
+                        <div className="user-management">
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Investigator</th>
+                                        <th>Level / XP</th>
+                                        <th>Team</th>
+                                        <th>Joined</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {users.filter(u => u.username.toLowerCase().includes(searchQuery.toLowerCase())).map(u => (
+                                        <tr key={u._id}>
+                                            <td>
+                                                <div className="user-cell">
+                                                    <div className="user-avatar">{u.username[0]}</div>
+                                                    <div className="user-text">
+                                                        <span className="username">{u.username}</span>
+                                                        <span className="user-id">{u._id}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="xp-cell">
+                                                    Lvl {u.level}
+                                                    <span className="xp-pills">{u.xp} XP</span>
+                                                </div>
+                                            </td>
+                                            <td>{u.teamId?.name || <span className="text-muted">No Team</span>}</td>
+                                            <td>{new Date(u.createdAt).toLocaleDateString()}</td>
+                                            <td>
+                                                <span className={`status-badge ${u.isFrozen ? 'frozen' : 'active'}`}>
+                                                    {u.isFrozen ? 'Terminal Locked' : 'Active'}
+                                                </span>
+                                            </td>
+                                            <td className="actions-cell">
+                                                <button 
+                                                    className={`action-btn ${u.isFrozen ? 'unfreeze' : 'freeze'}`}
+                                                    onClick={() => handleFreeze(u._id)}
+                                                    title={u.isFrozen ? 'Unfreeze Account' : 'Freeze Account'}
+                                                >
+                                                    <AlertCircle size={16} />
+                                                </button>
+                                                <button 
+                                                    className="action-btn reset"
+                                                    onClick={() => handleResetPassword(u._id)}
+                                                    title="Reset Terminal Password"
+                                                >
+                                                    <Lock size={16} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     )}
                 </div>
