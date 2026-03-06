@@ -1,6 +1,6 @@
 import express from 'express';
 import UgcScenario from '../models/UgcScenario.js';
-import { authenticateToken } from '../routes/auth.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 

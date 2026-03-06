@@ -1,23 +1,12 @@
 import express from 'express';
 import Groq from 'groq-sdk';
-import jwt from 'jsonwebtoken';
+import { authenticateToken } from '../middleware/auth.js';
 import User from '../models/User.js';
 
 const router = express.Router();
 
 // Middleware to verify user token before allowing AI access
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) return res.status(401).json({ message: 'Authentication required to use AI Assistant' });
-
-    jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret', (err, user) => {
-        if (err) return res.status(403).json({ message: 'Invalid or expired token' });
-        req.user = user;
-        next();
-    });
-};
+// authenticateToken is imported from middleware
 
 // INITIALIZE GROQ SDK
 // We initialize it lazily inside the route so it doesn't crash the server if the key is initially missing

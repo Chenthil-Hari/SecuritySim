@@ -1,7 +1,7 @@
 import express from 'express';
 import WarRoom from '../models/WarRoom.js';
 import ChatMessage from '../models/ChatMessage.js';
-import { authenticateToken } from '../routes/auth.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 

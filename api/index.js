@@ -46,6 +46,7 @@ async function connectToDatabase() {
     // Set connection options for stability
     const opts = {
         bufferCommands: false,
+        serverSelectionTimeoutMS: 5000,
     };
 
     try {
