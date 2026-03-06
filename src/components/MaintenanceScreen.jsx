@@ -1,5 +1,4 @@
-import { Shield, Lock, ExternalLink } from 'lucide-react';
-import maintenanceImg from '../assets/Gemini_Generated_Image_cejcaacejcaacejc_small.png';
+import { Shield, Lock, ExternalLink, Activity } from 'lucide-react';
 import './MaintenanceScreen.css';
 
 export default function MaintenanceScreen() {
@@ -8,12 +7,15 @@ export default function MaintenanceScreen() {
             <div className="maintenance-overlay">
                 <div className="maintenance-card animate-pop">
                     <div className="card-header">
-                        <Shield size={32} className="status-glow" />
+                        <Activity size={32} className="status-glow" />
                         <h1>System Under Maintenance</h1>
                     </div>
                     
-                    <div className="maintenance-image-container">
-                        <img src={maintenanceImg} alt="Maintenance Illustration" className="premium-image" />
+                    <div className="maintenance-radar-container">
+                        <div className="radar">
+                            <div className="radar-sweep"></div>
+                            <Shield size={64} className="radar-shield" />
+                        </div>
                     </div>
 
                     <div className="maintenance-body">
