@@ -856,3 +856,118 @@
     background: rgba(248, 81, 73, 0.1);
     color: #f85149;
 }
+
+/* Evidence Locker */
+.evidence-locker {
+    height: 100%;
+}
+
+.asset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-xl);
+}
+
+.asset-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s ease;
+}
+
+.asset-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border-color: #484f58;
+}
+
+.asset-image-container {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background: #0d1117;
+    overflow: hidden;
+}
+
+.asset-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.asset-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.asset-card:hover .asset-overlay {
+    opacity: 1;
+}
+
+.btn-takedown {
+    background: rgba(248, 81, 73, 0.2);
+    border: none;
+    color: #f85149;
+    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-takedown:hover {
+    background: #f85149;
+    color: white;
+    transform: scale(1.1);
+}
+
+.asset-info {
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.asset-info strong {
+    color: white;
+    font-size: 0.95rem;
+}
+
+.asset-type-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    width: max-content;
+    margin-bottom: 4px;
+}
+
+.asset-type-badge.user {
+    background: rgba(63, 185, 80, 0.15);
+    color: #3fb950;
+}
+
+.asset-type-badge.scenario {
+    background: rgba(168, 85, 247, 0.15);
+    color: var(--secondary);
+}
+
+.text-small {
+    font-size: 0.8rem;
+}

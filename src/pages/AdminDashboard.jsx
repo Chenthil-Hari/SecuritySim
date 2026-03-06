@@ -20,6 +20,7 @@ export default function AdminDashboard() {
     const [activeScenario, setActiveScenario] = useState(null);
     const [moderationView, setModerationView] = useState('pending'); // 'pending' or 'live'
     const [liveScenarios, setLiveScenarios] = useState([]);
+    const [assets, setAssets] = useState([]);
 
     useEffect(() => {
         if (user?.role !== 'admin') {
@@ -36,6 +37,9 @@ export default function AdminDashboard() {
             else if (activeTab === 'analytics') fetchAnalytics();
             else if (activeTab === 'operations') {
                 fetchLogs();
+            }
+            else if (activeTab === 'evidence') {
+                fetchAssets();
             }
         };
 
@@ -127,6 +131,23 @@ export default function AdminDashboard() {
             }
         } catch (err) {
             console.error("Error fetching live scenarios:", err);
+        }
+    };
+
+    const fetchAssets = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/assets'), {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                setAssets(await res.json());
+            }
+        } catch (err) {
+            console.error("Error fetching assets:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -254,6 +275,31 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleAssetTakedown = async (assetId, assetType) => {
+        if (!confirm("Are you sure you want to take down this specific image? This will permanently remove it.")) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/assets'), {
+                method: 'DELETE',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ id: assetId, type: assetType })
+            });
+
+            if (res.ok) {
+                setAssets(assets.filter(a => !(a._id === assetId && a.type === assetType)));
+                alert("Image successfully removed from platform.");
+            } else {
+                const data = await res.json();
+                alert(data.message || "Failed to remove image");
+            }
+        } catch (err) {
+            alert("Error removing asset: " + err.message);
+        }
+    };
+
     const handleLogout = () => {
         logout();
         navigate('/admin');
@@ -269,12 +315,14 @@ export default function AdminDashboard() {
                     {activeTab === 'users' && 'User Directory'}
                     {activeTab === 'analytics' && 'Intelligence Dashboard'}
                     {activeTab === 'operations' && 'Mission Operations'}
+                    {activeTab === 'evidence' && 'Evidence Locker'}
                 </h1>
                 <p>
                     {activeTab === 'moderation' && `Total pending scenarios: ${stats.pending} | Live: ${liveScenarios.length}`}
                     {activeTab === 'users' && `Total registered investigators: ${stats.totalUsers}`}
                     {activeTab === 'analytics' && 'Real-time platform performance metrics.'}
                     {activeTab === 'operations' && 'Administrative controls and security logs.'}
+                    {activeTab === 'evidence' && 'Review uploaded visual assets from users and scenarios.'}
                 </p>
             </div>
             {activeTab === 'users' && (
@@ -293,6 +341,7 @@ export default function AdminDashboard() {
                 else if (activeTab === 'users') fetchUsers();
                 else if (activeTab === 'analytics') fetchAnalytics();
                 else if (activeTab === 'operations') fetchLogs();
+                else if (activeTab === 'evidence') fetchAssets();
             }}>Refresh</button>
         </header>
     );
@@ -558,6 +607,45 @@ export default function AdminDashboard() {
         </div>
     );
 
+    const renderEvidenceLocker = () => (
+        <div className="evidence-locker animate-fade-in">
+            {assets.length === 0 ? (
+                <div className="queue-empty">
+                    <CheckCircle size={48} className="text-muted" />
+                    <h2>Locker Empty</h2>
+                    <p>There are no uploaded images to review at this time.</p>
+                </div>
+            ) : (
+                <div className="asset-grid">
+                    {assets.map(asset => (
+                        <div key={`${asset.type}-${asset._id}`} className="asset-card">
+                            <div className="asset-image-container">
+                                <img src={asset.url} alt="Uploaded Asset" className="asset-img" />
+                                <div className="asset-overlay">
+                                    <button 
+                                        className="btn-takedown" 
+                                        onClick={() => handleAssetTakedown(asset._id, asset.type)}
+                                        title="Take Down Image"
+                                    >
+                                        <XCircle size={32} />
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="asset-info">
+                                <span className={`asset-type-badge ${asset.type === 'user_profile' ? 'user' : 'scenario'}`}>
+                                    {asset.type === 'user_profile' ? 'Profile Photo' : 'Scenario Asset'}
+                                </span>
+                                <strong>Uploader: {asset.uploader}</strong>
+                                <span className="text-muted text-small">{asset.context}</span>
+                                <span className="text-muted text-small">{new Date(asset.date).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <div className="admin-dashboard-page">
             <aside className="admin-sidebar">
@@ -569,6 +657,9 @@ export default function AdminDashboard() {
                 <nav className="sidebar-nav">
                     <button className={`nav-item ${activeTab === 'moderation' ? 'active' : ''}`} onClick={() => setActiveTab('moderation')}>
                         <Clock size={18} /> Moderation Queue
+                    </button>
+                    <button className={`nav-item ${activeTab === 'evidence' ? 'active' : ''}`} onClick={() => setActiveTab('evidence')}>
+                        <Eye size={18} /> Evidence Locker
                     </button>
                     <button className={`nav-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
                         <Shield size={18} /> User Directory
@@ -597,12 +688,16 @@ export default function AdminDashboard() {
 
             <main className="admin-main">
                 {renderHeader()}
-                <div className="dashboard-content">
+                <div className="admin-content">
                     {loading ? (
-                        <div className="admin-loading">Initializing Terminal...</div>
+                        <div className="loading-state">
+                            <div className="spinner"></div>
+                            <p>Loading intel...</p>
+                        </div>
                     ) : (
                         <>
                             {activeTab === 'moderation' && renderModeration()}
+                            {activeTab === 'evidence' && renderEvidenceLocker()}
                             {activeTab === 'users' && renderUsers()}
                             {activeTab === 'analytics' && renderAnalytics()}
                             {activeTab === 'operations' && renderOperations()}

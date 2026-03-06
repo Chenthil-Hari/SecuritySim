@@ -162,4 +162,73 @@ router.delete('/logs', authenticateToken, isAdmin, async (req, res) => {
     }
 });
 
+// GET /api/admin/assets — Aggregate images for Evidence Locker
+router.get('/assets', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const users = await User.find({ profilePhoto: { $ne: null, $ne: '' } }, '_id username profilePhoto createdAt');
+        const scenarios = await UgcScenario.find({ "visualData.imageUrl": { $exists: true, $ne: '' } }, '_id title authorId visualData createdAt');
+
+        const assets = [];
+
+        users.forEach(u => {
+            assets.push({
+                _id: u._id, // Used for deletion
+                type: 'user_profile',
+                url: u.profilePhoto,
+                uploader: u.username,
+                context: 'Profile Photo',
+                date: u.createdAt
+            });
+        });
+
+        scenarios.forEach(s => {
+            assets.push({
+                _id: s._id, // Used for deletion
+                type: 'scenario_image',
+                url: s.visualData.imageUrl,
+                uploader: s.authorId ? s.authorId.username : 'Unknown', // Need populate or handle missing
+                context: `UGC Scenario: ${s.title}`,
+                date: s.createdAt
+            });
+        });
+
+        // Sort newest first
+        assets.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        res.json(assets);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// DELETE /api/admin/assets — Takedown an image
+router.delete('/assets', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { id, type } = req.body; // type is 'user_profile' or 'scenario_image'
+        if (!id || !type) return res.status(400).json({ message: "Asset ID and Type are required" });
+
+        if (type === 'user_profile') {
+            const user = await User.findById(id);
+            if (!user) return res.status(404).json({ message: "User not found" });
+            const oldUrl = user.profilePhoto;
+            user.profilePhoto = ''; // Clear it
+            await user.save();
+            await logAction(req.user, 'asset_takedown', `Removed profile picture for ${user.username} (${oldUrl})`);
+        } else if (type === 'scenario_image') {
+            const scenario = await UgcScenario.findById(id);
+            if (!scenario) return res.status(404).json({ message: "Scenario not found" });
+            const oldUrl = scenario.visualData.imageUrl;
+            scenario.visualData.imageUrl = ''; // Clear it
+            await scenario.save();
+            await logAction(req.user, 'asset_takedown', `Removed image from scenario "${scenario.title}" (${oldUrl})`);
+        } else {
+            return res.status(400).json({ message: "Invalid asset type" });
+        }
+
+        res.json({ message: "Asset successfully taken down" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 export default router;
