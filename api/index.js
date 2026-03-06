@@ -32,13 +32,45 @@ app.use(express.json());
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-    console.error("CRITICAL: MONGODB_URI environment variable is not defined!");
-} else {
-    mongoose.connect(MONGODB_URI)
-        .then(() => console.log('✅ Connected to MongoDB successfully!'))
-        .catch(err => console.error('❌ MongoDB connection error:', err.message));
+let cachedConnection = null;
+
+async function connectToDatabase() {
+    if (cachedConnection) {
+        return cachedConnection;
+    }
+
+    if (!MONGODB_URI) {
+        throw new Error("MONGODB_URI environment variable is not defined!");
+    }
+
+    // Set connection options for stability
+    const opts = {
+        bufferCommands: false,
+    };
+
+    try {
+        cachedConnection = await mongoose.connect(MONGODB_URI, opts);
+        console.log('✅ Connected to MongoDB successfully!');
+        return cachedConnection;
+    } catch (err) {
+        console.error('❌ MongoDB connection error:', err.message);
+        throw err;
+    }
 }
+
+// Middleware to ensure DB is connected
+app.use(async (req, res, next) => {
+    try {
+        await connectToDatabase();
+        next();
+    } catch (err) {
+        res.status(500).json({ 
+            message: 'Database connection failed', 
+            error: err.message,
+            tip: 'Check your Vercel environment variables and MongoDB Atlas IP whitelist.' 
+        });
+    }
+});
 
 // Socket.io Logic
 io.on('connection', (socket) => {

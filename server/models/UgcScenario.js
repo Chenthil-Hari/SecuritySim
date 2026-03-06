@@ -54,5 +54,5 @@ const ugcScenarioSchema = new mongoose.Schema({
     }
 });
 
-const UgcScenario = mongoose.model('UgcScenario', ugcScenarioSchema);
+const UgcScenario = mongoose.models.UgcScenario || mongoose.model('UgcScenario', ugcScenarioSchema);
 export default UgcScenario;

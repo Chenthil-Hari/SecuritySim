@@ -46,5 +46,5 @@ const warRoomSchema = new mongoose.Schema({
     completedAt: Date
 });
 
-const WarRoom = mongoose.model('WarRoom', warRoomSchema);
+const WarRoom = mongoose.models.WarRoom || mongoose.model('WarRoom', warRoomSchema);
 export default WarRoom;

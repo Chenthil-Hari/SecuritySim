@@ -36,7 +36,16 @@ router.get('/', async (req, res) => {
 
         res.json(leaderboard);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching leaderboard', error: error.message });
+        console.error('Leaderboard error:', error);
+        res.status(500).json({ 
+            message: 'Error fetching leaderboard', 
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+            diagnostics: {
+                modelState: mongoose.connection.readyState,
+                hasQuery: !!req.query
+            }
+        });
     }
 });
 
