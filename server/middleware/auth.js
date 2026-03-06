@@ -44,8 +44,10 @@ export const isAdmin = (req, res, next) => {
 };
 
 export const maintenanceCheck = async (req, res, next) => {
-  // Allow the frontend to check the status without being blocked
-  if (req.path === '/api/auth/maintenance-status') {
+  // Allow frontend status checks, admin login, and ALL admin API routes to bypass the block
+  if (req.path === '/api/auth/maintenance-status' || 
+      req.path === '/api/auth/admin-login' ||
+      req.path.startsWith('/api/admin')) {
       return next();
   }
 
