@@ -25,7 +25,6 @@ import MatrixBackground from './components/MatrixBackground';
 import AdminLogin from './pages/AdminLogin';
 import { io } from 'socket.io-client';
 import GlobalAlert from './components/GlobalAlert';
-import MaintenanceScreen from './components/MaintenanceScreen';
 import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
 
@@ -37,39 +36,10 @@ function AppContent() {
   const gameState = useGame();
   const isLoggedIn = !!user;
   const location = useLocation();
-  const [isMaintenance, setIsMaintenance] = useState(false);
-
-  useEffect(() => {
-    // 1. Check initial maintenance status
-    const checkMaintenance = async () => {
-      try {
-        const res = await fetch('/api/auth/maintenance-status');
-        const data = await res.json();
-        setIsMaintenance(data.enabled);
-      } catch (err) {
-        console.error("Maintenance check failed:", err);
-      }
-    };
-    checkMaintenance();
-
-    // 2. Listen for real-time toggles
-    const socket = io(window.location.origin);
-    socket.on('maintenance_toggle', (data) => {
-      setIsMaintenance(data.enabled);
-    });
-
-    return () => socket.disconnect();
-  }, []);
 
   // Hide UI elements on admin routes
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isScenarioRoute = location.pathname.startsWith('/scenarios');
-  
-  // Enforce maintenance screen for non-admins
-  const isExcludedFromMaintenance = isAdminRoute;
-  if (isMaintenance && !isExcludedFromMaintenance) {
-    return <MaintenanceScreen />;
-  }
 
   return (
     <div className="app">

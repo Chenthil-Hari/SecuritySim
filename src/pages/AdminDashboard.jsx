@@ -13,7 +13,6 @@ export default function AdminDashboard() {
     const [users, setUsers] = useState([]);
     const [analytics, setAnalytics] = useState(null);
     const [logs, setLogs] = useState([]);
-    const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [broadcast, setBroadcast] = useState({ message: '', type: 'info' });
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
@@ -32,7 +31,6 @@ export default function AdminDashboard() {
             else if (activeTab === 'analytics') fetchAnalytics();
             else if (activeTab === 'operations') {
                 fetchLogs();
-                fetchMaintenanceStatus();
             }
         };
 
@@ -69,20 +67,6 @@ export default function AdminDashboard() {
         }
     };
 
-    const fetchMaintenanceStatus = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl('/api/admin/maintenance/status'), {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setMaintenanceMode(data.enabled);
-            }
-        } catch (err) {
-            console.error("Maintenance Status Error:", err);
-        }
-    };
 
     const handleBroadcast = async (e) => {
         e.preventDefault();
@@ -106,27 +90,6 @@ export default function AdminDashboard() {
         }
     };
 
-    const toggleMaintenance = async (enabled) => {
-        if (!confirm(`Are you sure you want to ${enabled ? 'SHUT DOWN' : 'RESTORE'} public access?`)) return;
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl('/api/admin/maintenance'), {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
-                },
-                body: JSON.stringify({ enabled })
-            });
-            if (res.ok) {
-                setMaintenanceMode(enabled);
-                alert(`System is now ${enabled ? 'in MAINTENANCE' : 'OPERATIONAL'}`);
-                fetchLogs();
-            }
-        } catch (err) {
-            alert("Maintenance Toggle Error: " + err.message);
-        }
-    };
 
     const fetchPending = async () => {
         setLoading(true);
@@ -473,17 +436,6 @@ export default function AdminDashboard() {
                             <button type="submit" className="btn-broadcast">Deploy</button>
                         </div>
                     </form>
-                </div>
-                <div className="ops-card maintenance">
-                    <h3>Maintenance Logic</h3>
-                    <div className="maintenance-toggle">
-                        <div className={`status-pill ${maintenanceMode ? 'offline' : 'online'}`}>
-                            {maintenanceMode ? 'SYSTEM OFF-LINE' : 'SYSTEM OPERATIONAL'}
-                        </div>
-                        <button onClick={() => toggleMaintenance(!maintenanceMode)}>
-                            {maintenanceMode ? 'Restore Normal Ops' : 'Initiate Maintenance'}
-                        </button>
-                    </div>
                 </div>
                 <div className="audit-log-card">
                     <div className="card-header-with-action">

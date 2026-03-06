@@ -4,8 +4,6 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { maintenanceCheck } from '../server/middleware/auth.js';
-
 import authRoutes from '../server/routes/auth.js';
 import profileRoutes from '../server/routes/profile.js';
 import leaderboardRoutes from '../server/routes/leaderboard.js';
@@ -78,9 +76,6 @@ app.use(async (req, res, next) => {
         });
     }
 });
-
-// Maintenance check (Global)
-app.use(maintenanceCheck);
 
 // Socket.io Logic
 io.on('connection', (socket) => {
