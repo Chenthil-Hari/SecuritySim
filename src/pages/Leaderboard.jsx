@@ -27,15 +27,18 @@ const Leaderboard = () => {
                 }
 
                 const response = await fetch(buildApiUrl(url));
+                const data = await response.json();
+
                 if (response.ok) {
-                    const data = await response.json();
                     setLeaderboard(data);
                 } else {
-                    setError('Failed to load leaderboard');
+                    // Try to show specific server error message if available
+                    setError(data.message || data.error || 'Failed to load leaderboard');
+                    console.error('Leaderboard error data:', data);
                 }
             } catch (err) {
                 console.error('Error fetching leaderboard:', err);
-                setError('Could not connect to server');
+                setError('Could not connect to server: ' + err.message);
             } finally {
                 setLoading(false);
             }
