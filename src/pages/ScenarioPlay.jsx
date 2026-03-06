@@ -400,93 +400,98 @@ export default function ScenarioPlay() {
         const displayXp = isAlreadyCompleted ? 0 : xpEarned;
 
         return (
-            <div className="scenario-play">
-                <Character character={character} reaction={charReaction} />
-                <div className="scenario-summary">
-                    <div className="scenario-summary-card">
-                        <div className={`summary-icon ${grade}`}>{grade === 'great' ? <Trophy size={40} /> : <Star size={40} />}</div>
-                        <h2 className="summary-title">{grade === 'great' ? 'Excellent Work!' : grade === 'ok' ? 'Good Effort!' : 'Keep Practicing!'}</h2>
-                        <div className={`summary-accuracy ${grade}`}>{accuracy}%</div>
-                        <div className="summary-stats">
-                            <div className="summary-stat"><div className="summary-stat-value" style={{ color: 'var(--success)' }}>{correctCount}</div><div className="summary-stat-label">Correct</div></div>
-                            <div className="summary-stat"><div className="summary-stat-value" style={{ color: 'var(--danger)' }}>{totalSteps - correctCount}</div><div className="summary-stat-label">Incorrect</div></div>
-                            <div className="summary-stat"><div className="summary-stat-value" style={{ color: 'var(--warning)' }}>+{displayXp}</div><div className="summary-stat-label">XP {isAlreadyCompleted && <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>(Already Done)</span>}</div></div>
+            <div className="scenario-system-wrapper">
+                <div className="scenario-dashboard">
+                    <div className="scenario-summary">
+                        <Character character={character} reaction={charReaction} />
+                        <div className="scenario-summary-card">
+                            <div className={`summary-icon ${grade}`}>{grade === 'great' ? <Trophy size={40} /> : <Star size={40} />}</div>
+                            <h2 className="summary-title">{grade === 'great' ? 'Excellent Work!' : grade === 'ok' ? 'Good Effort!' : 'Keep Practicing!'}</h2>
+                            <div className={`summary-accuracy ${grade}`}>{accuracy}%</div>
+                            <div className="summary-stats">
+                                <div className="summary-stat"><div className="summary-stat-value" style={{ color: 'var(--success)' }}>{correctCount}</div><div className="summary-stat-label">Correct</div></div>
+                                <div className="summary-stat"><div className="summary-stat-value" style={{ color: 'var(--danger)' }}>{totalSteps - correctCount}</div><div className="summary-stat-label">Incorrect</div></div>
+                                <div className="summary-stat"><div className="summary-stat-value" style={{ color: 'var(--warning)' }}>+{displayXp}</div><div className="summary-stat-label">XP {isAlreadyCompleted && <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>(Already Done)</span>}</div></div>
+                            </div>
+                        </div>
+                        <div className="summary-actions">
+                            <button className="btn-outline" onClick={() => { setCurrentStepIndex(0); setSelectedOption(null); setStepResults([]); setFinished(false); setTimeBonusTotal(0); setActiveConsequence(null); }}><RotateCcw size={16} /> Try Again</button>
+                            <Link to={challengeId ? "/challenges" : "/scenarios"} className="btn-primary">
+                                Continue <ArrowRight size={16} />
+                            </Link>
                         </div>
                     </div>
-                </div>
-                <div className="summary-actions">
-                    <button className="btn-outline" onClick={() => { setCurrentStepIndex(0); setSelectedOption(null); setStepResults([]); setFinished(false); setTimeBonusTotal(0); setActiveConsequence(null); }}><RotateCcw size={16} /> Try Again</button>
-                    <Link to={challengeId ? "/challenges" : "/scenarios"} className="btn-primary">
-                        Continue <ArrowRight size={16} />
-                    </Link>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="perfect-scenario-container">
-            <header className="scenario-play-header">
-                <div className="scenario-top-line">
-                    <button className="back-link" onClick={() => navigate('/scenarios')}>
-                        <ArrowLeft size={14} /> EXIT SIMULATION
-                    </button>
-                    <span className={`scenario-card-badge ${scenario.category.toLowerCase()}`}>
-                        {scenario.category}
-                    </span>
-                </div>
+        <div className="scenario-system-wrapper">
+            <div className="scenario-dashboard">
 
-                <div className="scenario-progress-container">
-                    <div className="progress-bar">
-                        <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
+                <header className="scenario-header">
+                    <div className="scenario-topbar">
+                        <button className="scenario-exit-btn" onClick={() => navigate('/scenarios')}>
+                            <ArrowLeft size={16} /> END SIM
+                        </button>
+                        <span className="scenario-badge">{scenario.category}</span>
                     </div>
-                    <span className="progress-value">{Math.round(progress)}% SYNCHRONIZED</span>
-                </div>
 
-                <h1>{scenario.title}</h1>
-            </header>
+                    <h1 className="scenario-title">{scenario.title}</h1>
 
-            <main className="scenario-main-layout">
-                <aside className="scenario-character-column">
-                    <Character character={character} reaction={charReaction} />
-                </aside>
-
-                <div className="scenario-content-column">
-                    <section className="scenario-visual-box" key={currentStepIndex}>
-                        {renderVisual()}
-                    </section>
-
-                    <section className="scenario-options-box">
-                        {step.title && <p className="step-subtitle">{step.title}</p>}
-                        <h3>{step.prompt || 'What do you do?'} {timedOut && <span className="text-danger">(Timed Out)</span>}</h3>
-
-                        <div className="options-grid">
-                            {step.options.map((option, i) => (
-                                <button
-                                    key={i}
-                                    className={`option-btn ${selectedOption === i ? (option.isCorrect ? 'selected-correct' : 'selected-incorrect') : ''}`}
-                                    onClick={() => handleOptionSelect(option, i)}
-                                    disabled={selectedOption !== null}
-                                >
-                                    <div className="option-number">{i + 1}</div>
-                                    <div className="option-text">{option.text}</div>
-                                    <ChevronRight size={20} className="option-arrow" />
-                                </button>
-                            ))}
+                    <div className="scenario-progress-wrap">
+                        <div className="scenario-progress-track">
+                            <div className="scenario-progress-fill" style={{ width: `${progress}%` }} />
                         </div>
-                    </section>
-                </div>
-            </main>
+                        <span className="scenario-progress-text">{Math.round(progress)}% SYNCH</span>
+                    </div>
+                </header>
 
-            {showFeedback && selectedOption !== null && (
-                <FeedbackModal
-                    isCorrect={step.options[selectedOption].isCorrect}
-                    feedback={step.options[selectedOption].feedback}
-                    defenseTip={step.options[selectedOption].defenseTip}
-                    xpEarned={step.results?.xp || 0}
-                    onContinue={handleContinue}
-                />
-            )}
+                <main className="scenario-workspace">
+                    <aside className="scenario-character-panel">
+                        <Character character={character} reaction={charReaction} />
+                    </aside>
+
+                    <div className="scenario-interaction-pane">
+                        <section className="scenario-visual-container" key={currentStepIndex}>
+                            {renderVisual()}
+                        </section>
+
+                        <section className="scenario-action-console">
+                            {step.title && <div className="scenario-step-context">{step.title}</div>}
+                            <h3 className="scenario-action-query">
+                                {step.prompt || 'Choose your response'} {timedOut && <span className="text-danger">(Timed Out)</span>}
+                            </h3>
+
+                            <div className="scenario-options-list">
+                                {step.options.map((option, i) => (
+                                    <button
+                                        key={i}
+                                        className={`scenario-option-block ${selectedOption === i ? (option.isCorrect ? 'is-correct' : 'is-incorrect') : ''}`}
+                                        onClick={() => handleOptionSelect(option, i)}
+                                        disabled={selectedOption !== null}
+                                    >
+                                        <div className="scenario-option-id">{i + 1}</div>
+                                        <div className="scenario-option-content">{option.text}</div>
+                                        <ChevronRight size={20} className="scenario-option-arrow" />
+                                    </button>
+                                ))}
+                            </div>
+                        </section>
+                    </div>
+                </main>
+
+                {showFeedback && selectedOption !== null && (
+                    <FeedbackModal
+                        isCorrect={step.options[selectedOption].isCorrect}
+                        feedback={step.options[selectedOption].feedback}
+                        defenseTip={step.options[selectedOption].defenseTip}
+                        xpEarned={step.results?.xp || 0}
+                        onContinue={handleContinue}
+                    />
+                )}
+            </div>
         </div>
     );
 }
