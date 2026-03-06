@@ -195,35 +195,37 @@ export default function ScenarioBuilder() {
                                             />
                                         </div>
                                         <div className="input-group">
-                                            <label>Email Body (HTML/Markdown supported)</label>
+                                            <label>Email Content (HTML/Markdown)</label>
                                             <textarea 
                                                 className="body-editor"
-                                                placeholder="Write the email content here..." 
+                                                placeholder="Write the deceptive email body..." 
                                                 value={scenario.content.visualData.body}
                                                 onChange={(e) => setScenario({...scenario, content: {...scenario.content, visualData: {...scenario.content.visualData, body: e.target.value}}})}
                                             />
                                         </div>
                                     </>
                                 )}
-                                {/* More types can be added here */}
+                                {/* Other types could follow similar high-quality structure */}
                             </div>
 
                             <div className="options-editor">
-                                <h3>User Decisions</h3>
+                                <h3><AlertCircle size={14} /> USER DECISIONS</h3>
                                 {scenario.content.options.map((opt, i) => (
                                     <div key={i} className={`option-item ${opt.isCorrect ? 'correct' : 'incorrect'}`}>
                                         <div className="option-header">
-                                            <label>Option {i+1} {opt.isCorrect ? '(Correct Action)' : '(Mistake)'}</label>
-                                            {i > 1 && <button onClick={() => removeOption(i)}><Trash2 size={14} /></button>}
+                                            <label>
+                                                {opt.isCorrect ? '✅ CORRECT ACTION' : '❌ MISTAKE / TRAP'}
+                                            </label>
+                                            {i > 1 && <button onClick={() => removeOption(i)} title="Remove option"><Trash2 size={14} /></button>}
                                         </div>
                                         <input 
                                             type="text" 
-                                            placeholder="Option text..." 
+                                            placeholder="Label (e.g. Click the link)" 
                                             value={opt.text}
                                             onChange={(e) => handleOptionChange(i, 'text', e.target.value)}
                                         />
                                         <textarea 
-                                            placeholder="Feedback to show after decision..." 
+                                            placeholder="Feedback message to show user..." 
                                             value={opt.feedback}
                                             onChange={(e) => handleOptionChange(i, 'feedback', e.target.value)}
                                         />
@@ -231,16 +233,16 @@ export default function ScenarioBuilder() {
                                 ))}
                                 {scenario.content.options.length < 4 && (
                                     <button className="add-opt-btn" onClick={addOption}>
-                                        <Plus size={16} /> Add Distractor Option
+                                        <Plus size={16} /> Add distractor
                                     </button>
                                 )}
                             </div>
                         </div>
 
                         <div className="explanation-editor">
-                            <label>Educational Summary</label>
+                            <label><Shield size={18} /> Deep-Dive Explanation</label>
                             <textarea 
-                                placeholder="Explain why this was a threat..." 
+                                placeholder="Detail exactly why this is a threat and what red flags users should look for..." 
                                 value={scenario.content.educationalExplanation}
                                 onChange={(e) => setScenario({...scenario, content: {...scenario.content, educationalExplanation: e.target.value}})}
                             />
@@ -248,8 +250,8 @@ export default function ScenarioBuilder() {
 
                         <div className="builder-actions">
                             <button className="btn-secondary" onClick={() => setStep(2)}>Back</button>
-                            <button className="btn-publish" onClick={handlePublish} disabled={loading}>
-                                {loading ? 'Publishing...' : <><Save size={18} /> Publish Scenario</>}
+                            <button className="btn-publish" onClick={handlePublish} disabled={loading || !scenario.content.visualData.sender || !scenario.content.visualData.body}>
+                                {loading ? 'Publishing...' : <><Save size={18} /> Deploy to Grid</>}
                             </button>
                         </div>
                     </div>
