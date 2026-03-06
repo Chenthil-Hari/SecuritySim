@@ -60,6 +60,11 @@ export default function Navbar() {
                 </li>
                 {user && (
                     <>
+                        <li>
+                            <NavLink to="/interactive-scenarios" onClick={handleNavClick}>
+                                <Shield size={16} /> Cases
+                            </NavLink>
+                        </li>
                         <li
                             className={`nav-dropdown ${gamesOpen ? 'open' : ''}`}
                             onMouseEnter={() => setGamesOpen(true)}

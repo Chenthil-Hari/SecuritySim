@@ -1,0 +1,352 @@
+.simulator-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 80px); /* Fill remaining height under navbar */
+  max-width: 1400px;
+  margin: 0 auto;
+  background: rgba(10, 15, 26, 0.85);
+  border-left: 1px solid rgba(0, 255, 136, 0.2);
+  border-right: 1px solid rgba(0, 255, 136, 0.2);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+/* Header Area */
+.sim-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: rgba(4, 9, 20, 0.95);
+  border-bottom: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: var(--text-secondary, #b0bec5);
+  border: none;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 0.5rem;
+}
+
+.back-btn:hover {
+  color: var(--primary, #00ff88);
+}
+
+.sim-title-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #fff;
+}
+
+.sim-title-area h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.2rem;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.sim-icon {
+  color: var(--primary, #00ff88);
+}
+
+.sim-status-indicators {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  color: #ff4757;
+  display: flex;
+  align-items: center;
+}
+
+.pulse-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: pulseColor 2s infinite;
+}
+
+@keyframes pulseColor {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+/* Main Display Area (Terminal) */
+.sim-main-content {
+  flex-grow: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.terminal-window {
+  flex-grow: 1;
+  background: #050a14;
+  border: 1px solid #1a2639;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+}
+
+.terminal-header {
+  background: #111823;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #1a2639;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.dot.red { background: #ff5f56; }
+.dot.yellow { background: #ffbd2e; }
+.dot.green { background: #27c93f; }
+
+.terminal-title {
+  color: #8b9eb5;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.8rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.terminal-body {
+  padding: 1.5rem;
+  font-family: 'Fira Code', 'Courier New', Courier, monospace;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  overflow-y: auto;
+  flex-grow: 1;
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar for Terminal */
+.terminal-body::-webkit-scrollbar {
+  width: 8px;
+}
+.terminal-body::-webkit-scrollbar-track {
+  background: #050a14;
+}
+.terminal-body::-webkit-scrollbar-thumb {
+  background: #1a2639;
+  border-radius: 4px;
+}
+.terminal-body::-webkit-scrollbar-thumb:hover {
+  background: #2a3b55;
+}
+
+.history-block {
+  margin-bottom: 1.5rem;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+.history-block:hover {
+  opacity: 1;
+}
+
+.active-block {
+  margin-bottom: 1rem;
+}
+
+.sys-prompt {
+  color: #557599;
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+  user-select: none;
+}
+
+.sys-text {
+  color: #e2e8f0;
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  border-left: 2px solid #2a3b55;
+}
+
+.user-choice {
+  color: var(--primary, #00ff88);
+  padding-left: 1rem;
+  font-weight: 600;
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+  color: var(--primary, #00ff88);
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Controls Area */
+.sim-controls-panel {
+  padding: 1.5rem;
+  background: rgba(10, 15, 26, 0.95);
+  border-top: 1px solid rgba(0, 255, 136, 0.3);
+  min-height: 250px;
+}
+
+.options-title {
+  font-family: 'Orbitron', sans-serif;
+  color: #8b9eb5;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.action-btn {
+  display: flex;
+  align-items: flex-start;
+  text-align: left;
+  background: rgba(16, 22, 36, 0.8);
+  border: 1px solid rgba(85, 117, 153, 0.4);
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn:hover {
+  background: rgba(0, 255, 136, 0.1);
+  border-color: var(--primary, #00ff88);
+  box-shadow: 0 4px 15px rgba(0, 255, 136, 0.1);
+  transform: translateX(5px);
+}
+
+.btn-index {
+  color: var(--primary, #00ff88);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+  margin-right: 1rem;
+  opacity: 0.7;
+  margin-top: 0.2rem;
+}
+
+.btn-text {
+  flex-grow: 1;
+  line-height: 1.4;
+}
+
+/* Wrap up container */
+.wrap-up-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+}
+
+.wrap-up-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #ffbd2e;
+  margin-bottom: 1rem;
+}
+
+.wrap-up-alert h3 {
+  font-family: 'Orbitron', sans-serif;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.wrap-up-container p {
+  color: #8b9eb5;
+  margin-bottom: 2rem;
+  max-width: 500px;
+}
+
+.restart-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: var(--primary, #00ff88);
+  border: 1px solid var(--primary, #00ff88);
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.restart-btn:hover {
+  background: rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.fade-up {
+  animation: fadeUp 0.4s ease-out forwards;
+}
+
+/* Responsive constraints explicitly for user request */
+@media (max-width: 768px) {
+  .simulator-container {
+    height: calc(100vh - 60px); 
+    border-left: none;
+    border-right: none;
+  }
+  
+  .sim-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+  
+  .sim-title-area h2 {
+    font-size: 1rem;
+  }
+  
+  .sim-main-content {
+    padding: 0.5rem;
+  }
+  
+  .terminal-body {
+    padding: 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .sim-controls-panel {
+    padding: 1rem;
+    min-height: auto; /* Allow sizing down slightly on mobile */
+  }
+  
+  .action-btn {
+    padding: 0.8rem;
+    font-size: 1rem;
+  }
+}

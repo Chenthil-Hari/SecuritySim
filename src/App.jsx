@@ -23,6 +23,7 @@ import { io } from 'socket.io-client';
 import GlobalAlert from './components/GlobalAlert';
 import AdminDashboard from './pages/AdminDashboard';
 import TerminalLocked from './pages/TerminalLocked';
+import InteractiveScenarios from './pages/InteractiveScenarios';
 import './App.css';
 
 import { useAuth } from './context/AuthContext';
@@ -67,6 +68,7 @@ function AppContent() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/forensics" element={<ForensicsGame />} />
+          <Route path="/interactive-scenarios" element={<InteractiveScenarios />} />
           <Route path="/warroom/:id" element={<WarRoom />} />
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLogin />} />
