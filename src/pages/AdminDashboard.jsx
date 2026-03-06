@@ -54,9 +54,16 @@ export default function AdminDashboard() {
             const res = await fetch(buildApiUrl('/api/admin/stats'), {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (res.ok) setAnalytics(await res.json());
+            if (res.ok) {
+                setAnalytics(await res.json());
+                setError(null);
+            } else {
+                const errorData = await res.json().catch(() => ({}));
+                setError(errorData.message || `Intelligence Error (${res.status})`);
+            }
         } catch (err) {
             console.error("Analytics Error:", err);
+            setError("Tactical link offline.");
         } finally {
             setLoading(false);
         }
@@ -69,9 +76,16 @@ export default function AdminDashboard() {
             const res = await fetch(buildApiUrl('/api/admin/logs'), {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (res.ok) setLogs(await res.json());
+            if (res.ok) {
+                setLogs(await res.json());
+                setError(null);
+            } else {
+                const errorData = await res.json().catch(() => ({}));
+                setError(errorData.message || `Ops Log Error (${res.status})`);
+            }
         } catch (err) {
             console.error("Log Error:", err);
+            setError("Mission Log link offline.");
         } finally {
             setLoading(false);
         }
@@ -112,9 +126,14 @@ export default function AdminDashboard() {
                 const data = await res.json();
                 setScenarios(data);
                 setStats(prev => ({ ...prev, pending: data.length }));
+                setError(null);
+            } else {
+                const errorData = await res.json().catch(() => ({}));
+                setError(errorData.message || `Queue Error (${res.status})`);
             }
         } catch (err) {
             console.error("Error fetching pending:", err);
+            setError("Moderation link offline.");
         } finally {
             setLoading(false);
         }
@@ -144,9 +163,14 @@ export default function AdminDashboard() {
             });
             if (res.ok) {
                 setAssets(await res.json());
+                setError(null);
+            } else {
+                const errorData = await res.json().catch(() => ({}));
+                setError(errorData.message || `Evidence Error (${res.status})`);
             }
         } catch (err) {
             console.error("Error fetching assets:", err);
+            setError("Evidence link offline.");
         } finally {
             setLoading(false);
         }
@@ -165,8 +189,9 @@ export default function AdminDashboard() {
                 setStats(prev => ({ ...prev, totalUsers: data.length }));
                 setError(null);
             } else {
-                console.error("Failed to fetch users:", res.status, res.statusText);
-                setError(`API Connection Issue (${res.status})`);
+                const errorData = await res.json().catch(() => ({}));
+                console.error("Failed to fetch users:", res.status, res.statusText, errorData);
+                setError(errorData.message || `API Connection Issue (${res.status})`);
             }
         } catch (err) {
             console.error("Error fetching users:", err);
