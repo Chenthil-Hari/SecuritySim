@@ -44,6 +44,10 @@ const ugcScenarioSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isFeatured: {
+        type: Boolean,
+        default: false
+    },
     bountyMultiplier: {
         type: Number,
         default: 2

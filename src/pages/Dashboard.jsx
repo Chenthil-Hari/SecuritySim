@@ -6,12 +6,32 @@ import ScoreRing from '../components/ScoreRing';
 import StatCard from '../components/StatCard';
 
 import { getRank } from '../utils/ranks';
+import { buildApiUrl } from '../utils/api';
 import './Dashboard.css';
+import { useState, useEffect } from 'react';
 
 export default function Dashboard() {
     const { score, xp, level, difficulty } = useGame();
     const { user } = useAuth();
+    const [activeEvents, setActiveEvents] = useState([]);
+    const [featuredScenarios, setFeaturedScenarios] = useState([]);
     const xpInLevel = xp % 100;
+
+    useEffect(() => {
+        const fetchHighlights = async () => {
+            try {
+                const [evRes, featRes] = await Promise.all([
+                    fetch(buildApiUrl('/api/events/active')),
+                    fetch(buildApiUrl('/api/ugc-scenarios/featured'))
+                ]);
+                if (evRes.ok) setActiveEvents(await evRes.json());
+                if (featRes.ok) setFeaturedScenarios(await featRes.json());
+            } catch (err) {
+                console.error("Failed to fetch dashboard highlights:", err);
+            }
+        };
+        fetchHighlights();
+    }, []);
 
     if (!user) {
         return (
@@ -60,9 +80,22 @@ export default function Dashboard() {
     return (
         <div className="dashboard">
             <div className="dashboard-header">
-                <h1>Risk Assessment Dashboard</h1>
+                <h1>Risk Assessment Dashboard {activeEvents.length > 0 && <span className="live-tag">OPS LIVE</span>}</h1>
                 <p>Your cybersecurity awareness at a glance</p>
             </div>
+
+            {activeEvents.map(event => (
+                <div key={event._id} className={`event-banner ${event.type.toLowerCase()}`}>
+                    <Zap size={20} />
+                    <div className="event-banner-content">
+                        <h3>{event.title}</h3>
+                        <p>{event.description} — <strong>{event.multiplier}x Multiplier Active</strong></p>
+                    </div>
+                    <div className="event-timer">
+                        ENDS {new Date(event.expiresAt).toLocaleDateString()}
+                    </div>
+                </div>
+            ))}
 
             <div className="dashboard-grid">
                 <div className="dashboard-score-panel">
@@ -93,6 +126,28 @@ export default function Dashboard() {
                     <StatCard icon={Zap} label="Total XP" value={xp} sub="Experience points" color="yellow" />
                 </div>
             </div>
+
+            {featuredScenarios.length > 0 && (
+                <div className="featured-missions">
+                    <div className="section-header">
+                        <h2><Target size={20} /> Priority Missions</h2>
+                        <Link to="/scenarios" className="text-link">View All</Link>
+                    </div>
+                    <div className="featured-grid">
+                        {featuredScenarios.map(s => (
+                            <Link to={`/scenario/${s._id}`} key={s._id} className="featured-card">
+                                <div className="card-badge">FEATURED</div>
+                                <div className="featured-card-content">
+                                    <span className="scen-cat">{s.category}</span>
+                                    <h3>{s.title}</h3>
+                                    <div className="scen-author">by {s.authorId?.username || 'System'}</div>
+                                </div>
+                                <PlayCircle size={32} className="play-icon" />
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="forensics-preview">
                 <div className="preview-content">

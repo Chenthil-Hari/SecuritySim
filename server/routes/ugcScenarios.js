@@ -39,6 +39,18 @@ router.get('/', async (req, res) => {
     }
 });
 
+// GET /api/ugc-scenarios/featured — Get pinned scenarios
+router.get('/featured', async (req, res) => {
+    try {
+        const scenarios = await UgcScenario.find({ isFeatured: true, status: 'approved' })
+            .populate('authorId', 'username profilePhoto')
+            .limit(5);
+        res.json(scenarios);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Get scenario by ID
 router.get('/:id', async (req, res) => {
     try {

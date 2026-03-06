@@ -17,6 +17,7 @@ import warroomsRoutes from '../server/routes/warrooms.js';
 import usersRoutes from '../server/routes/users.js';
 import adminRoutes from '../server/routes/admin.js';
 import pvpRoutes from '../server/routes/pvp.js';
+import eventsRoutes from '../server/routes/events.js';
 
 dotenv.config();
 
@@ -167,6 +168,7 @@ app.use('/api/warrooms', warroomsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/pvp', pvpRoutes);
+app.use('/api/events', eventsRoutes);
 
 app.get('/api', (req, res) => {
     res.json({ 

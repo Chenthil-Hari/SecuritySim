@@ -8,11 +8,13 @@ import './AdminDashboard.css';
 export default function AdminDashboard() {
     const navigate = useNavigate();
     const { logout, user } = useAuth();
-    const [activeTab, setActiveTab] = useState('moderation'); // 'moderation', 'users', 'analytics', 'operations'
+    const [activeTab, setActiveTab] = useState('moderation'); 
     const [scenarios, setScenarios] = useState([]);
     const [users, setUsers] = useState([]);
     const [analytics, setAnalytics] = useState(null);
     const [logs, setLogs] = useState([]);
+    const [events, setEvents] = useState([]);
+    const [newEvent, setNewEvent] = useState({ title: '', description: '', type: 'XP_BOOST', multiplier: 2.0, expiresAt: '' });
     const [broadcast, setBroadcast] = useState({ message: '', type: 'info' });
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
@@ -38,6 +40,7 @@ export default function AdminDashboard() {
             else if (activeTab === 'analytics') fetchAnalytics();
             else if (activeTab === 'operations') {
                 fetchLogs();
+                fetchEvents();
             }
             else if (activeTab === 'evidence') {
                 fetchAssets();
@@ -46,6 +49,18 @@ export default function AdminDashboard() {
 
         fetchData();
     }, [user, navigate, activeTab]);
+
+    const fetchEvents = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/events'), {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) setEvents(await res.json());
+        } catch (err) {
+            console.error("Failed to fetch events:", err);
+        }
+    };
 
     const fetchAnalytics = async () => {
         setLoading(true);
@@ -344,7 +359,7 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleToggleBounty = async (id, currentStatus) => {
+    const handleToggleBounty = async (id) => {
         try {
             const token = localStorage.getItem('token');
             const res = await fetch(buildApiUrl(`/api/ugc-scenarios/admin/${id}/bounty`), {
@@ -357,6 +372,61 @@ export default function AdminDashboard() {
             }
         } catch (err) {
             alert("Error toggling bounty: " + err.message);
+        }
+    };
+
+    const handleCreateEvent = async (e) => {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/events'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(newEvent)
+            });
+            if (res.ok) {
+                alert("Global Operation Deployed!");
+                setNewEvent({ title: '', description: '', type: 'XP_BOOST', multiplier: 2.0, expiresAt: '' });
+                fetchEvents();
+            }
+        } catch (err) {
+            alert("Error creating event: " + err.message);
+        }
+    };
+
+    const handleCancelEvent = async (id) => {
+        if (!confirm("Are you sure you want to cancel this operation?")) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/admin/events/${id}`), {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                fetchEvents();
+                alert("Operation Terminated.");
+            }
+        } catch (err) {
+            alert("Error canceling event: " + err.message);
+        }
+    };
+
+    const handleToggleFeature = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/admin/scenarios/${id}/feature`), {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setLiveScenarios(liveScenarios.map(s => s._id === id ? { ...s, isFeatured: data.isFeatured } : s));
+            }
+        } catch (err) {
+            alert("Error pinning scenario: " + err.message);
         }
     };
 
@@ -406,7 +476,7 @@ export default function AdminDashboard() {
                     {activeTab === 'moderation' && `Total pending scenarios: ${stats.pending} | Live: ${liveScenarios.length}`}
                     {activeTab === 'users' && `Total registered investigators: ${stats.totalUsers}`}
                     {activeTab === 'analytics' && 'Real-time platform performance metrics.'}
-                    {activeTab === 'operations' && 'Administrative controls and security logs.'}
+                    {activeTab === 'operations' && 'Manage global XP boosts and time-limited operations.'}
                     {activeTab === 'evidence' && 'Review uploaded visual assets from users and scenarios.'}
                 </p>
             </div>
@@ -516,9 +586,15 @@ export default function AdminDashboard() {
                             <div className="queue-card-actions">
                                 <button
                                     className={`btn-bounty ${s.isBountied ? 'active' : ''}`}
-                                    onClick={() => handleToggleBounty(s._id, s.isBountied)}
+                                    onClick={() => handleToggleBounty(s._id)}
                                 >
-                                    <Star size={16} /> {s.isBountied ? 'Revoke Bounty' : 'Set 2x XP Bounty'}
+                                    <Zap size={16} /> {s.isBountied ? 'Revoke Bounty' : 'Set 2x XP Bounty'}
+                                </button>
+                                <button
+                                    className={`btn-feature ${s.isFeatured ? 'active' : ''}`}
+                                    onClick={() => handleToggleFeature(s._id)}
+                                >
+                                    <Star size={16} /> {s.isFeatured ? 'Unpin Featured' : 'Pin to Featured'}
                                 </button>
                                 <button className="btn-reject" onClick={() => handleModerate(s._id, 'rejected')}>
                                     <AlertCircle size={16} /> Takedown
@@ -663,10 +739,78 @@ export default function AdminDashboard() {
         <div className="admin-ops animate-fade-in">
             <div className="ops-grid">
                 <div className="ops-card">
-                    <h3><Radio size={18} /> Global Broadcast</h3>
+                    <h3><Zap size={18} /> Global Event Deployment</h3>
+                    <form onSubmit={handleCreateEvent} className="event-form">
+                        <div className="form-group">
+                            <label>Operation Title</label>
+                            <input
+                                type="text"
+                                placeholder="e.g., XP Overload Weekend"
+                                value={newEvent.title}
+                                onChange={e => setNewEvent({ ...newEvent, title: e.target.value })}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Description</label>
+                            <textarea
+                                placeholder="Describe the mission parameters..."
+                                value={newEvent.description}
+                                onChange={e => setNewEvent({ ...newEvent, description: e.target.value })}
+                                required
+                            />
+                        </div>
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label>Event Type</label>
+                                <select value={newEvent.type} onChange={e => setNewEvent({ ...newEvent, type: e.target.value })}>
+                                    <option value="XP_BOOST">XP Boost (Global Multiplier)</option>
+                                    <option value="ZERO_DAY_FRIDAY">Zero-Day Friday</option>
+                                    <option value="CHALLENGE_WEEKEND">Challenge Weekend</option>
+                                    <option value="SYSTEM_MAINTENANCE">Maintenance Mode</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Multiplier</label>
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    value={newEvent.multiplier}
+                                    onChange={e => setNewEvent({ ...newEvent, multiplier: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <div className="form-group">
+                            <label>Expiration Date</label>
+                            <input
+                                type="datetime-local"
+                                value={newEvent.expiresAt}
+                                onChange={e => setNewEvent({ ...newEvent, expiresAt: e.target.value })}
+                                required
+                            />
+                        </div>
+                        <button type="submit" className="btn-deploy">Deploy Global Operation</button>
+                    </form>
+
+                    <div className="active-events-list">
+                        <h4>Active Operations</h4>
+                        {events.filter(e => new Date(e.expiresAt) > new Date()).map(event => (
+                            <div key={event._id} className="event-item">
+                                <div className="event-info">
+                                    <strong>{event.title}</strong>
+                                    <span>{event.type} — {event.multiplier}x Multiplier</span>
+                                </div>
+                                <button className="btn-cancel-event" onClick={() => handleCancelEvent(event._id)}>Cancel</button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="ops-card">
+                    <h3><Radio size={18} /> Emergency Broadcast</h3>
                     <form onSubmit={handleBroadcast}>
                         <textarea
-                            placeholder="Message to all terminals..."
+                            placeholder="Immediate transmission to all agents..."
                             value={broadcast.message}
                             onChange={e => setBroadcast({ ...broadcast, message: e.target.value })}
                         />
@@ -676,29 +820,23 @@ export default function AdminDashboard() {
                                 <option value="warning">Warning</option>
                                 <option value="danger">CRITICAL</option>
                             </select>
-                            <button type="submit" className="btn-broadcast">Deploy</button>
+                            <button type="submit" className="btn-broadcast">Broadcast</button>
                         </div>
                     </form>
-                </div>
-                <div className="audit-log-card">
-                    <div className="card-header-with-action">
-                        <h3>Audit Logs</h3>
-                        <button className="btn-clear-logs" onClick={handleClearLogs}>
-                            <XCircle size={14} /> Clear All History
-                        </button>
-                    </div>
-                    <div className="log-list">
-                        {logs.map(log => (
-                            <div key={log._id} className="log-entry">
-                                <span className="time">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                                <span className="admin">{log.adminName}</span>
-                                <span className="action">{log.action}</span>
-                                <p className="desc">{log.details}</p>
-                                <button className="btn-delete-log" onClick={() => handleDeleteLog(log._id)} title="Remove Log Entry">
-                                    <X size={14} />
-                                </button>
-                            </div>
-                        ))}
+
+                    <div className="audit-log-section">
+                        <div className="section-header">
+                            <h4>Mission Logs</h4>
+                            <button className="text-btn" onClick={handleClearLogs}>Clear History</button>
+                        </div>
+                        <div className="mini-log-list">
+                            {logs.slice(0, 10).map(log => (
+                                <div key={log._id} className="mini-log-entry">
+                                    <span className="log-time">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                                    <span className="log-text">{log.details}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -766,7 +904,7 @@ export default function AdminDashboard() {
                         <BarChart2 size={18} /> Analytics
                     </button>
                     <button className={`nav-item ${activeTab === 'operations' ? 'active' : ''}`} onClick={() => setActiveTab('operations')}>
-                        <Radio size={18} /> Operations
+                        <Zap size={18} /> Global Operations
                     </button>
                 </nav>
 

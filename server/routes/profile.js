@@ -1,6 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import Event from '../models/Event.js';
 
 const router = express.Router();
 
@@ -123,8 +124,17 @@ router.put('/sync', authMiddleware, async (req, res) => {
 
         // Apply increments & Handle Leveling/XP logic
         if (incrementalScore !== undefined) {
-            user.score += incrementalScore;
-            user.xp += incrementalScore; // 1:1 ratio
+            // Check for active XP_BOOST events
+            const activeEvent = await Event.findOne({ 
+                type: 'XP_BOOST', 
+                isActive: true, 
+                expiresAt: { $gt: new Date() } 
+            });
+            const multiplier = activeEvent ? activeEvent.multiplier : 1.0;
+            const finalIncrement = Math.round(incrementalScore * multiplier);
+
+            user.score += finalIncrement;
+            user.xp += finalIncrement;
             
             // Leveling logic: Level = floor(xp / 100) + 1
             const newLevel = Math.floor(user.xp / 100) + 1;

@@ -4,6 +4,7 @@ import UgcScenario from '../models/UgcScenario.js';
 import Team from '../models/Team.js';
 import AuditLog from '../models/AuditLog.js';
 import SystemSetting from '../models/SystemSetting.js';
+import Event from '../models/Event.js';
 import { authenticateToken, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -231,6 +232,64 @@ router.delete('/assets', authenticateToken, isAdmin, async (req, res) => {
         }
 
         res.json({ message: "Asset successfully taken down" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// GET /api/admin/events — List all events
+router.get('/events', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const events = await Event.find().sort({ createdAt: -1 });
+        res.json(events);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// POST /api/admin/events — Create new global event
+router.post('/events', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { title, description, type, multiplier, expiresAt } = req.body;
+        const event = new Event({ title, description, type, multiplier, expiresAt });
+        await event.save();
+        
+        await logAction(req.user, 'create_event', `Created ${type} event: ${title}`);
+        
+        // Notify via socket
+        const io = req.app.get('io');
+        if (io) io.emit('new_event', event);
+
+        res.status(201).json(event);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// DELETE /api/admin/events/:id — Cancel an event
+router.delete('/events/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const event = await Event.findByIdAndDelete(req.params.id);
+        if (!event) return res.status(404).json({ message: 'Event not found' });
+        
+        await logAction(req.user, 'cancel_event', `Canceled event: ${event.title}`);
+        res.json({ message: 'Event canceled' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// PATCH /api/admin/scenarios/:id/feature — Pin/Unpin scenario
+router.patch('/scenarios/:id/feature', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const scenario = await UgcScenario.findById(req.params.id);
+        if (!scenario) return res.status(404).json({ message: 'Scenario not found' });
+
+        scenario.isFeatured = !scenario.isFeatured;
+        await scenario.save();
+
+        await logAction(req.user, 'feature_scenario', `${scenario.isFeatured ? 'Featured' : 'Unfeatured'} scenario: ${scenario.title}`);
+        res.json({ isFeatured: scenario.isFeatured });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
