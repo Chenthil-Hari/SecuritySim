@@ -114,13 +114,17 @@ router.post('/login', async (req, res) => {
 // Secure Admin Login with single fixed credentials
 router.post('/admin-login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        let { email, password } = req.body;
+        email = email?.trim();
+        password = password?.trim();
         
         // Single admin credentials
         const ADMIN_EMAIL = 'admin@hari07.tech';
         const ADMIN_PASS = 'CyberSecurity2026!'; // User should change this later
 
         if (email !== ADMIN_EMAIL || password !== ADMIN_PASS) {
+            console.log(`[DEBUG] Login attempt failed. Target: ${ADMIN_EMAIL}. Received: ${email}`);
+            console.log(`[DEBUG] Pass Lengths - Target: ${ADMIN_PASS.length}, Received: ${password?.length}`);
             return res.status(401).json({ message: 'Invalid administrative credentials' });
         }
 

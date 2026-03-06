@@ -16,10 +16,14 @@ export default function AdminLogin() {
         setLoading(true);
 
         try {
+            const trimmedCredentials = {
+                email: credentials.email.trim(),
+                password: credentials.password.trim()
+            };
             const response = await fetch(buildApiUrl('/api/auth/admin-login'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(credentials),
+                body: JSON.stringify(trimmedCredentials),
             });
             const data = await response.json();
             
