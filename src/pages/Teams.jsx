@@ -211,6 +211,40 @@ export default function Teams() {
                         </button>
                     </div>
 
+                    <div className="team-warroom-prompt">
+                        <div className="prompt-content">
+                            <h3><Shield size={24} /> Active Operations</h3>
+                            <p>Launch a collaborative War Room to analyze threats with your teammates in real-time.</p>
+                        </div>
+                        <button 
+                            className="btn-primary" 
+                            onClick={async () => {
+                                try {
+                                    const token = localStorage.getItem('token');
+                                    const res = await fetch('/api/warrooms', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Bearer ${token}`
+                                        },
+                                        body: JSON.stringify({
+                                            name: `${team.name} Ops`,
+                                            teamId: team._id,
+                                            scenarioId: 'scen-01', // Example default
+                                            scenarioType: 'core'
+                                        })
+                                    });
+                                    const data = await res.json();
+                                    if (res.ok) navigate(`/warroom/${data._id}`);
+                                } catch (err) {
+                                    alert('Error launching War Room');
+                                }
+                            }}
+                        >
+                            <Play size={18} /> Launch War Room
+                        </button>
+                    </div>
+
                     <div className="team-invite-code-card">
                         <h3>Team Invite Code</h3>
                         <p>Share this code with other agents so they can join <strong>{team.name}</strong> (Max 10 per team).</p>

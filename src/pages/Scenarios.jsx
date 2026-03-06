@@ -12,10 +12,28 @@ export default function Scenarios() {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [activeFilter, setActiveFilter] = useState('All');
+    const [ugcScenarios, setUgcScenarios] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        fetchUgc();
+    }, []);
+
+    const fetchUgc = async () => {
+        try {
+            const res = await fetch('/api/ugc-scenarios');
+            const data = await res.json();
+            if (res.ok) setUgcScenarios(data);
+        } catch (err) {
+            console.error("Error fetching UGC:", err);
+        }
+    };
+
+    const allScenarios = [...scenarios, ...ugcScenarios];
 
     const filtered = activeFilter === 'All'
-        ? scenarios
-        : scenarios.filter(s => s.category === activeFilter);
+        ? allScenarios
+        : allScenarios.filter(s => s.category === activeFilter);
 
     if (!user) {
         return (
@@ -47,8 +65,13 @@ export default function Scenarios() {
                 </button>
             </div>
             <div className="scenarios-header">
-                <h1>Threat Scenarios</h1>
-                <p>Choose a scenario and test your cyber defense skills</p>
+                <div className="header-content">
+                    <h1>Threat Scenarios</h1>
+                    <p>Choose a scenario and test your cyber defense skills</p>
+                </div>
+                <Link to="/builder" className="btn-primary create-scenario-btn">
+                    <Plus size={18} /> Create Scenario
+                </Link>
             </div>
 
             <div className="scenarios-filters">
