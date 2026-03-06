@@ -1,5 +1,5 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Zap, Calendar, Users, Swords, Globe, ChevronDown, Gamepad2, Search } from 'lucide-react';
+import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Zap, Calendar, Users, Swords, Globe, ChevronDown, Gamepad2, Search, Crown } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
@@ -153,6 +153,11 @@ export default function Navbar() {
             <div className="navbar-right">
                 {user ? (
                     <>
+                        {user.role === 'admin' && (
+                            <Link to="/admin/dashboard" className="hq-navbar-btn" onClick={playNavSound}>
+                                <Crown size={16} /> Headquarters
+                            </Link>
+                        )}
                         <div className="user-greeting">
                             <span title={getRank(level).title}>{getRank(level).icon}</span>
                             <span>{user.username}</span>

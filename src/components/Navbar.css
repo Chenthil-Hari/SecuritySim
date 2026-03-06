@@ -226,6 +226,28 @@
     height: 14px;
 }
 
+.hq-navbar-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(189, 0, 255, 0.1);
+    color: #bd00ff;
+    border: 1px solid rgba(189, 0, 255, 0.2);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    margin-right: 10px;
+}
+
+.hq-navbar-btn:hover {
+    background: #bd00ff;
+    color: white;
+    box-shadow: 0 0 15px rgba(189, 0, 255, 0.4);
+}
+
 .user-greeting {
     display: flex;
     align-items: center;

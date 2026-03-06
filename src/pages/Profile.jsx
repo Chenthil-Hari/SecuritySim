@@ -267,11 +267,11 @@ const Profile = () => {
 
     if (loading) return <Loader />;
 
-    const score = profileData?.score !== undefined ? profileData.score : (isOwnProfile ? gameState.score : 0);
-    const xp = profileData?.xp !== undefined ? profileData.xp : (isOwnProfile ? gameState.xp : 0);
-    const level = profileData?.level !== undefined ? profileData.level : (isOwnProfile ? gameState.level : 1);
-    const earnedBadges = profileData?.badges || (isOwnProfile ? gameState.badges : []);
-    const completedScenarios = profileData?.completedScenarios || (isOwnProfile ? gameState.completedScenarios : []);
+    const score = profileData?.score !== undefined ? profileData.score : (isOwnProfile ? (gameState?.score || 0) : 0);
+    const xp = profileData?.xp !== undefined ? profileData.xp : (isOwnProfile ? (gameState?.xp || 0) : 0);
+    const level = profileData?.level !== undefined ? profileData.level : (isOwnProfile ? (gameState?.level || 1) : 1);
+    const earnedBadges = profileData?.badges || (isOwnProfile ? (gameState?.badges || []) : []);
+    const completedScenarios = profileData?.completedScenarios || (isOwnProfile ? (gameState?.completedScenarios || []) : []);
     const memberSince = profileData?.createdAt ? new Date(profileData.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
     const xpToNext = 100 - (xp % 100);
     const xpProgress = (xp % 100) / 100 * 100;
@@ -281,14 +281,14 @@ const Profile = () => {
         earned: earnedBadges.includes(b.id)
     }));
 
-    const activeBanner = customizations.banners.find(b => b.id === (profileData?.customization?.activeBanner || (isOwnProfile ? gameState?.customization?.activeBanner : 'default')));
-    const auraEnabled = profileData?.customization?.auraEnabled !== undefined ? profileData.customization.auraEnabled : (isOwnProfile ? gameState.customization?.auraEnabled : false);
-    const auraConfig = auraEnabled ? (
+    const activeBanner = customizations.banners.find(b => b.id === (profileData?.customization?.activeBanner || (isOwnProfile ? gameState?.customization?.activeBanner : 'default'))) || customizations.banners[0];
+    const auraEnabled = profileData?.customization?.auraEnabled !== undefined ? profileData.customization.auraEnabled : (isOwnProfile ? (gameState?.customization?.auraEnabled || false) : false);
+    const auraConfig = (auraEnabled && customizations.auras) ? (
         profileData?.rank === 1 ? customizations.auras.rank1 :
             profileData?.rank <= 10 ? customizations.auras.top10 :
                 profileData?.rank <= 50 ? customizations.auras.top50 :
                     customizations.auras.default
-    ) : customizations.auras.default;
+    ) : customizations.auras?.default || { color: 'transparent', blur: '0' };
 
     return (
         <div className="profile-container">
