@@ -14,10 +14,10 @@ export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
   const [scoreAwarded, setScoreAwarded] = useState(false);
   
   const bottomRef = useRef(null);
-  const { dispatch } = useGameDispatch();
+  const dispatch = useGameDispatch();
   
   const currentNode = scenario.nodes[currentNodeId];
-  const isFinished = currentNode.options.length === 0;
+  const isFinished = currentNode?.options?.length === 0;
 
   // Typewriter effect logic
   useEffect(() => {
@@ -159,7 +159,7 @@ export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
                 <div className="sys-prompt">$ system_alert --read</div>
                 <div className="sys-text prev-text">{log.question}</div>
                 <div className="sys-prompt">$ user_response --input</div>
-                <div className="user-choice {`> ${log.choice}`}">{`> ${log.choice}`}</div>
+                <div className="user-choice">{`> ${log.choice}`}</div>
               </div>
             ))}
             
