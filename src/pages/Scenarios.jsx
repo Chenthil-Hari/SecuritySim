@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { Filter, Lock, Shield, ArrowLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Filter, Lock, Shield, ArrowLeft, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ScenarioCard from '../components/ScenarioCard';
+import { buildApiUrl } from '../utils/api';
 import scenarios from '../data/scenarios';
 import './Scenarios.css';
 
@@ -21,7 +22,7 @@ export default function Scenarios() {
 
     const fetchUgc = async () => {
         try {
-            const res = await fetch('/api/ugc-scenarios');
+            const res = await fetch(buildApiUrl('/api/ugc-scenarios'));
             const data = await res.json();
             if (res.ok) setUgcScenarios(data);
         } catch (err) {

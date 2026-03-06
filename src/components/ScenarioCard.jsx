@@ -13,7 +13,7 @@ export default function ScenarioCard({ scenario }) {
 
     const completed = completedScenarios.find(s => s.scenarioId === scenario.id);
     const Icon = iconMap[scenario.icon] || Mail;
-    const categoryClass = scenario.category.toLowerCase().replace(/\s+/g, '-');
+    const categoryClass = (scenario.category || 'general').toLowerCase().replace(/\s+/g, '-');
 
     return (
         <article
