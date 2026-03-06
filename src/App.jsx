@@ -21,6 +21,8 @@ import ScenarioBuilder from './pages/ScenarioBuilder';
 import WarRoom from './pages/WarRoom';
 import ChatWidget from './components/ChatWidget';
 import MatrixBackground from './components/MatrixBackground';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
 
 import { useAuth } from './context/AuthContext';
