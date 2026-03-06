@@ -129,8 +129,11 @@ router.post('/admin-login', async (req, res) => {
         }
 
         // We create a special JWT for the super admin
+        // Use a valid BSON hex string (24 chars) to satisfy Mongoose ObjectId validation
+        const SUPER_ADMIN_ID = '000000000000000000000001'; 
+
         const token = jwt.sign(
-            { userId: 'SUPER_ADMIN_ID', username: 'Headquarters', role: 'admin' },
+            { userId: SUPER_ADMIN_ID, username: 'Headquarters', role: 'admin' },
             process.env.JWT_SECRET || 'fallback_secret',
             { expiresIn: '2h' } // Short duration for high-security sessions
         );
@@ -138,7 +141,7 @@ router.post('/admin-login', async (req, res) => {
         res.json({
             token,
             user: {
-                id: 'SUPER_ADMIN_ID',
+                id: SUPER_ADMIN_ID,
                 username: 'Headquarters',
                 email: ADMIN_EMAIL,
                 role: 'admin'
