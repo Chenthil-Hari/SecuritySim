@@ -93,23 +93,23 @@
   letter-spacing: 1px;
 }
 
-.difficulty-badge.medium {
-  background: rgba(255, 193, 7, 0.15);
-  color: #ffc107;
-  border: 1px solid rgba(255, 193, 7, 0.3);
-}
+.difficulty-badge.easy { background: rgba(0, 255, 136, 0.1); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.3); }
+.difficulty-badge.medium { background: rgba(255, 189, 46, 0.1); color: #ffbd2e; border: 1px solid rgba(255, 189, 46, 0.3); }
+.difficulty-badge.hard { background: rgba(255, 71, 87, 0.1); color: #ff4757; border: 1px solid rgba(255, 71, 87, 0.3); }
 
-.difficulty-badge.hard {
-  background: rgba(255, 71, 87, 0.15);
-  color: #ff4757;
-  border: 1px solid rgba(255, 71, 87, 0.3);
-}
-
-/* Added default style in case other difficulties are used */
-.difficulty-badge.easy {
-  background: rgba(0, 255, 136, 0.15);
-  color: var(--primary, #00ff88);
-  border: 1px solid rgba(0, 255, 136, 0.3);
+.type-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(144, 202, 249, 0.1);
+  color: #90caf9;
+  border: 1px solid rgba(144, 202, 249, 0.3);
+  margin-left: 0.5rem;
+  vertical-align: middle;
 }
 
 .scene-card-body {

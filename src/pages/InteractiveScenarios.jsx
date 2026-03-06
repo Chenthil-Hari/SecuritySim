@@ -36,6 +36,11 @@ export default function InteractiveScenarios() {
               <span className={`difficulty-badge ${scenario.difficulty.toLowerCase()}`}>
                 {scenario.difficulty}
               </span>
+              {scenario.type && (
+                 <span className="type-badge">
+                   {scenario.type}
+                 </span>
+              )}
               <h3>{scenario.title}</h3>
             </div>
             

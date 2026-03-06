@@ -110,7 +110,10 @@ export default function ScenarioSimulator({ scenario, onClose }) {
         </button>
         <div className="sim-title-area">
           <Terminal className="sim-icon" />
-          <h2>Active Incident: {scenario.title}</h2>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+             <h2>Active Incident: {scenario.title}</h2>
+             {scenario.type && <span style={{ color: '#90caf9', fontSize: '0.8rem', fontVariant: 'small-caps', letterSpacing: '1px' }}>Threat Vector: {scenario.type}</span>}
+          </div>
         </div>
         <div className="sim-status-indicators" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
           <span style={{ color: '#ffbd2e', fontFamily: 'Orbitron, sans-serif' }}>Score: {finalTotalScore}</span>
