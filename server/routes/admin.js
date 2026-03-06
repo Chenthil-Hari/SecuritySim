@@ -315,10 +315,23 @@ router.get('/settings/maintenance', authenticateToken, isAdmin, async (req, res)
 router.patch('/settings/maintenance', authenticateToken, isAdmin, async (req, res) => {
     try {
         const { isActive } = req.body;
+        
+        // Defensive check for request body
+        if (isActive === undefined) {
+            console.error("Maintenance Toggle Failure: isActive is undefined in request body");
+            return res.status(400).json({ message: "Payload error: isActive is required." });
+        }
+
         const setting = await SystemSetting.findOneAndUpdate(
             { key: 'maintenance_mode' },
-            { value: isActive, updatedAt: new Date(), updatedBy: req.user.id },
-            { upsert: true, new: true }
+            { 
+                $set: { 
+                    value: isActive, 
+                    updatedAt: new Date(), 
+                    updatedBy: req.user.id 
+                } 
+            },
+            { upsert: true, new: true, setDefaultsOnInsert: true }
         );
 
         await logAction(
@@ -329,7 +342,8 @@ router.patch('/settings/maintenance', authenticateToken, isAdmin, async (req, re
 
         res.json({ message: `Maintenance mode ${isActive ? 'activated' : 'deactivated'}`, isActive: setting.value });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("CRITICAL ERROR: Maintenance toggle failed:", error);
+        res.status(500).json({ message: "System failure during maintenance toggle: " + error.message });
     }
 });
 
