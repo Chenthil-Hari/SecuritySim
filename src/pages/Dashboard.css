@@ -1,5 +1,5 @@
 .dashboard {
-    padding: var(--space-2xl) var(--space-lg);
+    padding: var(--space-lg) var(--space-md);
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -245,12 +245,18 @@
         padding: var(--space-xl) var(--space-md);
     }
 
+    .dashboard-header {
+        margin-bottom: var(--space-xl);
+        text-align: center;
+    }
+
     .dashboard-header h1 {
         font-size: 1.5rem;
     }
 
     .dashboard-grid {
         grid-template-columns: 1fr;
+        gap: var(--space-lg);
     }
 
     .stats-column {
@@ -273,6 +279,10 @@
     .empty-dashboard .btn-secondary {
         width: 100%;
         margin-bottom: 10px;
+    }
+
+    .dashboard-score-panel {
+        padding: var(--space-lg);
     }
 }
 

@@ -1,5 +1,5 @@
 .scenarios-page {
-    padding: var(--space-2xl) var(--space-lg);
+    padding: var(--space-xl) var(--space-md);
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -74,5 +74,13 @@
 
     .scenarios-grid {
         grid-template-columns: 1fr;
+    }
+
+    .scenarios-header {
+        text-align: center;
+    }
+
+    .scenarios-filters {
+        justify-content: center;
     }
 }

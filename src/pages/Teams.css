@@ -1,7 +1,7 @@
 .teams-page {
     max-width: 900px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: var(--space-lg) var(--space-md);
 }
 
 .teams-header {
@@ -131,6 +131,21 @@
     padding: 2rem;
     border-radius: var(--radius-xl);
     border: 1px solid var(--border-color);
+    transition: all var(--transition-base);
+}
+
+@media (max-width: 768px) {
+    .team-dash-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: var(--space-lg);
+        padding: var(--space-xl) var(--space-md);
+    }
+
+    .team-dash-info h2 {
+        font-size: 1.75rem;
+    }
 }
 
 .team-dash-info h2 {

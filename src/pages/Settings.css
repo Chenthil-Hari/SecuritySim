@@ -173,8 +173,12 @@
         padding: var(--space-xl) var(--space-md);
     }
 
+    .settings-header {
+        text-align: center;
+    }
+
     .settings-section {
-        padding: var(--space-lg) var(--space-md);
+        padding: var(--space-xl) var(--space-md);
     }
 
     .setting-item {
