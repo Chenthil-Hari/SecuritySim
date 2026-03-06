@@ -321,12 +321,11 @@ router.patch('/settings/maintenance', authenticateToken, isAdmin, async (req, re
             { upsert: true, new: true }
         );
 
-        await AuditLog.create({
-            userId: req.user.id,
-            action: isActive ? 'SET_MAINTENANCE_ON' : 'SET_MAINTENANCE_OFF',
-            details: `Maintenance mode toggled to ${isActive ? 'ACTIVE' : 'INACTIVE'}`,
-            timestamp: new Date()
-        });
+        await logAction(
+            req.user, 
+            isActive ? 'maintenance_on' : 'maintenance_off', 
+            `Global Maintenance Mode toggled to ${isActive ? 'ACTIVE' : 'INACTIVE'}`
+        );
 
         res.json({ message: `Maintenance mode ${isActive ? 'activated' : 'deactivated'}`, isActive: setting.value });
     } catch (error) {
