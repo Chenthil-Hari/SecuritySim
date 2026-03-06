@@ -17,7 +17,7 @@ export default function ScenarioCard({ scenario }) {
 
     return (
         <article
-            className="scenario-card"
+            className={`scenario-card ${scenario.isBountied ? 'bountied-scenario' : ''}`}
             onClick={() => navigate(`/scenarios/${scenario.id}`)}
             role="button"
             tabIndex={0}
@@ -49,6 +49,10 @@ export default function ScenarioCard({ scenario }) {
                 {completed ? (
                     <span className="scenario-card-status completed">
                         <CheckCircle size={14} /> {completed.accuracy}%
+                    </span>
+                ) : scenario.isBountied ? (
+                    <span className="scenario-card-status bounty-tag">
+                        2x XP BOUNTY
                     </span>
                 ) : (
                     <span className="scenario-card-status new">New</span>

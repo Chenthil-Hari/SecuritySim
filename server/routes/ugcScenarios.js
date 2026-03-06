@@ -64,6 +64,18 @@ router.get('/admin/pending', authenticateToken, isAdmin, async (req, res) => {
     }
 });
 
+// Admin get live (approved) scenarios for bounties
+router.get('/admin/live', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const scenarios = await UgcScenario.find({ status: 'approved' })
+            .populate('authorId', 'username profilePhoto')
+            .sort({ plays: -1 }); // Most played first
+        res.json(scenarios);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Moderate a scenario (approve/reject)
 router.patch('/:id/moderate', authenticateToken, isAdmin, async (req, res) => {
     try {
@@ -80,6 +92,22 @@ router.patch('/:id/moderate', authenticateToken, isAdmin, async (req, res) => {
         await scenario.save();
 
         res.json({ message: `Scenario ${status} successfully`, scenario });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Admin toggle scenario bounty
+router.patch('/admin/:id/bounty', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const scenario = await UgcScenario.findById(req.params.id);
+        if (!scenario) return res.status(404).json({ message: 'Scenario not found' });
+        
+        scenario.isBountied = !scenario.isBountied;
+        await scenario.save();
+        
+        // Log the bounty action if logAction is available (optional but good practice)
+        res.json({ message: `Bounty ${scenario.isBountied ? 'placed on' : 'removed from'} scenario`, isBountied: scenario.isBountied });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

@@ -292,7 +292,66 @@
 }
 
 .queue-empty h2 {
-    margin: 20px 0 8px;
+    color: white;
+    margin: 16px 0 8px;
+}
+
+.bountied-border {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 15px rgba(244, 63, 94, 0.15);
+}
+
+.btn-bounty {
+    background: rgba(244, 63, 94, 0.1);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    color: var(--accent);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-bounty:hover {
+    background: rgba(244, 63, 94, 0.2);
+}
+
+.btn-bounty.active {
+    background: var(--accent);
+    color: var(--bg-primary);
+    box-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
+}
+
+.moderation-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: var(--space-lg);
+}
+
+.mod-tab {
+    background: transparent;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.mod-tab:hover {
+    background: #161b22;
+    color: white;
+}
+
+.mod-tab.active {
+    background: var(--primary);
+    color: var(--primary-bg);
+    border-color: var(--primary);
 }
 
 .queue-empty p {

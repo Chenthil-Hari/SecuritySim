@@ -18,6 +18,8 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ pending: 0, totalUsers: 0 });
     const [activeScenario, setActiveScenario] = useState(null);
+    const [moderationView, setModerationView] = useState('pending'); // 'pending' or 'live'
+    const [liveScenarios, setLiveScenarios] = useState([]);
 
     useEffect(() => {
         if (user?.role !== 'admin') {
@@ -26,7 +28,10 @@ export default function AdminDashboard() {
         }
         
         const fetchData = () => {
-            if (activeTab === 'moderation') fetchPending();
+            if (activeTab === 'moderation') {
+                fetchPending();
+                fetchLiveScenarios();
+            }
             else if (activeTab === 'users') fetchUsers();
             else if (activeTab === 'analytics') fetchAnalytics();
             else if (activeTab === 'operations') {
@@ -107,6 +112,21 @@ export default function AdminDashboard() {
             console.error("Error fetching pending:", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchLiveScenarios = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/ugc-scenarios/admin/live'), {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setLiveScenarios(data);
+            }
+        } catch (err) {
+            console.error("Error fetching live scenarios:", err);
         }
     };
 
@@ -218,6 +238,22 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleToggleBounty = async (id, currentStatus) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/ugc-scenarios/admin/${id}/bounty`), {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setLiveScenarios(liveScenarios.map(s => s._id === id ? { ...s, isBountied: data.isBountied } : s));
+            }
+        } catch (err) {
+            alert("Error toggling bounty: " + err.message);
+        }
+    };
+
     const handleLogout = () => {
         logout();
         navigate('/admin');
@@ -229,13 +265,13 @@ export default function AdminDashboard() {
         <header className="main-header">
             <div className="header-title">
                 <h1>
-                    {activeTab === 'moderation' && 'Moderation Queue'}
+                    {activeTab === 'moderation' && 'Scenario Management'}
                     {activeTab === 'users' && 'User Directory'}
                     {activeTab === 'analytics' && 'Intelligence Dashboard'}
                     {activeTab === 'operations' && 'Mission Operations'}
                 </h1>
                 <p>
-                    {activeTab === 'moderation' && `Total pending scenarios: ${stats.pending}`}
+                    {activeTab === 'moderation' && `Total pending scenarios: ${stats.pending} | Live: ${liveScenarios.length}`}
                     {activeTab === 'users' && `Total registered investigators: ${stats.totalUsers}`}
                     {activeTab === 'analytics' && 'Real-time platform performance metrics.'}
                     {activeTab === 'operations' && 'Administrative controls and security logs.'}
@@ -253,7 +289,7 @@ export default function AdminDashboard() {
                 </div>
             )}
             <button className="refresh-btn" onClick={() => {
-                if (activeTab === 'moderation') fetchPending();
+                if (activeTab === 'moderation') { fetchPending(); fetchLiveScenarios(); }
                 else if (activeTab === 'users') fetchUsers();
                 else if (activeTab === 'analytics') fetchAnalytics();
                 else if (activeTab === 'operations') fetchLogs();
@@ -262,48 +298,108 @@ export default function AdminDashboard() {
     );
 
     const renderModeration = () => (
-        scenarios.length > 0 ? (
-            <div className="scenario-queue">
-                {scenarios.map(s => (
-                    <div key={s._id} className="queue-card animate-fade-in">
-                        <div className="queue-card-main">
-                            <div className="scenario-identity">
-                                <span className={`cat-tag ${s.category.toLowerCase()}`}>{s.category}</span>
-                                <h3>{s.title}</h3>
-                                <p>{s.description}</p>
-                            </div>
-                            <div className="scenario-meta">
-                                <div className="meta-item">
-                                    <span>Author</span>
-                                    <strong>{s.authorId?.username || 'Unknown'}</strong>
+        <div className="moderation-container animate-fade-in">
+            <div className="moderation-tabs">
+                <button 
+                    className={`mod-tab ${moderationView === 'pending' ? 'active' : ''}`}
+                    onClick={() => setModerationView('pending')}
+                >
+                    Pending Queue ({stats.pending})
+                </button>
+                <button 
+                    className={`mod-tab ${moderationView === 'live' ? 'active' : ''}`}
+                    onClick={() => setModerationView('live')}
+                >
+                    Live Scenarios ({liveScenarios.length})
+                </button>
+            </div>
+
+            {moderationView === 'pending' ? (
+                scenarios.length > 0 ? (
+                    <div className="scenario-queue">
+                        {scenarios.map(s => (
+                            <div key={s._id} className="queue-card">
+                                <div className="queue-card-main">
+                                    <div className="scenario-identity">
+                                        <span className={`cat-tag ${s.category.toLowerCase()}`}>{s.category}</span>
+                                        <h3>{s.title}</h3>
+                                        <p>{s.description}</p>
+                                    </div>
+                                    <div className="scenario-meta">
+                                        <div className="meta-item">
+                                            <span>Author</span>
+                                            <strong>{s.authorId?.username || 'Unknown'}</strong>
+                                        </div>
+                                        <div className="meta-item">
+                                            <span>Difficulty</span>
+                                            <strong className={s.difficulty.toLowerCase()}>{s.difficulty}</strong>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="meta-item">
-                                    <span>Difficulty</span>
-                                    <strong className={s.difficulty.toLowerCase()}>{s.difficulty}</strong>
+                                <div className="queue-card-actions">
+                                    <button className="btn-view" onClick={() => setActiveScenario(s)}>
+                                        <Eye size={16} /> Review
+                                    </button>
+                                    <button className="btn-approve" onClick={() => handleModerate(s._id, 'approved')}>
+                                        <CheckCircle size={16} /> Approve
+                                    </button>
+                                    <button className="btn-reject" onClick={() => handleModerate(s._id, 'rejected')}>
+                                        <XCircle size={16} /> Reject
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-                        <div className="queue-card-actions">
-                            <button className="btn-view" onClick={() => setActiveScenario(s)}>
-                                <Eye size={16} /> Review
-                            </button>
-                            <button className="btn-approve" onClick={() => handleModerate(s._id, 'approved')}>
-                                <CheckCircle size={16} /> Approve
-                            </button>
-                            <button className="btn-reject" onClick={() => handleModerate(s._id, 'rejected')}>
-                                <XCircle size={16} /> Reject
-                            </button>
-                        </div>
+                        ))}
                     </div>
-                ))}
-            </div>
-        ) : (
-            <div className="queue-empty">
-                <CheckCircle size={48} className="text-success" />
-                <h2>All Caught Up!</h2>
-                <p>There are no pending scenarios to moderate.</p>
-            </div>
-        )
+                ) : (
+                    <div className="queue-empty">
+                        <CheckCircle size={48} className="text-success" />
+                        <h2>All Caught Up!</h2>
+                        <p>There are no pending scenarios to moderate.</p>
+                    </div>
+                )
+            ) : (
+                <div className="scenario-queue">
+                    {liveScenarios.map(s => (
+                        <div key={s._id} className={`queue-card ${s.isBountied ? 'bountied-border' : ''}`}>
+                            <div className="queue-card-main">
+                                <div className="scenario-identity">
+                                    <span className={`cat-tag ${s.category.toLowerCase()}`}>{s.category}</span>
+                                    {s.isBountied && <span className="cat-tag" style={{ background: 'var(--accent)', marginLeft: '10px' }}>BOUNTY ACTIVE</span>}
+                                    <h3>{s.title}</h3>
+                                    <p>{s.description}</p>
+                                </div>
+                                <div className="scenario-meta">
+                                    <div className="meta-item">
+                                        <span>Author</span>
+                                        <strong>{s.authorId?.username || 'Unknown'}</strong>
+                                    </div>
+                                    <div className="meta-item">
+                                        <span>Total Plays</span>
+                                        <strong>{s.plays || 0}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="queue-card-actions">
+                                <button 
+                                    className={`btn-bounty ${s.isBountied ? 'active' : ''}`} 
+                                    onClick={() => handleToggleBounty(s._id, s.isBountied)}
+                                >
+                                    <Star size={16} /> {s.isBountied ? 'Revoke Bounty' : 'Set 2x XP Bounty'}
+                                </button>
+                                <button className="btn-reject" onClick={() => handleModerate(s._id, 'rejected')}>
+                                    <AlertCircle size={16} /> Takedown
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                    {liveScenarios.length === 0 && (
+                        <div className="queue-empty">
+                            <p>No live UGC scenarios yet.</p>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
     );
 
     const renderUsers = () => (

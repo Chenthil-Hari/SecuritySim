@@ -135,6 +135,38 @@
     color: var(--text-muted);
 }
 
+.scenario-card.bountied-scenario {
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(244, 63, 94, 0.2);
+}
+
+.scenario-card.bountied-scenario:hover {
+    box-shadow: 0 0 25px rgba(244, 63, 94, 0.4);
+    transform: translateY(-4px);
+}
+
+.scenario-card.bountied-scenario::before {
+    background: linear-gradient(90deg, var(--accent), #ff7e67);
+    opacity: 0.8;
+}
+
+.scenario-card-status.bounty-tag {
+    color: var(--bg-primary);
+    background: var(--accent);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-weight: 800;
+    font-size: 0.65rem;
+    letter-spacing: 0.5px;
+    animation: bounty-pulse 2s infinite;
+}
+
+@keyframes bounty-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(244, 63, 94, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+}
+
 @media (max-width: 768px) {
     .scenario-card {
         padding: var(--space-md);

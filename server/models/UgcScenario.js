@@ -40,6 +40,14 @@ const ugcScenarioSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isBountied: {
+        type: Boolean,
+        default: false
+    },
+    bountyMultiplier: {
+        type: Number,
+        default: 2
+    },
     status: {
         type: String,
         enum: ['pending', 'approved', 'rejected'],
