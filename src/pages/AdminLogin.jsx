@@ -6,7 +6,6 @@ import './AdminLogin.css';
 
 export default function AdminLogin() {
     const navigate = useNavigate();
-    const { login, user } = useAuth();
     const [credentials, setCredentials] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
