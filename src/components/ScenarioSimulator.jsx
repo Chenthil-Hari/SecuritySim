@@ -4,6 +4,7 @@ import './ScenarioSimulator.css';
 import { buildApiUrl } from '../utils/api';
 
 import { useGameDispatch } from '../context/GameContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
   const [currentNodeId, setCurrentNodeId] = useState("start");
@@ -15,6 +16,7 @@ export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
   
   const bottomRef = useRef(null);
   const dispatch = useGameDispatch();
+  const { updateUser } = useAuth();
   
   const currentNode = scenario.nodes[currentNodeId];
   const isFinished = currentNode?.options?.length === 0;
@@ -77,7 +79,14 @@ export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
                 timestamp: new Date()
               }
             })
-          }).catch(err => console.warn('Backend sync failed:', err));
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.user) {
+              updateUser(data.user);
+            }
+          })
+          .catch(err => console.warn('Backend sync failed:', err));
         }
       }
       
@@ -116,7 +125,8 @@ export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
       return <div>Error: Scenario data corrupted. Missing node: {currentNodeId}</div>;
   }
 
-  const finalTotalScore = isFinished ? currentScore + (currentNode.score || 0) : currentScore;
+  const rawFinalScore = isFinished ? currentScore + (currentNode.score || 0) : currentScore;
+  const finalTotalScore = Math.min(scenario.maxScore, rawFinalScore);
 
   return (
     <div className="simulator-container fade-in">
