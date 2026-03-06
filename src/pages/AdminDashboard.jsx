@@ -59,6 +59,9 @@ export default function AdminDashboard() {
                 setScenarios(scenarios.filter(s => s._id !== id));
                 setStats(prev => ({ ...prev, pending: prev.pending - 1 }));
                 setActiveScenario(null);
+                // Simple success feedback
+                const action = status === 'approved' ? 'Approved' : 'Rejected';
+                alert(`Scenario ${action} and updated successfully.`);
             }
         } catch (err) {
             alert("Error moderating scenario: " + err.message);
