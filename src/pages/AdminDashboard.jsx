@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, CheckCircle, XCircle, Eye, AlertCircle, Clock, Search, LogOut, ExternalLink, Lock, BarChart2, Radio } from 'lucide-react';
+import { Shield, CheckCircle, XCircle, Eye, AlertCircle, Clock, Search, LogOut, ExternalLink, Lock, BarChart2, Radio, Star, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { buildApiUrl } from '../utils/api';
 import './AdminDashboard.css';
@@ -27,7 +27,7 @@ export default function AdminDashboard() {
             navigate('/admin');
             return;
         }
-        
+
         const fetchData = () => {
             if (activeTab === 'moderation') {
                 fetchPending();
@@ -83,9 +83,9 @@ export default function AdminDashboard() {
             const token = localStorage.getItem('token');
             const res = await fetch(buildApiUrl('/api/admin/broadcast'), {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(broadcast)
             });
@@ -162,6 +162,8 @@ export default function AdminDashboard() {
                 const data = await res.json();
                 setUsers(data);
                 setStats(prev => ({ ...prev, totalUsers: data.length }));
+            } else {
+                console.error("Failed to fetch users:", res.status, res.statusText);
             }
         } catch (err) {
             console.error("Error fetching users:", err);
@@ -241,9 +243,9 @@ export default function AdminDashboard() {
             const token = localStorage.getItem('token');
             const res = await fetch(buildApiUrl(`/api/ugc-scenarios/${id}/moderate`), {
                 method: 'PATCH',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ status })
             });
@@ -281,9 +283,9 @@ export default function AdminDashboard() {
             const token = localStorage.getItem('token');
             const res = await fetch(buildApiUrl('/api/admin/assets'), {
                 method: 'DELETE',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ id: assetId, type: assetType })
             });
@@ -328,9 +330,9 @@ export default function AdminDashboard() {
             {activeTab === 'users' && (
                 <div className="header-search">
                     <Search size={18} />
-                    <input 
-                        type="text" 
-                        placeholder="Search by username..." 
+                    <input
+                        type="text"
+                        placeholder="Search by username..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -349,13 +351,13 @@ export default function AdminDashboard() {
     const renderModeration = () => (
         <div className="moderation-container animate-fade-in">
             <div className="moderation-tabs">
-                <button 
+                <button
                     className={`mod-tab ${moderationView === 'pending' ? 'active' : ''}`}
                     onClick={() => setModerationView('pending')}
                 >
                     Pending Queue ({stats.pending})
                 </button>
-                <button 
+                <button
                     className={`mod-tab ${moderationView === 'live' ? 'active' : ''}`}
                     onClick={() => setModerationView('live')}
                 >
@@ -429,8 +431,8 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                             <div className="queue-card-actions">
-                                <button 
-                                    className={`btn-bounty ${s.isBountied ? 'active' : ''}`} 
+                                <button
+                                    className={`btn-bounty ${s.isBountied ? 'active' : ''}`}
                                     onClick={() => handleToggleBounty(s._id, s.isBountied)}
                                 >
                                     <Star size={16} /> {s.isBountied ? 'Revoke Bounty' : 'Set 2x XP Bounty'}
@@ -465,7 +467,7 @@ export default function AdminDashboard() {
                     </tr>
                 </thead>
                 <tbody>
-                    {users.filter(u => u.username.toLowerCase().includes(searchQuery.toLowerCase())).map(u => (
+                    {Array.isArray(users) && users.filter(u => u.username?.toLowerCase().includes(searchQuery.toLowerCase())).map(u => (
                         <tr key={u._id}>
                             <td>
                                 <div className="user-cell">
@@ -490,14 +492,14 @@ export default function AdminDashboard() {
                                 </span>
                             </td>
                             <td className="actions-cell">
-                                <button 
+                                <button
                                     className={`action-btn ${u.isFrozen ? 'unfreeze' : 'freeze'}`}
                                     onClick={() => handleFreeze(u._id)}
                                     title={u.isFrozen ? 'Unfreeze' : 'Freeze'}
                                 >
                                     <AlertCircle size={16} />
                                 </button>
-                                <button 
+                                <button
                                     className="action-btn reset"
                                     onClick={() => handleResetPassword(u._id)}
                                     title="Reset Password"
@@ -535,8 +537,8 @@ export default function AdminDashboard() {
                             <div key={c._id} className="cat-item">
                                 <span className="cat-name">{c._id}</span>
                                 <div className="progress-bg">
-                                    <div 
-                                        className={`progress-bar ${c.avgAccuracy < 60 ? 'danger' : c.avgAccuracy < 80 ? 'warning' : 'success'}`} 
+                                    <div
+                                        className={`progress-bar ${c.avgAccuracy < 60 ? 'danger' : c.avgAccuracy < 80 ? 'warning' : 'success'}`}
                                         style={{ width: `${c.avgAccuracy}%` }}
                                     ></div>
                                 </div>
@@ -567,13 +569,13 @@ export default function AdminDashboard() {
                 <div className="ops-card">
                     <h3><Radio size={18} /> Global Broadcast</h3>
                     <form onSubmit={handleBroadcast}>
-                        <textarea 
+                        <textarea
                             placeholder="Message to all terminals..."
                             value={broadcast.message}
-                            onChange={e => setBroadcast({...broadcast, message: e.target.value})}
+                            onChange={e => setBroadcast({ ...broadcast, message: e.target.value })}
                         />
                         <div className="form-actions">
-                            <select value={broadcast.type} onChange={e => setBroadcast({...broadcast, type: e.target.value})}>
+                            <select value={broadcast.type} onChange={e => setBroadcast({ ...broadcast, type: e.target.value })}>
                                 <option value="info">Information</option>
                                 <option value="warning">Warning</option>
                                 <option value="danger">CRITICAL</option>
@@ -622,8 +624,8 @@ export default function AdminDashboard() {
                             <div className="asset-image-container">
                                 <img src={asset.url} alt="Uploaded Asset" className="asset-img" />
                                 <div className="asset-overlay">
-                                    <button 
-                                        className="btn-takedown" 
+                                    <button
+                                        className="btn-takedown"
                                         onClick={() => handleAssetTakedown(asset._id, asset.type)}
                                         title="Take Down Image"
                                     >
@@ -653,7 +655,7 @@ export default function AdminDashboard() {
                     <Shield size={24} className="text-primary" />
                     <span>HQ ADMIN</span>
                 </div>
-                
+
                 <nav className="sidebar-nav">
                     <button className={`nav-item ${activeTab === 'moderation' ? 'active' : ''}`} onClick={() => setActiveTab('moderation')}>
                         <Clock size={18} /> Moderation Queue
