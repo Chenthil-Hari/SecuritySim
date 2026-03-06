@@ -170,6 +170,22 @@ export default function AdminDashboard() {
                             <button className="close-btn" onClick={() => setActiveScenario(null)}>&times;</button>
                         </div>
                         <div className="modal-body">
+                            <div className="review-section author-info-section">
+                                <h3>Author Details</h3>
+                                <div className="author-card">
+                                    <div className="author-avatar">
+                                        {activeScenario.authorId?.profilePhoto ? (
+                                            <img src={activeScenario.authorId.profilePhoto} alt="" />
+                                        ) : (
+                                            <span>{activeScenario.authorId?.username?.[0] || '?'}</span>
+                                        )}
+                                    </div>
+                                    <div className="author-text">
+                                        <strong>{activeScenario.authorId?.username || 'Unknown User'}</strong>
+                                        <span className="author-email">{activeScenario.authorId?.email || 'No email provided'}</span>
+                                    </div>
+                                </div>
+                            </div>
                             <div className="review-section">
                                 <h3>Visual Content</h3>
                                 <pre className="content-preview">
