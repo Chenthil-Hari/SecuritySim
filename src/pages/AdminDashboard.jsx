@@ -58,8 +58,15 @@ export default function AdminDashboard() {
                 setAnalytics(await res.json());
                 setError(null);
             } else {
-                const errorData = await res.json().catch(() => ({}));
-                setError(errorData.message || `Intelligence Error (${res.status})`);
+                const text = await res.text().catch(() => '');
+                let msg = `Intelligence Error (${res.status})`;
+                try {
+                    const data = JSON.parse(text);
+                    msg = data.message || msg;
+                } catch (e) {
+                    msg = text ? `${msg}: ${text.substring(0, 50)}` : msg;
+                }
+                setError(msg);
             }
         } catch (err) {
             console.error("Analytics Error:", err);
@@ -80,8 +87,15 @@ export default function AdminDashboard() {
                 setLogs(await res.json());
                 setError(null);
             } else {
-                const errorData = await res.json().catch(() => ({}));
-                setError(errorData.message || `Ops Log Error (${res.status})`);
+                const text = await res.text().catch(() => '');
+                let msg = `Ops Log Error (${res.status})`;
+                try {
+                    const data = JSON.parse(text);
+                    msg = data.message || msg;
+                } catch (e) {
+                    msg = text ? `${msg}: ${text.substring(0, 50)}` : msg;
+                }
+                setError(msg);
             }
         } catch (err) {
             console.error("Log Error:", err);
@@ -128,8 +142,15 @@ export default function AdminDashboard() {
                 setStats(prev => ({ ...prev, pending: data.length }));
                 setError(null);
             } else {
-                const errorData = await res.json().catch(() => ({}));
-                setError(errorData.message || `Queue Error (${res.status})`);
+                const text = await res.text().catch(() => '');
+                let msg = `Queue Error (${res.status})`;
+                try {
+                    const data = JSON.parse(text);
+                    msg = data.message || msg;
+                } catch (e) {
+                    msg = text ? `${msg}: ${text.substring(0, 50)}` : msg;
+                }
+                setError(msg);
             }
         } catch (err) {
             console.error("Error fetching pending:", err);
@@ -165,8 +186,15 @@ export default function AdminDashboard() {
                 setAssets(await res.json());
                 setError(null);
             } else {
-                const errorData = await res.json().catch(() => ({}));
-                setError(errorData.message || `Evidence Error (${res.status})`);
+                const text = await res.text().catch(() => '');
+                let msg = `Evidence Error (${res.status})`;
+                try {
+                    const data = JSON.parse(text);
+                    msg = data.message || msg;
+                } catch (e) {
+                    msg = text ? `${msg}: ${text.substring(0, 50)}` : msg;
+                }
+                setError(msg);
             }
         } catch (err) {
             console.error("Error fetching assets:", err);
@@ -189,9 +217,15 @@ export default function AdminDashboard() {
                 setStats(prev => ({ ...prev, totalUsers: data.length }));
                 setError(null);
             } else {
-                const errorData = await res.json().catch(() => ({}));
-                console.error("Failed to fetch users:", res.status, res.statusText, errorData);
-                setError(errorData.message || `API Connection Issue (${res.status})`);
+                const text = await res.text().catch(() => '');
+                let msg = `API Connection Issue (${res.status})`;
+                try {
+                    const data = JSON.parse(text);
+                    msg = data.message || msg;
+                } catch (e) {
+                    msg = text ? `${msg}: ${text.substring(0, 50)}` : msg;
+                }
+                setError(msg);
             }
         } catch (err) {
             console.error("Error fetching users:", err);
