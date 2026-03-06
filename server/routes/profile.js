@@ -113,13 +113,41 @@ router.put('/sync', authMiddleware, async (req, res) => {
              return res.json({ message: 'No updates provided' });
         }
 
-        const user = await User.findByIdAndUpdate(
-            req.userId,
-            updateOperation,
-            { new: true }
-        ).select('-password');
-
+        const user = await User.findById(req.userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
+
+        // Apply updates
+        if (Object.keys(updateData).length > 0) {
+            Object.assign(user, updateData);
+        }
+
+        // Apply increments & Handle Leveling/XP logic
+        if (incrementalScore !== undefined) {
+            user.score += incrementalScore;
+            user.xp += incrementalScore; // 1:1 ratio
+            
+            // Leveling logic: Level = floor(xp / 100) + 1
+            const newLevel = Math.floor(user.xp / 100) + 1;
+            if (newLevel > user.level) {
+                user.skillPoints += (newLevel - user.level);
+                user.level = newLevel;
+            }
+        }
+
+        // Handle path-based increments (xp, level if passed)
+        if (xp !== undefined && xp > user.xp) user.xp = xp;
+        if (level !== undefined && level > user.level) user.level = level;
+
+        // Apply push data
+        if (newCompletedScenario) {
+            // Check if already completed to avoid duplicates
+            const isFinished = user.completedScenarios.some(s => s.scenarioId === newCompletedScenario.scenarioId);
+            if (!isFinished) {
+                user.completedScenarios.push(newCompletedScenario);
+            }
+        }
+
+        await user.save();
         res.json({ message: 'Profile synced successfully', user });
     } catch (error) {
         res.status(500).json({ message: 'Error syncing profile', error: error.message });

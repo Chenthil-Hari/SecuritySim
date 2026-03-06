@@ -3,6 +3,8 @@ import { ArrowLeft, Terminal, ShieldAlert, Cpu, Activity, RefreshCw, CheckCircle
 import './ScenarioSimulator.css';
 import { buildApiUrl } from '../utils/api';
 
+import { useGameDispatch } from '../context/GameContext';
+
 export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
   const [currentNodeId, setCurrentNodeId] = useState("start");
   const [history, setHistory] = useState([]);
@@ -12,6 +14,7 @@ export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
   const [scoreAwarded, setScoreAwarded] = useState(false);
   
   const bottomRef = useRef(null);
+  const { dispatch } = useGameDispatch();
   
   const currentNode = scenario.nodes[currentNodeId];
   const isFinished = currentNode.options.length === 0;
@@ -28,13 +31,12 @@ export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
       if (currentIndex < currentNode.text.length) {
         setDisplayedText(currentNode.text.substring(0, currentIndex + 1));
         currentIndex++;
-        // Auto scroll as text is typing potentially
         if (bottomRef.current) bottomRef.current.scrollIntoView({ behavior: 'smooth' });
       } else {
         clearInterval(intervalId);
         setTyping(false);
       }
-    }, 15); // Adjust typing speed here
+    }, 15);
 
     return () => clearInterval(intervalId);
   }, [currentNodeId, currentNode]);
@@ -42,39 +44,46 @@ export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
   // Handle score awarding on finish
   useEffect(() => {
     if (isFinished && !scoreAwarded && currentNode.score !== undefined) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const finalTotalScore = currentScore + (currentNode.score || 0);
+      // CAP the score at maxScore to prevent 200/100
+      const rawFinalScore = currentScore + (currentNode.score || 0);
+      const finalTotalScore = Math.min(scenario.maxScore, rawFinalScore);
 
-        const payload = {
-          // Only send incremental score if it's NOT a replay
-          ...(isReplay ? {} : { incrementalScore: finalTotalScore }),
-          // Always send completion if it's the first time (though backend should handle idempotency)
-          ...(!isReplay ? { 
-            newCompletedScenario: { 
-              scenarioId: scenario.id, 
-              category: scenario.type,
-              accuracy: Math.max(0, Math.floor((finalTotalScore / scenario.maxScore) * 100)),
-              timestamp: new Date()
-            } 
-          } : {})
-        };
+      if (!isReplay) {
+        // Dispatch to global context to handle XP and Leveling
+        dispatch({
+          type: 'COMPLETE_SCENARIO',
+          payload: {
+            scenarioId: scenario.id,
+            score: finalTotalScore,
+            category: scenario.type
+          }
+        });
 
-        if (!isReplay || payload.newCompletedScenario) {
+        // Sync to backend
+        const token = localStorage.getItem('token');
+        if (token) {
           fetch(buildApiUrl('/api/profile/sync'), {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(payload)
-          }).catch(err => console.warn('Failed to sync state:', err));
+            body: JSON.stringify({
+              incrementalScore: finalTotalScore,
+              newCompletedScenario: { 
+                scenarioId: scenario.id, 
+                category: scenario.type,
+                accuracy: Math.max(0, Math.min(100, Math.floor((finalTotalScore / scenario.maxScore) * 100))),
+                timestamp: new Date()
+              }
+            })
+          }).catch(err => console.warn('Backend sync failed:', err));
         }
-        
-        setScoreAwarded(true);
       }
+      
+      setScoreAwarded(true);
     }
-  }, [isFinished, scoreAwarded, currentNode, currentScore]);
+  }, [isFinished, scoreAwarded, currentNode, currentScore, isReplay, scenario, dispatch]);
 
   const handleOptionClick = (option) => {
     if (typing) return; // Prevent clicking while text is typing
@@ -208,9 +217,14 @@ export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
                  {currentNode.explanation}
                </div>
 
-               <button className="restart-btn" onClick={handleRestart} style={{ alignSelf: 'center' }}>
-                 <RefreshCw size={18} /> Restart Simulation
-               </button>
+               <div className="wrap-up-actions" style={{ display: 'flex', gap: '1rem', width: '100%', justifyContent: 'center', marginTop: '1rem' }}>
+                 <button className="back-catalog-btn" onClick={onClose} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: 'rgba(144, 202, 249, 0.1)', border: '1px solid #90caf9', color: '#90caf9', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Rajdhani, sans-serif', fontWeight: 600 }}>
+                   <ArrowLeft size={18} /> Back to Catalog
+                 </button>
+                 <button className="restart-btn" onClick={handleRestart} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: 'rgba(0, 255, 136, 0.1)', border: '1px solid #00ff88', color: '#00ff88', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Rajdhani, sans-serif', fontWeight: 600 }}>
+                   <RefreshCw size={18} /> Restart Simulation
+                 </button>
+               </div>
             </div>
          )}
       </div>

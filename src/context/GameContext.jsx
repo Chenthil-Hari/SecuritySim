@@ -187,6 +187,31 @@ function gameReducer(state, action) {
             };
             break;
         }
+        case 'COMPLETE_SCENARIO': {
+            const { scenarioId, score, category } = action.payload;
+            
+            // Calculate new XP and Level
+            const newXp = state.xp + score;
+            const newLevel = calculateLevel(newXp);
+            const levelGained = newLevel > state.level;
+            const newSkillPoints = state.skillPoints + (levelGained ? (newLevel - state.level) : 0);
+            
+            newState = {
+                ...state,
+                score: state.score + score,
+                xp: newXp,
+                level: newLevel,
+                skillPoints: newSkillPoints
+            };
+
+            // Track completion for UI badges if not already there
+            if (!state.weeklyCompleted.includes(scenarioId)) {
+                newState.weeklyCompleted = [...state.weeklyCompleted, scenarioId];
+            }
+            
+            newState = checkNewTitles(newState);
+            break;
+        }
         case 'UPDATE_CUSTOMIZATION': {
             newState = {
                 ...state,
