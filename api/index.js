@@ -113,19 +113,24 @@ io.on('connection', (socket) => {
     });
 
     socket.on('identify', (userId) => {
-        userSockets.set(userId, socket.id);
-        console.log(`User ${userId} identified with socket ${socket.id}`);
+        if (!userSockets.has(userId)) {
+            userSockets.set(userId, new Set());
+        }
+        userSockets.get(userId).add(socket.id);
+        console.log(`User ${userId} added socket ${socket.id}. Total sockets: ${userSockets.get(userId).size}`);
     });
 
     socket.on('disconnect', () => {
-        // Remove from mapping
-        for (const [userId, socketId] of userSockets.entries()) {
-            if (socketId === socket.id) {
-                userSockets.delete(userId);
+        for (const [userId, sockets] of userSockets.entries()) {
+            if (sockets.has(socket.id)) {
+                sockets.delete(socket.id);
+                if (sockets.size === 0) {
+                    userSockets.delete(userId);
+                }
                 break;
             }
         }
-        console.log('User disconnected');
+        console.log('User disconnected:', socket.id);
     });
 
     // PvP Duel Handlers
@@ -147,9 +152,11 @@ io.on('connection', (socket) => {
     // Private Invitations
     socket.on('send_duel_invite', (data) => {
         // data: { fromId, fromName, toId, matchId, scenarioId }
-        const targetSocketId = userSockets.get(data.toId);
-        if (targetSocketId) {
-            io.to(targetSocketId).emit('incoming_duel_invite', data);
+        const targetSockets = userSockets.get(data.toId);
+        if (targetSockets && targetSockets.size > 0) {
+            targetSockets.forEach(socketId => {
+                io.to(socketId).emit('incoming_duel_invite', data);
+            });
         } else {
             // Target is offline
             socket.emit('invite_response', { accepted: false, message: 'Opponent is offline.' });
@@ -158,9 +165,11 @@ io.on('connection', (socket) => {
 
     socket.on('respond_to_invite', (data) => {
         // data: { fromId, toId, matchId, accepted }
-        const targetSocketId = userSockets.get(data.toId);
-        if (targetSocketId) {
-            io.to(targetSocketId).emit('invite_response', data);
+        const targetSockets = userSockets.get(data.toId);
+        if (targetSockets && targetSockets.size > 0) {
+            targetSockets.forEach(socketId => {
+                io.to(socketId).emit('invite_response', data);
+            });
         }
     });
 });

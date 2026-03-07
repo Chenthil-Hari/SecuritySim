@@ -53,6 +53,25 @@ function AppContent() {
     return <TerminalLocked />;
   }
 
+  // Global socket identification for presence
+  useEffect(() => {
+    if (isLoggedIn && user?._id) {
+      const socket = io(window.location.origin);
+      
+      const identify = () => {
+        socket.emit('identify', user._id);
+      };
+
+      socket.on('connect', identify);
+      identify(); // Initial identification
+
+      return () => {
+        socket.off('connect', identify);
+        socket.disconnect();
+      };
+    }
+  }, [isLoggedIn, user?._id]);
+
   // Handle Maintenance Redirect
   const isAdmin = user?.role === 'admin';
   const isAdminRoute = location.pathname.startsWith('/admin');
