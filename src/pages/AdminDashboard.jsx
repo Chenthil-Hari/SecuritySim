@@ -26,6 +26,9 @@ export default function AdminDashboard() {
     const [assets, setAssets] = useState([]);
     const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
     const [expectedReturn, setExpectedReturn] = useState('');
+    const [featureToggles, setFeatureToggles] = useState({ teams: true, warrooms: true, pvp: true, ugc: true, threat_map: true });
+    const [newsItems, setNewsItems] = useState([]);
+    const [newNews, setNewNews] = useState({ title: '', message: '', type: 'info', priority: 0, expiresAt: '' });
 
     useEffect(() => {
         if (user?.role !== 'admin') {
@@ -44,6 +47,8 @@ export default function AdminDashboard() {
                 fetchLogs();
                 fetchEvents();
                 fetchMaintenanceStatus();
+                fetchFeatureToggles();
+                fetchNews();
             }
             else if (activeTab === 'evidence') {
                 fetchAssets();
@@ -173,6 +178,97 @@ export default function AdminDashboard() {
         }
     };
 
+
+    const fetchFeatureToggles = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/settings/features'), {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) setFeatureToggles(await res.json());
+        } catch (err) {
+            console.error("Failed to fetch toggles:", err);
+        }
+    };
+
+    const fetchNews = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/news/admin'), {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) setNewsItems(await res.json());
+        } catch (err) {
+            console.error("Failed to fetch news:", err);
+        }
+    };
+
+    const handleToggleFeatureFlag = async (feature) => {
+        const newToggles = { ...featureToggles, [feature]: !featureToggles[feature] };
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/settings/features'), {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ toggles: newToggles })
+            });
+            if (res.ok) setFeatureToggles(newToggles);
+        } catch (err) {
+            alert("Failed to update feature: " + err.message);
+        }
+    };
+
+    const handleCreateNews = async (e) => {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/news'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(newNews)
+            });
+            if (res.ok) {
+                alert("News Item Published!");
+                setNewNews({ title: '', message: '', type: 'info', priority: 0, expiresAt: '' });
+                fetchNews();
+            }
+        } catch (err) {
+            alert("Error publishing news: " + err.message);
+        }
+    };
+
+    const handleToggleNews = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/admin/news/${id}/toggle`), {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) fetchNews();
+        } catch (err) {
+            console.error("Error toggling news:", err);
+        }
+    };
+
+    const handleDeleteNews = async (id) => {
+        if (!confirm("Delete this news item permanently?")) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/admin/news/${id}`), {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) fetchNews();
+        } catch (err) {
+            console.error("Error deleting news:", err);
+        }
+    };
 
     const fetchPending = async () => {
         setLoading(true);
@@ -898,6 +994,24 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
+                    <h3 style={{ marginTop: '2rem' }}><Zap size={18} /> Feature Toggles</h3>
+                    <p style={{ fontSize: '0.85rem', color: '#8b949e', marginBottom: '1.5rem' }}>Instantly enable/disable platform components.</p>
+                    <div className="feature-grid">
+                        {Object.entries(featureToggles).map(([key, value]) => (
+                            <div key={key} className="feature-toggle-item">
+                                <span className="feature-label">{key.replace('_', ' ')}</span>
+                                <label className="switch">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={value} 
+                                        onChange={() => handleToggleFeatureFlag(key)} 
+                                    />
+                                    <span className="slider"></span>
+                                </label>
+                            </div>
+                        ))}
+                    </div>
+
                     <h3 style={{ marginTop: '2rem' }}><Radio size={18} /> Emergency Broadcast</h3>
                     <form onSubmit={handleBroadcast}>
                         <textarea
@@ -914,7 +1028,86 @@ export default function AdminDashboard() {
                             <button type="submit" className="btn-broadcast">Broadcast</button>
                         </div>
                     </form>
+                </div>
 
+                <div className="ops-card large" style={{ gridColumn: 'span 2' }}>
+                    <div className="news-manager-header">
+                        <h3><Radio size={18} /> Global News Manager</h3>
+                        <p>Manage high-priority updates that appear on the agent dashboard.</p>
+                    </div>
+                    
+                    <div className="news-layout">
+                        <form onSubmit={handleCreateNews} className="news-form">
+                            <div className="form-group">
+                                <label>Headline</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="e.g., Massive Breach Contained"
+                                    value={newNews.title}
+                                    onChange={e => setNewNews({...newNews, title: e.target.value})}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>News Content</label>
+                                <textarea 
+                                    placeholder="Intel details go here..."
+                                    value={newNews.message}
+                                    onChange={e => setNewNews({...newNews, message: e.target.value})}
+                                    required
+                                />
+                            </div>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Alert Type</label>
+                                    <select value={newNews.type} onChange={e => setNewNews({...newNews, type: e.target.value})}>
+                                        <option value="info">Info (Default)</option>
+                                        <option value="success">Success (Green)</option>
+                                        <option value="warning">Alert (Orange)</option>
+                                        <option value="emergency">Emergency (Red)</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Priority</label>
+                                    <input 
+                                        type="number" 
+                                        value={newNews.priority}
+                                        onChange={e => setNewNews({...newNews, priority: parseInt(e.target.value)})}
+                                    />
+                                </div>
+                            </div>
+                            <button type="submit" className="btn-deploy">Publish to Dashboard</button>
+                        </form>
+
+                        <div className="news-list-container">
+                            <h4>Active Intelligence Feed</h4>
+                            <div className="news-items-scroll">
+                                {newsItems.map(item => (
+                                    <div key={item._id} className={`news-item-card ${item.type} ${!item.isActive ? 'disabled' : ''}`}>
+                                        <div className="news-item-main">
+                                            <div className="news-item-header">
+                                                <span className={`news-type-tag ${item.type}`}>{item.type}</span>
+                                                <strong>{item.title}</strong>
+                                            </div>
+                                            <p>{item.message}</p>
+                                        </div>
+                                        <div className="news-item-actions">
+                                            <button onClick={() => handleToggleNews(item._id)} className="icon-btn">
+                                                {item.isActive ? <Eye size={16} /> : <XCircle size={16} />}
+                                            </button>
+                                            <button onClick={() => handleDeleteNews(item._id)} className="icon-btn delete">
+                                                <X size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {newsItems.length === 0 && <p className="text-muted">No news intel published yet.</p>}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="ops-card" style={{ gridColumn: 'span 2' }}>
                     <div className="audit-log-section">
                         <div className="section-header">
                             <h4>Mission Logs</h4>

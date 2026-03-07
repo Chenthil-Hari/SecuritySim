@@ -3,10 +3,32 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { getMaintenanceStatus } from '../middleware/auth.js';
+import NewsItem from '../models/NewsItem.js';
+import SystemSetting from '../models/SystemSetting.js';
 
 const router = express.Router();
 
 router.get('/maintenance-status', getMaintenanceStatus);
+
+// Public System Status (News + Features)
+router.get('/system-status', async (req, res) => {
+    try {
+        const news = await NewsItem.find({ isActive: true }).sort({ priority: -1, createdAt: -1 }).limit(5);
+        const featureSetting = await SystemSetting.findOne({ key: 'feature_toggles' });
+        const maintenance = await SystemSetting.findOne({ key: 'maintenance_mode' });
+        
+        res.json({
+            news,
+            features: featureSetting ? featureSetting.value : {},
+            maintenance: {
+                enabled: maintenance ? maintenance.value : false,
+                expectedReturn: maintenance ? maintenance.updatedAt : null // Simplified
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 // Signup Route
 router.post('/signup', async (req, res) => {

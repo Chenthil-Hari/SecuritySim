@@ -2,6 +2,7 @@ import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Zap, Calendar, Users, Swords, Globe, ChevronDown, Gamepad2, Search, Crown } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
+import { useSystemStatus } from '../context/SystemStatusContext';
 import { useState } from 'react';
 import { getRank } from '../utils/ranks';
 import { playClick } from '../utils/soundEffects';
@@ -11,6 +12,7 @@ export default function Navbar() {
     const gameState = useGame();
     const { score = 0, level = 1, settings = {} } = gameState || {};
     const { user, logout } = useAuth();
+    const { features } = useSystemStatus();
     const [menuOpen, setMenuOpen] = useState(false);
     const [multiplayerOpen, setMultiplayerOpen] = useState(false);
     const [gamesOpen, setGamesOpen] = useState(false);
@@ -82,28 +84,41 @@ export default function Navbar() {
                                 </li>
                             </ul>
                         </li>
-                        <li
-                            className={`nav-dropdown ${multiplayerOpen ? 'open' : ''}`}
-                            onMouseEnter={() => setMultiplayerOpen(true)}
-                            onMouseLeave={() => setMultiplayerOpen(false)}
-                            onClick={() => setMultiplayerOpen(!multiplayerOpen)}
-                        >
-                            <button className="dropdown-trigger" type="button">
-                                <Globe size={16} /> Multiplayer <ChevronDown size={14} className={multiplayerOpen ? 'rotate' : ''} />
-                            </button>
-                            <ul className="dropdown-menu">
-                                <li>
-                                    <NavLink to="/teams" onClick={handleNavClick}>
-                                        <Users size={16} /> Teams
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink to="/multiplayer/pvp" onClick={handleNavClick}>
-                                        <Swords size={16} /> 1v1 Duel
-                                    </NavLink>
-                                </li>
-                            </ul>
-                        </li>
+                        {features.multiplayer !== false && (
+                            <li
+                                className={`nav-dropdown ${multiplayerOpen ? 'open' : ''}`}
+                                onMouseEnter={() => setMultiplayerOpen(true)}
+                                onMouseLeave={() => setMultiplayerOpen(false)}
+                                onClick={() => setMultiplayerOpen(!multiplayerOpen)}
+                            >
+                                <button className="dropdown-trigger" type="button">
+                                    <Globe size={16} /> Multiplayer <ChevronDown size={14} className={multiplayerOpen ? 'rotate' : ''} />
+                                </button>
+                                <ul className="dropdown-menu">
+                                    {features.teams !== false && (
+                                        <li>
+                                            <NavLink to="/teams" onClick={handleNavClick}>
+                                                <Users size={16} /> Teams
+                                            </NavLink>
+                                        </li>
+                                    )}
+                                    {features.pvp !== false && (
+                                        <li>
+                                            <NavLink to="/multiplayer/pvp" onClick={handleNavClick}>
+                                                <Swords size={16} /> 1v1 Duel
+                                            </NavLink>
+                                        </li>
+                                    )}
+                                    {features.warrooms !== false && (
+                                        <li>
+                                            <NavLink to="/warrooms" onClick={handleNavClick}>
+                                                <Shield size={16} /> War Rooms
+                                            </NavLink>
+                                        </li>
+                                    )}
+                                </ul>
+                            </li>
+                        )}
                         <li>
                             <NavLink to="/leaderboard" onClick={handleNavClick}>
                                 <Trophy size={16} /> Leaderboard

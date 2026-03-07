@@ -5,6 +5,7 @@ import Team from '../models/Team.js';
 import AuditLog from '../models/AuditLog.js';
 import SystemSetting from '../models/SystemSetting.js';
 import Event from '../models/Event.js';
+import NewsItem from '../models/NewsItem.js';
 import { authenticateToken, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -350,6 +351,94 @@ router.patch('/settings/maintenance', authenticateToken, isAdmin, async (req, re
             isActive,
             expectedReturn
         });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// --- Feature Toggles ---
+router.get('/settings/features', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        let setting = await SystemSetting.findOne({ key: 'feature_toggles' });
+        if (!setting) {
+            setting = await SystemSetting.create({
+                key: 'feature_toggles',
+                value: {
+                    teams: true,
+                    warrooms: true,
+                    pvp: true,
+                    ugc: true,
+                    threat_map: true
+                },
+                description: 'Enable/Disable platform features'
+            });
+        }
+        res.json(setting.value);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.patch('/settings/features', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { toggles } = req.body;
+        const setting = await SystemSetting.findOneAndUpdate(
+            { key: 'feature_toggles' },
+            { $set: { value: toggles, updatedAt: new Date(), updatedBy: req.user.id } },
+            { upsert: true, new: true }
+        );
+        await logAction(req.user, 'update_features', `Updated feature toggles: ${Object.keys(toggles).filter(k => toggles[k]).join(', ')}`);
+        res.json(setting.value);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// --- Global News Manager ---
+router.get('/news/admin', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const news = await NewsItem.find().sort({ createdAt: -1 });
+        res.json(news);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.post('/news', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { title, message, type, priority, expiresAt } = req.body;
+        const news = new NewsItem({
+            title,
+            message,
+            type,
+            priority,
+            expiresAt,
+            createdBy: req.user.id
+        });
+        await news.save();
+        await logAction(req.user, 'create_news', `Created news: ${title}`);
+        res.status(201).json(news);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.patch('/news/:id/toggle', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const news = await NewsItem.findById(req.params.id);
+        if (!news) return res.status(404).json({ message: 'News item not found' });
+        news.isActive = !news.isActive;
+        await news.save();
+        res.json(news);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.delete('/news/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        await NewsItem.findByIdAndDelete(req.params.id);
+        res.json({ message: 'News item deleted' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

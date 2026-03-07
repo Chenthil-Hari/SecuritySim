@@ -1,0 +1,99 @@
+.news-feed-container {
+    margin: 2rem 0;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(0, 240, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.news-feed-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+    padding-bottom: 0.75rem;
+}
+
+.pulse-icon {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.news-items-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.news-feed-item {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary);
+    transition: all 0.2s ease;
+    cursor: default;
+}
+
+.news-feed-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(5px);
+}
+
+.news-item-content {
+    flex: 1;
+}
+
+.news-item-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.news-item-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #fff;
+}
+
+.news-item-time {
+    font-size: 0.7rem;
+    color: #8b949e;
+    margin-left: auto;
+}
+
+.news-item-msg {
+    font-size: 0.85rem;
+    color: #8b949e;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.news-item-arrow {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+/* Types */
+.news-feed-item.emergency { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.05); }
+.news-feed-item.warning { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.05); }
+.news-feed-item.success { border-left-color: #10b981; background: rgba(16, 185, 129, 0.05); }
+
+.news-icon.emergency { color: #ef4444; }
+.news-icon.warning { color: #f59e0b; }
+.news-icon.success { color: #10b981; }
+.news-icon.info { color: var(--primary); }

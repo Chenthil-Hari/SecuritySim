@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { useState, useEffect } from 'react';
 import { GameProvider } from './context/GameContext';
 import { AuthProvider } from './context/AuthContext';
+import { SystemStatusProvider, useSystemStatus } from './context/SystemStatusContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
@@ -35,27 +36,10 @@ import { useGame } from './context/GameContext';
 
 function AppContent() {
   const { user, checkFreezeStatus } = useAuth();
-  const [maintenance, setMaintenance] = useState(false);
-  const [expectedReturn, setExpectedReturn] = useState('');
+  const { maintenance, features, loading } = useSystemStatus();
   const gameState = useGame();
   const isLoggedIn = !!user;
   const location = useLocation();
-
-  useEffect(() => {
-    const fetchMaintenance = async () => {
-      try {
-        const res = await fetch(buildApiUrl('/api/maintenance/status'));
-        if (res.ok) {
-          const data = await res.json();
-          setMaintenance(data.maintenance);
-          setExpectedReturn(data.expectedReturn || '');
-        }
-      } catch (err) {
-        console.error("Maintenance check failed:", err);
-      }
-    };
-    fetchMaintenance();
-  }, [location.pathname]);
 
   // Check for account freeze on every navigation
   useEffect(() => {
@@ -72,8 +56,8 @@ function AppContent() {
   // Handle Maintenance Redirect
   const isAdmin = user?.role === 'admin';
   const isAdminRoute = location.pathname.startsWith('/admin');
-  if (maintenance && !isAdmin && !isAdminRoute) {
-    return <Maintenance expectedReturn={expectedReturn} />;
+  if (maintenance.enabled && !isAdmin && !isAdminRoute) {
+    return <Maintenance expectedReturn={maintenance.expectedReturn} />;
   }
 
   return (
@@ -111,11 +95,13 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <GameProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </GameProvider>
+      <SystemStatusProvider>
+        <GameProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </GameProvider>
+      </SystemStatusProvider>
     </AuthProvider>
   );
 }

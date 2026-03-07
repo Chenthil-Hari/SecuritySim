@@ -4,6 +4,8 @@ import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
 import ScoreRing from '../components/ScoreRing';
 import StatCard from '../components/StatCard';
+import NewsFeed from '../components/NewsFeed';
+import { useSystemStatus } from '../context/SystemStatusContext';
 
 import { getRank } from '../utils/ranks';
 import { buildApiUrl } from '../utils/api';
@@ -13,6 +15,7 @@ import { useState, useEffect } from 'react';
 export default function Dashboard() {
     const { score, xp, level, difficulty } = useGame();
     const { user } = useAuth();
+    const { features } = useSystemStatus();
     const [activeEvents, setActiveEvents] = useState([]);
     const [featuredScenarios, setFeaturedScenarios] = useState([]);
     const xpInLevel = xp % 100;
@@ -97,6 +100,8 @@ export default function Dashboard() {
                 </div>
             ))}
 
+            <NewsFeed />
+
             <div className="dashboard-grid">
                 <div className="dashboard-score-panel">
                     <span className="score-panel-label">Cyber Safety Score</span>
@@ -127,7 +132,7 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            {featuredScenarios.length > 0 && (
+            {features.ugc !== false && featuredScenarios.length > 0 && (
                 <div className="featured-missions">
                     <div className="section-header">
                         <h2><Target size={20} /> Priority Missions</h2>
@@ -149,20 +154,22 @@ export default function Dashboard() {
                 </div>
             )}
 
-            <div className="forensics-preview">
-                <div className="preview-content">
-                    <div className="preview-icon">
-                        <Search size={32} />
+            {features.forensics !== false && (
+                <div className="forensics-preview">
+                    <div className="preview-content">
+                        <div className="preview-icon">
+                            <Search size={32} />
+                        </div>
+                        <div className="preview-text">
+                            <h3>New: File Forensics Mini-Game</h3>
+                            <p>Put on your investigator hat. Scour the file system for malware and secure the site.</p>
+                        </div>
+                        <Link to="/forensics" className="btn-primary">
+                            Play Now
+                        </Link>
                     </div>
-                    <div className="preview-text">
-                        <h3>New: File Forensics Mini-Game</h3>
-                        <p>Put on your investigator hat. Scour the file system for malware and secure the site.</p>
-                    </div>
-                    <Link to="/forensics" className="btn-primary">
-                        Play Now
-                    </Link>
                 </div>
-            </div>
+            )}
 
 
             <div className="dashboard-footer">
