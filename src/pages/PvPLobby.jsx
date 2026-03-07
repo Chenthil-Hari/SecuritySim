@@ -172,9 +172,10 @@ export default function PvPLobby() {
                     ) : friends.length > 0 ? (
                         <div className="friends-grid">
                             {friends.map(friend => {
-                                const isOnline = onlineFriends.includes(friend.id) || onlineFriends.includes(friend._id);
+                                const fId = (friend.id || friend._id)?.toString();
+                                const isOnline = onlineFriends.includes(fId);
                                 return (
-                                    <div key={friend.id || friend._id} className={`friend-card ${isOnline ? 'online' : 'offline'}`}>
+                                    <div key={fId} className={`friend-card ${isOnline ? 'online' : 'offline'}`}>
                                         <div className="friend-info">
                                             <div className="friend-avatar">
                                                 {friend.profilePhoto ? <img src={friend.profilePhoto} alt="" /> : <Shield size={24} />}

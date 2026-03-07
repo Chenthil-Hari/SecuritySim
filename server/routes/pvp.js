@@ -37,12 +37,19 @@ router.get('/online-friends', authenticateToken, async (req, res) => {
         
         if (!user) return res.status(404).json({ message: 'User not found' });
 
+        // A user is considered online if they have a heartbeat in the last 2 minutes
+        const onlineThreshold = new Date(Date.now() - 2 * 60 * 1000);
+        
         const onlineFriendIds = user.friends
-            .map(f => {
+            .filter(f => {
+                // Check socket map first (fastest)
                 const fid = f._id ? f._id.toString() : f.toString();
-                return fid.trim();
+                if (userSockets.has(fid.trim())) return true;
+                
+                // Fallback to database lastSeen (best for Vercel)
+                return f.lastSeen && f.lastSeen > onlineThreshold;
             })
-            .filter(fid => userSockets.has(fid));
+            .map(f => f._id ? f._id.toString() : f.toString());
 
         res.json(onlineFriendIds);
     } catch (error) {

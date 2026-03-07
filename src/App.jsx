@@ -35,10 +35,32 @@ import { useAuth } from './context/AuthContext';
 import { useGame } from './context/GameContext';
 
 function AppContent() {
-  const { user, checkFreezeStatus } = useAuth();
+  const { user, checkFreezeStatus, isLoggedIn } = useAuth();
+  
+  // Heartbeat for persistence (works on Vercel where Sockets might fail)
+  useEffect(() => {
+    if (!isLoggedIn || !user?.id) return;
+
+    const sendHeartbeat = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        await fetch(buildApiUrl('/api/users/heartbeat'), {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (err) {
+        console.error("Heartbeat failed", err);
+      }
+    };
+
+    // Send immediately and then every 45 seconds
+    sendHeartbeat();
+    const interval = setInterval(sendHeartbeat, 45000);
+    return () => clearInterval(interval);
+  }, [isLoggedIn, user?.id]);
+
   const { maintenance, features, loading } = useSystemStatus();
   const gameState = useGame();
-  const isLoggedIn = !!user;
   const location = useLocation();
 
   // Check for account freeze on every navigation

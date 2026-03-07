@@ -119,6 +119,10 @@ const userSchema = new mongoose.Schema({
     isFrozen: {
         type: Boolean,
         default: false
+    },
+    lastSeen: {
+        type: Date,
+        default: Date.now
     }
 });
 

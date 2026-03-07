@@ -9,8 +9,18 @@ const router = express.Router();
 // Check current user status (Frozen/Level etc)
 router.get('/status', authenticateToken, async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('isFrozen role');
+        const user = await User.findById(req.user.id).select('isFrozen role lastSeen');
         res.json({ isFrozen: user.isFrozen, role: user.role });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Heartbeat endpoint to update activity
+router.post('/heartbeat', authenticateToken, async (req, res) => {
+    try {
+        await User.findByIdAndUpdate(req.user.id, { lastSeen: new Date() });
+        res.sendStatus(200);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
