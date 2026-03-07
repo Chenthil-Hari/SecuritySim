@@ -11,7 +11,16 @@ export default function GlobalAlert() {
         // Connect to the same origin as the app
         const socket = io(window.location.origin);
 
+        socket.on('connect', () => {
+            console.log('✅ GlobalAlert: Socket connected successfully');
+        });
+
+        socket.on('connect_error', (err) => {
+            console.error('❌ GlobalAlert: Socket connection error:', err.message);
+        });
+
         socket.on('system_broadcast', (data) => {
+            console.log('📣 GlobalAlert: Received system broadcast:', data);
             setAlert(data);
             setIsVisible(true);
             

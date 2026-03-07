@@ -164,6 +164,9 @@ export default function AdminDashboard() {
                 alert("Global Alert Deployed!");
                 setBroadcast({ ...broadcast, message: '' });
                 fetchLogs();
+            } else {
+                const data = await res.json().catch(() => ({}));
+                alert(`Broadcast Failed: ${data.message || 'Server error'}`);
             }
         } catch (err) {
             alert("Broadcast Error: " + err.message);

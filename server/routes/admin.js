@@ -91,6 +91,7 @@ router.post('/broadcast', authenticateToken, isAdmin, async (req, res) => {
         // Emission is handled by the main app instance via req.app.get('io')
         const io = req.app.get('io');
         if (io) {
+            console.log(`📣 Broadcasting message: "${message.substring(0, 30)}..." [Type: ${type}]`);
             io.emit('system_broadcast', {
                 message,
                 type,
@@ -101,7 +102,8 @@ router.post('/broadcast', authenticateToken, isAdmin, async (req, res) => {
             await logAction(req.user, 'broadcast', `Sent global alert: "${message.substring(0, 30)}..."`);
             res.json({ message: "Broadcast deployed successfully" });
         } else {
-            res.status(500).json({ message: "Terminal broadcast link offline" });
+            console.error("❌ Socket.io instance NOT found on req.app");
+            res.status(500).json({ message: "Terminal broadcast link offline (Socket server error)" });
         }
     } catch (error) {
         res.status(500).json({ message: error.message });
