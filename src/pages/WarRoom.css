@@ -2,21 +2,23 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background: #050510;
-    color: white;
+    background: #020208;
+    color: #e2e8f0;
     overflow: hidden;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 .warroom-header {
-    height: 70px;
+    height: 60px;
     padding: 0 var(--space-xl);
-    background: rgba(15, 15, 40, 0.95);
-    border-bottom: 1px solid var(--border-color);
+    background: rgba(10, 10, 25, 0.98);
+    border-bottom: 1px solid rgba(0, 240, 255, 0.2);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px);
     z-index: 100;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .header-left {
@@ -32,16 +34,25 @@
 }
 
 .header-left h1 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
     margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    background: linear-gradient(90deg, #fff, var(--primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .scen-badge {
-    font-size: 0.7rem;
-    color: var(--text-muted);
+    font-size: 0.65rem;
+    color: var(--primary);
     text-transform: uppercase;
+    letter-spacing: 1px;
+    background: rgba(0, 240, 255, 0.05);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 240, 255, 0.1);
 }
 
 .header-right {
@@ -54,236 +65,431 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 4px 12px;
     border-radius: var(--radius-full);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .user-tag {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--primary);
-    background: rgba(0, 240, 255, 0.1);
-    padding: 2px 8px;
+    padding: 0 4px;
+}
+
+.btn-exit {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    padding: 6px 14px;
     border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-exit:hover {
+    background: #ef4444;
+    color: white;
 }
 
 .warroom-main {
     flex: 1;
-    display: flex;
+    display: grid;
+    grid-template-columns: 280px 1fr 300px;
     overflow: hidden;
 }
 
-/* Evidence Section */
-.evidence-section {
-    flex: 3;
+/* Tool Panel (Left) */
+.warroom-tool-panel {
+    background: rgba(5, 5, 15, 0.95);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--border-color);
-    background: radial-gradient(circle at center, #0a0a20, #050510);
-    position: relative;
 }
 
 .section-header {
-    padding: var(--space-md);
+    padding: 12px 16px;
     background: rgba(255, 255, 255, 0.02);
-    border-bottom: 1px solid var(--border-color);
-    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 700;
+    letter-spacing: 1.5px;
+    font-weight: 800;
     display: flex;
     align-items: center;
     gap: 10px;
+    color: var(--text-muted);
 }
 
-.board-canvas {
-    flex: 1;
-    position: relative;
-    padding: 40px;
-    overflow: auto;
+.tool-grid {
+    padding: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
 }
 
-.empty-board {
-    height: 100%;
+.tool-grid button {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    padding: 10px 5px;
+    border-radius: 4px;
+    font-size: 0.7rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    text-align: center;
-}
-
-.evidence-card {
-    position: absolute;
-    background: var(--bg-card);
-    border: 1px solid var(--primary);
-    padding: var(--space-md);
-    border-radius: var(--radius-md);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 240, 255, 0.2);
-    width: 200px;
-    cursor: grab;
-}
-
-.evidence-card .icon {
-    color: var(--success);
-    margin-right: 8px;
-}
-
-.evidence-card span {
-    display: block;
-    font-weight: 700;
-    margin-bottom: 4px;
-}
-
-.evidence-card small {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-}
-
-.board-controls {
-    padding: var(--space-lg);
-    background: rgba(0, 0, 0, 0.3);
-    display: flex;
-    gap: 15px;
-}
-
-.board-controls button {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    color: white;
-    padding: 8px 16px;
-    border-radius: var(--radius-md);
+    gap: 8px;
     cursor: pointer;
-    font-size: 0.8rem;
+    transition: all 0.2s;
 }
 
-.board-controls button:hover {
+.tool-grid button:hover {
     border-color: var(--primary);
     background: rgba(0, 240, 255, 0.05);
+    color: var(--primary);
 }
 
-/* Side Panel */
-.warroom-side {
+.console-section {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: rgba(10, 10, 30, 0.5);
+    min-height: 0;
 }
 
-.chat-container {
+.console-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.console-placeholder {
+    color: rgba(255, 255, 255, 0.1);
+    text-align: center;
+    margin-top: 40px;
+}
+
+.console-entry {
+    line-height: 1.4;
+    animation: scanline 0.1s steps(10) infinite;
+}
+
+.console-entry .timestamp {
+    color: rgba(255, 255, 255, 0.3);
+    margin-right: 8px;
+}
+
+.console-entry .type {
+    font-weight: 700;
+    margin-right: 6px;
+}
+
+.console-entry.system .type { color: var(--primary); }
+.console-entry.result .type { color: #00ff88; }
+.console-entry.alert .type { color: #f59e0b; }
+
+.console-entry .msg {
+    display: inline;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Center Content */
+.warroom-center {
+    display: flex;
+    flex-direction: column;
+    background: radial-gradient(circle at center, #0a0a25, #020208);
+    min-width: 0;
+}
+
+.scenario-stage {
     flex: 2;
     display: flex;
     flex-direction: column;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.narrative-box {
+    flex: 1;
+    padding: 30px 40px;
+    overflow-y: auto;
+}
+
+.narrative-box h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.narrative-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+    max-width: 800px;
+}
+
+.decision-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    max-width: 800px;
+}
+
+.decision-btn {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    color: white;
+    text-align: left;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.decision-btn:hover {
+    border-color: var(--primary);
+    background: rgba(0, 240, 255, 0.05);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 240, 255, 0.1);
+}
+
+.btn-count {
+    color: var(--primary);
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    opacity: 0.5;
+}
+
+.scenario-complete {
+    text-align: center;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-xl);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.scenario-complete svg {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 20px;
+}
+
+.scenario-complete svg.success { color: #00ff88; }
+.scenario-complete svg.fail { color: #ef4444; }
+
+/* Evidence Board Mini */
+.evidence-board-mini {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.board-canvas-mini {
+    flex: 1;
+    position: relative;
+    background: #050510;
+    overflow: hidden;
+}
+
+.blueprint-grid {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.empty-msg {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.1);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.evidence-marker {
+    position: absolute;
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid var(--primary);
+    padding: 6px 12px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.board-quick-actions {
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.board-quick-actions button {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.board-quick-actions button:hover {
+    border-color: var(--primary);
+    color: white;
+}
+
+/* Right Side (Chat) */
+.warroom-side {
+    background: rgba(5, 5, 10, 0.95);
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.chat-container {
+    height: 65%;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .chat-log {
     flex: 1;
     overflow-y: auto;
-    padding: var(--space-lg);
+    padding: 15px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
 .chat-line {
-    background: rgba(255, 255, 255, 0.03);
-    padding: 10px;
-    border-radius: 8px;
-    max-width: 85%;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 8px 12px;
+    border-radius: 6px;
+    max-width: 90%;
+    border-left: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .chat-line.own {
     align-self: flex-end;
-    background: rgba(0, 240, 255, 0.05);
+    background: rgba(0, 240, 255, 0.03);
+    border-left: none;
     border-right: 2px solid var(--primary);
 }
 
 .chat-line .sender {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 800;
     color: var(--primary);
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .chat-line .text {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     line-height: 1.4;
 }
 
 .chat-input {
-    padding: var(--space-md);
+    padding: 12px;
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
 .chat-input input {
     flex: 1;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 8px 12px;
     color: white;
+    font-size: 0.85rem;
 }
 
 .chat-input button {
     background: var(--primary);
     border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    border-radius: 4px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
 }
 
-.mission-info {
-    flex: 1;
-    padding: var(--space-lg);
+.mission-objectives {
+    padding: 20px;
 }
 
-.info-body p {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
+.obj-body p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
     line-height: 1.5;
     margin-bottom: 15px;
 }
 
-.objective-list {
+.obj-list {
     list-style: none;
     padding: 0;
 }
 
-.objective-list li {
-    font-size: 0.85rem;
-    padding-left: 20px;
-    position: relative;
+.obj-list li {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 8px;
-    color: var(--text-muted);
 }
 
-.objective-list li::before {
-    content: '▶';
-    position: absolute;
-    left: 0;
-    color: var(--primary);
-    font-size: 0.7rem;
-    top: 3px;
+.obj-list li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--primary);
+    border-radius: 1px;
+    box-shadow: 0 0 5px var(--primary);
 }
 
 @keyframes pulse-glow {
-    0% { filter: drop-shadow(0 0 5px var(--primary)); }
-    50% { filter: drop-shadow(0 0 15px var(--primary)); }
-    100% { filter: drop-shadow(0 0 5px var(--primary)); }
-}
-
-.animate-pop {
-    animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    0%, 100% { filter: drop-shadow(0 0 4px var(--primary)); opacity: 0.8; }
+    50% { filter: drop-shadow(0 0 12px var(--primary)); opacity: 1; }
 }
 
 @keyframes popIn {
-    from { transform: scale(0.5); opacity: 0; }
+    from { transform: scale(0.8); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(1px); }
+}
+
+@media (max-width: 1200px) {
+    .warroom-main {
+        grid-template-columns: 200px 1fr 250px;
+    }
 }

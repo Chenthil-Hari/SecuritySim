@@ -24,6 +24,16 @@ const warRoomSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }],
+    currentNodeId: {
+        type: String,
+        default: 'start'
+    },
+    history: [{
+        question: String,
+        choice: String,
+        points: Number,
+        timestamp: { type: Date, default: Date.now }
+    }],
     evidenceBoard: {
         items: [{
             id: String,

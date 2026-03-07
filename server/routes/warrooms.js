@@ -71,4 +71,25 @@ router.patch('/:id/evidence', authenticateToken, async (req, res) => {
     }
 });
 
+// Advance scenario state
+router.patch('/:id/advance', authenticateToken, async (req, res) => {
+    try {
+        const { nextNodeId, historyItem } = req.body;
+        const update = { currentNodeId: nextNodeId };
+        
+        if (historyItem) {
+            update.$push = { history: historyItem };
+        }
+
+        const warRoom = await WarRoom.findByIdAndUpdate(
+            req.params.id,
+            update,
+            { new: true }
+        );
+        res.json(warRoom);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 export default router;

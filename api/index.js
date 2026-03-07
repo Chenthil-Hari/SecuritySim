@@ -107,6 +107,11 @@ io.on('connection', (socket) => {
         socket.to(data.roomId).emit('evidence_updated', data.evidence);
     });
 
+    socket.on('advance_scenario', (data) => {
+        // data: { roomId, nextNodeId, historyItem }
+        socket.to(data.roomId).emit('scenario_advanced', data);
+    });
+
     socket.on('identify', (userId) => {
         userSockets.set(userId, socket.id);
         console.log(`User ${userId} identified with socket ${socket.id}`);
