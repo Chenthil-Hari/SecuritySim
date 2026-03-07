@@ -42,15 +42,23 @@ export default function WarRoom() {
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    setWarRoomData(data.warRoom);
+                    const wr = data.warRoom;
+                    setWarRoomData(wr);
                     setMessages(data.messages || []);
-                    setEvidence(data.warRoom.evidenceBoard || { items: [] });
-                    setCurrentNodeId(data.warRoom.currentNodeId || 'start');
-                    setHistory(data.warRoom.history || []);
+                    setEvidence(wr?.evidenceBoard || { items: [] });
+                    setHistory(wr?.history || []);
                     
                     // Find matching scenario
-                    const found = interactiveScenarios.find(s => s.id === data.warRoom.scenarioId) || interactiveScenarios[0];
+                    const found = interactiveScenarios.find(s => s.id === wr?.scenarioId) || interactiveScenarios[0];
                     setScenario(found);
+
+                    // Safety: Validate currentNodeId exists in the chosen scenario
+                    const storedNode = wr?.currentNodeId || 'start';
+                    if (found && found.nodes && found.nodes[storedNode]) {
+                        setCurrentNodeId(storedNode);
+                    } else {
+                        setCurrentNodeId('start');
+                    }
                 }
             } catch (err) {
                 console.error("Error fetching war room state:", err);
@@ -210,8 +218,8 @@ export default function WarRoom() {
                 <div className="header-right">
                     <div className="participants-list">
                         <Users size={16} />
-                        {warRoomData.activeParticipants.map(p => (
-                            <span key={p._id} className="user-tag">{p.username}</span>
+                        {warRoomData.activeParticipants?.map(p => (
+                            p && <span key={p._id || Math.random()} className="user-tag">{p.username || 'Agent'}</span>
                         ))}
                     </div>
                     <button className="btn-exit" onClick={() => navigate('/teams')}>Exit Session</button>
@@ -239,14 +247,14 @@ export default function WarRoom() {
                             )}
                             {history.map((h, i) => (
                                 <div key={`hist-${i}`} className="console-entry">
-                                    <span className="timestamp">[{new Date(h.timestamp).toLocaleTimeString()}]</span>
+                                    <span className="timestamp">[{h?.timestamp ? new Date(h.timestamp).toLocaleTimeString() : '??:??'}]</span>
                                     <span className="type alert">INCIDENT_UPDATE:</span>
-                                    <p className="msg">{h.choice}</p>
+                                    <p className="msg">{h?.choice || 'N/A'}</p>
                                 </div>
                             ))}
                             {toolOutput.map((o, i) => (
                                 <div key={`tool-${i}`} className={`console-entry ${o.type}`}>
-                                    <span className="type">{o.type.toUpperCase()}:</span>
+                                    <span className="type">{o.type?.toUpperCase()}:</span>
                                     <p className="msg">{o.text}</p>
                                 </div>
                             ))}
@@ -260,10 +268,10 @@ export default function WarRoom() {
                     <section className="scenario-stage">
                         <div className="section-header"><Activity size={16} /> Tactical Assessment</div>
                         <div className="narrative-box">
-                            <h2>{scenario.title}</h2>
-                            <p className="narrative-text">{currentNode.text}</p>
+                            <h2>{scenario.title || 'Unknown Incident'}</h2>
+                            <p className="narrative-text">{currentNode?.text || 'Analyzing data... State unknown.'}</p>
                             
-                            {!isFinished ? (
+                            {!isFinished && currentNode?.options ? (
                                 <div className="decision-grid">
                                     {currentNode.options.map((opt, i) => (
                                         <button key={i} className="decision-btn" onClick={() => advanceScenario(opt)}>
@@ -272,13 +280,15 @@ export default function WarRoom() {
                                         </button>
                                     ))}
                                 </div>
-                            ) : (
+                            ) : isFinished && currentNode ? (
                                 <div className="scenario-complete animate-pop">
                                     <AlertTriangle className={currentNode.isSuccess ? 'success' : 'fail'} />
                                     <h3>Scenario {currentNode.isSuccess ? 'Resolved' : 'Escalated'}</h3>
                                     <p>{currentNode.explanation}</p>
                                     <button className="btn-primary" onClick={() => navigate('/teams')}>Return to Base</button>
                                 </div>
+                            ) : (
+                                <div className="scenario-error">Awaiting tactical data...</div>
                             )}
                         </div>
                     </section>
@@ -315,8 +325,8 @@ export default function WarRoom() {
                         <div className="section-header"><MessageSquare size={16} /> Team Comms</div>
                         <div className="chat-log">
                             {messages.map((msg, i) => (
-                                <div key={i} className={`chat-line ${msg.senderId === user._id ? 'own' : ''}`}>
-                                    <span className="sender">{msg.senderName}</span>
+                                <div key={i} className={`chat-line ${user && msg.senderId === user._id ? 'own' : ''}`}>
+                                    <span className="sender">{msg.senderName || 'Unknown'}</span>
                                     <p className="text">{msg.text}</p>
                                 </div>
                             ))}
