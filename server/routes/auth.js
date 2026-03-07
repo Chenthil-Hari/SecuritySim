@@ -15,14 +15,29 @@ router.get('/system-status', async (req, res) => {
     try {
         const news = await NewsItem.find({ isActive: true }).sort({ priority: -1, createdAt: -1 }).limit(5);
         const featureSetting = await SystemSetting.findOne({ key: 'feature_toggles' });
-        const maintenance = await SystemSetting.findOne({ key: 'maintenance_mode' });
+        const maintenanceSetting = await SystemSetting.findOne({ key: 'maintenance_mode' });
         
+        // Robust check for both boolean and object formats
+        let isMaintenanceEnabled = false;
+        let expectedReturn = null;
+        
+        if (maintenanceSetting) {
+            const val = maintenanceSetting.value;
+            if (typeof val === 'boolean') {
+                isMaintenanceEnabled = val;
+                expectedReturn = maintenanceSetting.updatedAt;
+            } else if (typeof val === 'object' && val !== null) {
+                isMaintenanceEnabled = !!val.isActive;
+                expectedReturn = val.expectedReturn || maintenanceSetting.updatedAt;
+            }
+        }
+
         res.json({
             news,
             features: featureSetting ? featureSetting.value : {},
             maintenance: {
-                enabled: maintenance ? maintenance.value : false,
-                expectedReturn: maintenance ? maintenance.updatedAt : null // Simplified
+                enabled: isMaintenanceEnabled,
+                expectedReturn
             }
         });
     } catch (error) {

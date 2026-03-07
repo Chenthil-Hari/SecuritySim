@@ -8,7 +8,15 @@ export const maintenanceMiddleware = async (req, res, next) => {
     try {
         // Find the maintenance setting
         const setting = await SystemSetting.findOne({ key: 'maintenance_mode' });
-        const isMaintenance = setting ? setting.value === true : false;
+        let isMaintenance = false;
+
+        if (setting) {
+            if (typeof setting.value === 'boolean') {
+                isMaintenance = setting.value;
+            } else if (typeof setting.value === 'object' && setting.value !== null) {
+                isMaintenance = !!setting.value.isActive;
+            }
+        }
 
         // If maintenance is ON and user is not an admin, block the request
         if (isMaintenance && req.user?.role !== 'admin') {
