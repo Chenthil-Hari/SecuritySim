@@ -43,6 +43,12 @@
     color: var(--primary);
 }
 
+.section-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
 .setting-item {
     display: flex;
     align-items: center;

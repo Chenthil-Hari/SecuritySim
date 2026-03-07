@@ -1,6 +1,7 @@
 import { Accessibility, Volume2, Eye, AlertTriangle, Info, RotateCcw, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGame, useGameDispatch } from '../context/GameContext';
+import accessibilityIcon from '../assets/accessibility-icon.png';
 import './Settings.css';
 
 export default function Settings() {
@@ -31,7 +32,7 @@ export default function Settings() {
             </div>
 
             <div className="settings-section">
-                <h2><Accessibility size={20} /> Accessibility</h2>
+                <h2><img src={accessibilityIcon} alt="" className="section-icon" /> Accessibility</h2>
 
                 <div className="setting-item">
                     <div className="setting-info">
