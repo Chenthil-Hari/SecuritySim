@@ -131,6 +131,7 @@
 .nav-dropdown:hover .dropdown-menu,
 .nav-dropdown.open .dropdown-menu {
     display: flex;
+    z-index: 1500;
 }
 
 .dropdown-menu li {

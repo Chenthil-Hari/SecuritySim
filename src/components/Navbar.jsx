@@ -14,8 +14,7 @@ export default function Navbar() {
     const { user, logout } = useAuth();
     const { features } = useSystemStatus();
     const [menuOpen, setMenuOpen] = useState(false);
-    const [multiplayerOpen, setMultiplayerOpen] = useState(false);
-    const [gamesOpen, setGamesOpen] = useState(false);
+    const [activeDropdown, setActiveDropdown] = useState(null); // 'games', 'multiplayer', or null
     const navigate = useNavigate();
 
     const playNavSound = () => {
@@ -27,6 +26,7 @@ export default function Navbar() {
     const handleNavClick = () => {
         playNavSound();
         setMenuOpen(false);
+        setActiveDropdown(null);
     };
 
     const handleLogout = () => {
@@ -34,6 +34,12 @@ export default function Navbar() {
         logout();
         navigate('/login');
         setMenuOpen(false);
+        setActiveDropdown(null);
+    };
+
+    const toggleDropdown = (e, name) => {
+        e.stopPropagation();
+        setActiveDropdown(activeDropdown === name ? null : name);
     };
 
     return (
@@ -68,13 +74,13 @@ export default function Navbar() {
                             </NavLink>
                         </li>
                         <li
-                            className={`nav-dropdown ${gamesOpen ? 'open' : ''}`}
-                            onMouseEnter={() => setGamesOpen(true)}
-                            onMouseLeave={() => setGamesOpen(false)}
-                            onClick={() => setGamesOpen(!gamesOpen)}
+                            className={`nav-dropdown ${activeDropdown === 'games' ? 'open' : ''}`}
+                            onMouseEnter={() => window.innerWidth > 900 && setActiveDropdown('games')}
+                            onMouseLeave={() => window.innerWidth > 900 && setActiveDropdown(null)}
+                            onClick={(e) => toggleDropdown(e, 'games')}
                         >
                             <button className="dropdown-trigger" type="button">
-                                <Gamepad2 size={16} /> Games <ChevronDown size={14} className={gamesOpen ? 'rotate' : ''} />
+                                <Gamepad2 size={16} /> Games <ChevronDown size={14} className={activeDropdown === 'games' ? 'rotate' : ''} />
                             </button>
                             <ul className="dropdown-menu">
                                 <li>
@@ -86,13 +92,13 @@ export default function Navbar() {
                         </li>
                         {features.multiplayer !== false && (
                             <li
-                                className={`nav-dropdown ${multiplayerOpen ? 'open' : ''}`}
-                                onMouseEnter={() => setMultiplayerOpen(true)}
-                                onMouseLeave={() => setMultiplayerOpen(false)}
-                                onClick={() => setMultiplayerOpen(!multiplayerOpen)}
+                                className={`nav-dropdown ${activeDropdown === 'multiplayer' ? 'open' : ''}`}
+                                onMouseEnter={() => window.innerWidth > 900 && setActiveDropdown('multiplayer')}
+                                onMouseLeave={() => window.innerWidth > 900 && setActiveDropdown(null)}
+                                onClick={(e) => toggleDropdown(e, 'multiplayer')}
                             >
                                 <button className="dropdown-trigger" type="button">
-                                    <Globe size={16} /> Multiplayer <ChevronDown size={14} className={multiplayerOpen ? 'rotate' : ''} />
+                                    <Globe size={16} /> Multiplayer <ChevronDown size={14} className={activeDropdown === 'multiplayer' ? 'rotate' : ''} />
                                 </button>
                                 <ul className="dropdown-menu">
                                     {features.teams !== false && (
