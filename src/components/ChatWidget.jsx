@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, Loader, Shield, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import chatbotIcon from '../assets/chatbot-icon.png';
 import './ChatWidget.css';
 
 export default function ChatWidget({ isLoggedIn }) {
@@ -91,7 +92,7 @@ export default function ChatWidget({ isLoggedIn }) {
                     onClick={() => setIsOpen(true)}
                     aria-label="Open AI Cybersecurity Assistant"
                 >
-                    <Shield size={24} className="main-icon" />
+                    <img src={chatbotIcon} alt="" className="chatbot-toggle-icon" />
                     <span className="tooltip">Ask AI Specialist</span>
                 </button>
             )}
@@ -103,8 +104,8 @@ export default function ChatWidget({ isLoggedIn }) {
                     {/* Header */}
                     <div className="chat-header">
                         <div className="chat-title">
-                            <div className="avatar glow">
-                                <Shield size={18} />
+                            <div className="avatar-img-container glow">
+                                <img src={chatbotIcon} alt="" />
                             </div>
                             <div>
                                 <h3>Cipher AI</h3>
@@ -127,13 +128,13 @@ export default function ChatWidget({ isLoggedIn }) {
                     <div className="chat-body">
                         {!isLoggedIn ? (
                             <div className="chat-status-message">
-                                <Shield size={32} />
+                                <img src={chatbotIcon} alt="" className="status-icon-img" />
                                 <p>Please Log In or Sign Up to access your personal AI Cybersecurity Specialist.</p>
                             </div>
                         ) : messages.length === 0 ? (
                             <div className="chat-welcome">
-                                <div className="welcome-icon">
-                                    <Shield size={32} />
+                                <div className="welcome-icon-img">
+                                    <img src={chatbotIcon} alt="" />
                                 </div>
                                 <p>System initialized. I am Cipher, your dedicated cybersecurity analyst. How can I help you secure your systems or learn today?</p>
                             </div>

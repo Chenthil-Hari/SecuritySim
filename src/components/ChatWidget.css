@@ -81,16 +81,22 @@
     gap: 12px;
 }
 
-.chat-title .avatar {
+.avatar-img-container {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: var(--primary-bg);
-    color: var(--primary);
+    background: rgba(0, 240, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
     box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.avatar-img-container img {
+    width: 75%;
+    height: 75%;
+    object-fit: contain;
 }
 
 .chat-title h3 {
@@ -167,16 +173,35 @@
     opacity: 0.8;
 }
 
-.welcome-icon {
-    width: 60px;
-    height: 60px;
+.welcome-icon-img {
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background: rgba(0, 240, 255, 0.1);
-    color: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: var(--space-sm);
+    overflow: hidden;
+}
+
+.welcome-icon-img img {
+    width: 65%;
+    height: 65%;
+    object-fit: contain;
+}
+
+.status-icon-img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    opacity: 0.8;
+}
+
+.chatbot-toggle-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
 }
 
 .messages-list {
