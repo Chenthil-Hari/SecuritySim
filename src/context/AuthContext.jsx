@@ -13,7 +13,10 @@ export const AuthProvider = ({ children }) => {
             const storedToken = localStorage.getItem('token');
             const storedUser = localStorage.getItem('user');
             if (storedToken && storedUser) {
-                setUser(JSON.parse(storedUser));
+                const parsedUser = JSON.parse(storedUser);
+                // Standardize ID field for backwards compatibility without logout
+                if (parsedUser._id && !parsedUser.id) parsedUser.id = parsedUser._id;
+                setUser(parsedUser);
             }
         } catch (error) {
             console.error("Error loading user context", error);

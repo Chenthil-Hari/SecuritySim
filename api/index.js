@@ -216,6 +216,18 @@ app.use('/api/users', maintenanceMiddleware);
 app.use('/api/pvp', authenticateToken, maintenanceMiddleware);
 app.use('/api/events', maintenanceMiddleware);
 
+// Debug endpoint for sockets
+app.get('/api/debug/sockets', (req, res) => {
+    const debugData = {};
+    for (const [userId, sockets] of userSockets.entries()) {
+        debugData[userId] = Array.from(sockets);
+    }
+    res.json({
+        totalUsers: userSockets.size,
+        users: debugData
+    });
+});
+
 app.use('/api/pvp', pvpRoutes);
 app.use('/api/events', eventsRoutes);
 

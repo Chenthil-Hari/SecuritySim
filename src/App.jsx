@@ -56,21 +56,37 @@ function AppContent() {
   // Global socket identification for presence
   useEffect(() => {
     if (isLoggedIn && user?.id) {
-      const socket = io(window.location.origin);
+      console.log(`[Presence] Initializing for user: ${user.id}`);
+      const socket = io(window.location.origin, {
+        reconnectionAttempts: 5,
+        timeout: 10000
+      });
       
       const identify = () => {
+        console.log(`[Presence] Identifying socket ${socket.id} for user ${user.id}`);
         socket.emit('identify', user.id);
       };
 
       socket.on('connect', identify);
+      socket.on('reconnect', identify);
+      
+      // Auto-identify on focus to ensure we haven't timed out
+      const handleFocus = () => {
+        if (socket.connected) identify();
+      };
+      window.addEventListener('focus', handleFocus);
+
       identify(); // Initial identification
 
       return () => {
+        console.log(`[Presence] Cleaning up for user: ${user.id}`);
         socket.off('connect', identify);
+        socket.off('reconnect', identify);
+        window.removeEventListener('focus', handleFocus);
         socket.disconnect();
       };
     }
-  }, [isLoggedIn, user?._id]);
+  }, [isLoggedIn, user?.id]);
 
   // Handle Maintenance Redirect
   const isAdmin = user?.role === 'admin';

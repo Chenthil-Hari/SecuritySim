@@ -38,8 +38,11 @@ router.get('/online-friends', authenticateToken, async (req, res) => {
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         const onlineFriendIds = user.friends
-            .map(f => f._id.toString())
-            .filter(id => userSockets.has(id));
+            .map(f => {
+                const fid = f._id ? f._id.toString() : f.toString();
+                return fid.trim();
+            })
+            .filter(fid => userSockets.has(fid));
 
         res.json(onlineFriendIds);
     } catch (error) {
