@@ -21,7 +21,6 @@ const defaultState = {
     difficulty: 1,
     settings: {
         highContrast: false,
-        voiceGuidance: false,
         soundEffects: true
     },
     customization: {

@@ -1,7 +1,6 @@
 import { Accessibility, Volume2, Eye, AlertTriangle, Info, RotateCcw, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGame, useGameDispatch } from '../context/GameContext';
-import { speak, stop } from '../utils/voiceGuidance';
 import './Settings.css';
 
 export default function Settings() {
@@ -11,13 +10,6 @@ export default function Settings() {
 
     const updateSetting = (key, value) => {
         dispatch({ type: 'UPDATE_SETTINGS', payload: { [key]: value } });
-
-        if (key === 'voiceGuidance' && value) {
-            speak('Voice guidance is now enabled. You will hear scenario text and feedback read aloud.', { voiceGuidance: true });
-        }
-        if (key === 'voiceGuidance' && !value) {
-            stop();
-        }
     };
 
     const handleReset = () => {
@@ -57,21 +49,6 @@ export default function Settings() {
                     </label>
                 </div>
 
-                <div className="setting-item">
-                    <div className="setting-info">
-                        <div className="setting-label">Voice Guidance</div>
-                        <div className="setting-desc">Read scenario text and feedback aloud using speech synthesis</div>
-                    </div>
-                    <label className="toggle-switch">
-                        <input
-                            type="checkbox"
-                            checked={settings.voiceGuidance}
-                            onChange={e => updateSetting('voiceGuidance', e.target.checked)}
-                            aria-label="Toggle voice guidance"
-                        />
-                        <span className="toggle-slider" />
-                    </label>
-                </div>
 
                 <div className="setting-item">
                     <div className="setting-info">
