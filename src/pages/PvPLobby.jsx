@@ -16,6 +16,7 @@ export default function PvPLobby() {
     const [error, setError] = useState(null);
     const [inviteSent, setInviteSent] = useState(null); // { toId, matchId }
     const [incomingInvite, setIncomingInvite] = useState(null); // { fromId, fromName, matchId }
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     useEffect(() => {
         const newSocket = io(window.location.origin);
@@ -49,6 +50,7 @@ export default function PvPLobby() {
 
     const fetchFriends = async () => {
         try {
+            setIsRefreshing(true);
             const token = localStorage.getItem('token');
             const res = await fetch(buildApiUrl('/api/friends'), {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -56,12 +58,13 @@ export default function PvPLobby() {
             const data = await res.json();
             if (res.ok) {
                 setFriends(data);
-                fetchOnlineFriends();
+                await fetchOnlineFriends();
             }
         } catch (err) {
             console.error("Failed to fetch friends:", err);
         } finally {
             setLoading(false);
+            setIsRefreshing(false);
         }
     };
 
@@ -158,10 +161,11 @@ export default function PvPLobby() {
                         <h2><UserPlus size={20} /> Online Friends</h2>
                         <button 
                             className="refresh-lobby-btn" 
-                            onClick={() => { fetchFriends(); fetchOnlineFriends(); }}
+                            onClick={fetchFriends}
                             title="Refresh Status"
+                            disabled={isRefreshing}
                         >
-                            <RefreshCw size={16} className={loading ? 'spinning' : ''} />
+                            <RefreshCw size={16} className={isRefreshing ? 'spinning' : ''} />
                         </button>
                     </div>
                     {loading ? (
