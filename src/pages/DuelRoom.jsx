@@ -47,7 +47,7 @@ export default function DuelRoom() {
                     const foundScen = interactiveScenarios.find(s => s.id === data.scenarioId);
                     setScenario(foundScen);
                     
-                    const opp = data.players.find(p => p._id !== user._id);
+                    const opp = data.players.find(p => p._id !== user.id);
                     if (opp) setOpponentProgress(prev => ({ ...prev, username: opp.username }));
                 }
             } catch (err) {
@@ -59,10 +59,11 @@ export default function DuelRoom() {
 
         const newSocket = io(window.location.origin);
         setSocket(newSocket);
+        newSocket.emit('identify', user.id);
         newSocket.emit('join_duel', matchId);
 
         newSocket.on('opponent_score_update', (data) => {
-            if (data.userId !== user._id) {
+            if (data.userId !== user.id) {
                 setOpponentProgress(prev => ({
                     ...prev,
                     score: data.score
@@ -71,7 +72,7 @@ export default function DuelRoom() {
         });
 
         newSocket.on('opponent_finished', (data) => {
-            if (data.userId !== user._id) {
+            if (data.userId !== user.id) {
                 setOpponentProgress(prev => ({
                     ...prev,
                     isFinished: true,
@@ -81,7 +82,7 @@ export default function DuelRoom() {
         });
 
         return () => newSocket.close();
-    }, [matchId, user._id]);
+    }, [matchId, user.id]);
 
     // Typewriter effect (same as Simulator)
     useEffect(() => {
@@ -124,7 +125,7 @@ export default function DuelRoom() {
         if (socket) {
             socket.emit('duel_score_update', {
                 matchId,
-                userId: user._id,
+                userId: user.id,
                 score: newScore,
                 currentNodeId: option.nextNodeId
             });
@@ -146,7 +147,7 @@ export default function DuelRoom() {
         if (socket) {
             socket.emit('duel_finish', {
                 matchId,
-                userId: user._id,
+                userId: user.id,
                 finalScore: finalScore
             });
         }
@@ -155,7 +156,7 @@ export default function DuelRoom() {
     if (!scenario || !match) return <div className="loading-screen">Establishing Secure Duel Connection...</div>;
 
     const currentNode = scenario.nodes[currentNodeId];
-    const opponent = match.players.find(p => p._id !== user._id);
+    const opponent = match.players.find(p => p._id !== user.id);
 
     return (
         <div className="duel-room-layout">

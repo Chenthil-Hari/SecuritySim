@@ -139,6 +139,7 @@ export default function WarRoom() {
             });
 
             if (res.ok) {
+                socket.emit('identify', user.id);
                 socket.emit('advance_scenario', {
                     roomId,
                     nextNodeId: option.nextNodeId,
@@ -325,7 +326,7 @@ export default function WarRoom() {
                         <div className="section-header"><MessageSquare size={16} /> Team Comms</div>
                         <div className="chat-log">
                             {messages.map((msg, i) => (
-                                <div key={i} className={`chat-line ${user && msg.senderId === user._id ? 'own' : ''}`}>
+                                <div key={i} className={`chat-line ${user && msg.senderId === user.id ? 'own' : ''}`}>
                                     <span className="sender">{msg.senderName || 'Unknown'}</span>
                                     <p className="text">{msg.text}</p>
                                 </div>

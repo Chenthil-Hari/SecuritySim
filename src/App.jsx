@@ -55,11 +55,11 @@ function AppContent() {
 
   // Global socket identification for presence
   useEffect(() => {
-    if (isLoggedIn && user?._id) {
+    if (isLoggedIn && user?.id) {
       const socket = io(window.location.origin);
       
       const identify = () => {
-        socket.emit('identify', user._id);
+        socket.emit('identify', user.id);
       };
 
       socket.on('connect', identify);

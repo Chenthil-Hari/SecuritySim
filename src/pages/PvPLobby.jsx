@@ -22,7 +22,7 @@ export default function PvPLobby() {
         setSocket(newSocket);
 
         if (user) {
-            newSocket.emit('identify', user._id);
+            newSocket.emit('identify', user.id);
         }
 
         newSocket.on('incoming_duel_invite', (data) => {
@@ -97,7 +97,7 @@ export default function PvPLobby() {
                 setInviteSent({ toId: friend._id, matchId: data.matchId });
                 // Notify via socket
                 socket.emit('send_duel_invite', {
-                    fromId: user._id,
+                    fromId: user.id,
                     fromName: user.username,
                     toId: friend._id,
                     matchId: data.matchId,
@@ -127,7 +127,7 @@ export default function PvPLobby() {
 
             if (res.ok) {
                 socket.emit('respond_to_invite', {
-                    fromId: user._id,
+                    fromId: user.id,
                     toId: incomingInvite.fromId,
                     matchId: incomingInvite.matchId,
                     accepted: accepted
