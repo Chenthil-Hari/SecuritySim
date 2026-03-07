@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Swords, Shield, Loader2, AlertTriangle, UserPlus, Zap, X, Check } from 'lucide-react';
+import { Swords, Shield, Loader2, AlertTriangle, UserPlus, Zap, X, Check, RefreshCw } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import { buildApiUrl } from '../utils/api';
@@ -154,7 +154,16 @@ export default function PvPLobby() {
 
             <div className="lobby-content">
                 <div className="friend-list-section">
-                    <h2><UserPlus size={20} /> Online Friends</h2>
+                    <div className="section-header-flex">
+                        <h2><UserPlus size={20} /> Online Friends</h2>
+                        <button 
+                            className="refresh-lobby-btn" 
+                            onClick={() => { fetchFriends(); fetchOnlineFriends(); }}
+                            title="Refresh Status"
+                        >
+                            <RefreshCw size={16} className={loading ? 'spinning' : ''} />
+                        </button>
+                    </div>
                     {loading ? (
                         <div className="lobby-loading">
                             <Loader2 className="spinning-loader" />
