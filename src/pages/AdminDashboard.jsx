@@ -198,7 +198,6 @@ export default function AdminDashboard() {
         }
     };
 
-
     const handleBroadcast = async (e) => {
         e.preventDefault();
         try {
@@ -223,7 +222,6 @@ export default function AdminDashboard() {
             alert("Broadcast Error: " + err.message);
         }
     };
-
 
     const fetchFeatureToggles = async () => {
         try {
@@ -533,7 +531,7 @@ export default function AdminDashboard() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
-                fetchLogs(); // Refresh to show the 'clear_logs' action just taken
+                fetchLogs();
                 alert("Audit logs cleared successfully.");
             }
         } catch (err) {
@@ -702,29 +700,22 @@ export default function AdminDashboard() {
 
     const downloadCSV = () => {
         if (!analytics) return;
-        
-        // 1. Growth Data
         let csvContent = "data:text/csv;charset=utf-8,";
         csvContent += "INVESTIGATOR GROWTH REPORT\n";
         csvContent += "Date,New Registrations\n";
         analytics.registrations.forEach(r => {
             csvContent += `${r._id},${r.count}\n`;
         });
-
-        // 2. Performance Data
         csvContent += "\nPLATFORM PERFORMANCE (ACCURACY)\n";
         csvContent += "Category,Avg Accuracy %,Total Attempts\n";
         analytics.categoryStats.forEach(c => {
             csvContent += `${c._id},${Math.round(c.avgAccuracy)}%,${c.totalAttempts}\n`;
         });
-
-        // 3. Locale Distribution
         csvContent += "\nGEOGRAPHIC DISTRIBUTION\n";
         csvContent += "Country,Agent Count\n";
         analytics.countries.forEach(c => {
             csvContent += `${c._id || 'Undisclosed'},${c.count}\n`;
         });
-
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
@@ -737,7 +728,6 @@ export default function AdminDashboard() {
     const downloadPDF = async () => {
         const element = document.getElementById('analytics-report-area');
         if (!element) return;
-
         try {
             const canvas = await html2canvas(element, {
                 backgroundColor: '#0d1117',
@@ -750,7 +740,6 @@ export default function AdminDashboard() {
             const imgProps = pdf.getImageProperties(imgData);
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-            
             pdf.setDrawColor(0, 240, 255);
             pdf.rect(5, 5, pdfWidth - 10, pdfHeight + 10);
             pdf.setFontSize(18);
@@ -759,7 +748,6 @@ export default function AdminDashboard() {
             pdf.setFontSize(10);
             pdf.setTextColor(139, 148, 158);
             pdf.text(`Generated: ${new Date().toLocaleString()} | Administrator: ${user.username}`, 10, 28);
-            
             pdf.addImage(imgData, 'PNG', 10, 35, pdfWidth - 20, pdfHeight);
             pdf.save(`SecuritySim_Global_Report_${new Date().toISOString().split('T')[0]}.pdf`);
         } catch (err) {
@@ -779,6 +767,7 @@ export default function AdminDashboard() {
                     {activeTab === 'analytics' && 'Intelligence Dashboard'}
                     {activeTab === 'operations' && 'Mission Operations'}
                     {activeTab === 'evidence' && 'Evidence Locker'}
+                    {activeTab === 'vitals' && 'System Health Control'}
                 </h1>
                 <p>
                     {activeTab === 'moderation' && `Total pending scenarios: ${stats.pending} | Live: ${liveScenarios.length}`}
@@ -786,6 +775,7 @@ export default function AdminDashboard() {
                     {activeTab === 'analytics' && 'Real-time platform performance metrics.'}
                     {activeTab === 'operations' && 'Manage global XP boosts and time-limited operations.'}
                     {activeTab === 'evidence' && 'Review uploaded visual assets from users and scenarios.'}
+                    {activeTab === 'vitals' && 'Monitor core infrastructure and maintain data integrity.'}
                 </p>
             </div>
             {activeTab === 'users' && (
@@ -805,6 +795,7 @@ export default function AdminDashboard() {
                 else if (activeTab === 'analytics') fetchAnalytics();
                 else if (activeTab === 'operations') fetchLogs();
                 else if (activeTab === 'evidence') fetchAssets();
+                else if (activeTab === 'vitals') fetchVitals();
             }}>Refresh</button>
         </header>
     );
@@ -812,20 +803,13 @@ export default function AdminDashboard() {
     const renderModeration = () => (
         <div className="moderation-container animate-fade-in">
             <div className="moderation-tabs">
-                <button
-                    className={`mod-tab ${moderationView === 'pending' ? 'active' : ''}`}
-                    onClick={() => setModerationView('pending')}
-                >
+                <button className={`mod-tab ${moderationView === 'pending' ? 'active' : ''}`} onClick={() => setModerationView('pending')}>
                     Pending Queue ({stats.pending})
                 </button>
-                <button
-                    className={`mod-tab ${moderationView === 'live' ? 'active' : ''}`}
-                    onClick={() => setModerationView('live')}
-                >
+                <button className={`mod-tab ${moderationView === 'live' ? 'active' : ''}`} onClick={() => setModerationView('live')}>
                     Live Scenarios ({liveScenarios.length})
                 </button>
             </div>
-
             {moderationView === 'pending' ? (
                 scenarios.length > 0 ? (
                     <div className="scenario-queue">
@@ -849,15 +833,9 @@ export default function AdminDashboard() {
                                     </div>
                                 </div>
                                 <div className="queue-card-actions">
-                                    <button className="btn-view" onClick={() => setActiveScenario(s)}>
-                                        <Eye size={16} /> Review
-                                    </button>
-                                    <button className="btn-approve" onClick={() => handleModerate(s._id, 'approved')}>
-                                        <CheckCircle size={16} /> Approve
-                                    </button>
-                                    <button className="btn-reject" onClick={() => handleModerate(s._id, 'rejected')}>
-                                        <XCircle size={16} /> Reject
-                                    </button>
+                                    <button className="btn-view" onClick={() => setActiveScenario(s)}><Eye size={16} /> Review</button>
+                                    <button className="btn-approve" onClick={() => handleModerate(s._id, 'approved')}><CheckCircle size={16} /> Approve</button>
+                                    <button className="btn-reject" onClick={() => handleModerate(s._id, 'rejected')}><XCircle size={16} /> Reject</button>
                                 </div>
                             </div>
                         ))}
@@ -892,29 +870,12 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                             <div className="queue-card-actions">
-                                <button
-                                    className={`btn-bounty ${s.isBountied ? 'active' : ''}`}
-                                    onClick={() => handleToggleBounty(s._id)}
-                                >
-                                    <Zap size={16} /> {s.isBountied ? 'Revoke Bounty' : 'Set 2x XP Bounty'}
-                                </button>
-                                <button
-                                    className={`btn-feature ${s.isFeatured ? 'active' : ''}`}
-                                    onClick={() => handleToggleFeature(s._id)}
-                                >
-                                    <Star size={16} /> {s.isFeatured ? 'Unpin Featured' : 'Pin to Featured'}
-                                </button>
-                                <button className="btn-reject" onClick={() => handleModerate(s._id, 'rejected')}>
-                                    <AlertCircle size={16} /> Takedown
-                                </button>
+                                <button className={`btn-bounty ${s.isBountied ? 'active' : ''}`} onClick={() => handleToggleBounty(s._id)}><Zap size={16} /> {s.isBountied ? 'Revoke Bounty' : 'Set 2x XP Bounty'}</button>
+                                <button className={`btn-feature ${s.isFeatured ? 'active' : ''}`} onClick={() => handleToggleFeature(s._id)}><Star size={16} /> {s.isFeatured ? 'Unpin Featured' : 'Pin to Featured'}</button>
+                                <button className="btn-reject" onClick={() => handleModerate(s._id, 'rejected')}><AlertCircle size={16} /> Takedown</button>
                             </div>
                         </div>
                     ))}
-                    {liveScenarios.length === 0 && (
-                        <div className="queue-empty">
-                            <p>No live UGC scenarios yet.</p>
-                        </div>
-                    )}
                 </div>
             )}
         </div>
@@ -954,48 +915,28 @@ export default function AdminDashboard() {
                                 </td>
                                 <td>{u.teamId?.name || <span className="text-muted">No Team</span>}</td>
                                 <td>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'Unknown'}</td>
-                                 <td>
+                                <td>
                                     <span className={`status-badge ${u.isBanned ? 'banned' : u.isFrozen ? 'frozen' : 'active'}`}>
                                         {u.isBanned ? 'BANNED' : u.isFrozen ? 'Terminal Locked' : 'Active'}
                                     </span>
                                 </td>
-                                 <td className="actions-cell">
-                                    <button
-                                        className={`action-btn ${u.isFrozen ? 'unfreeze' : 'freeze'}`}
-                                        onClick={() => handleFreeze(u._id)}
-                                        title={u.isFrozen ? 'Unfreeze' : 'Freeze'}
-                                    >
-                                        <AlertCircle size={16} />
-                                    </button>
-                                    <button
-                                        className={`action-btn ${u.isBanned ? 'unban' : 'ban'}`}
-                                        onClick={() => u.isBanned ? handleUnban(u._id) : setBanModal({ isOpen: true, userId: u._id, username: u.username, reason: '' })}
-                                        title={u.isBanned ? 'Lift Ban' : 'Ban User'}
-                                    >
-                                        <XCircle size={16} />
-                                    </button>
-                                    <button
-                                        className="action-btn reset"
-                                        onClick={() => handleResetPassword(u._id)}
-                                        title="Reset Password"
-                                    >
-                                        <Lock size={16} />
-                                    </button>
+                                <td className="actions-cell">
+                                    <button className={`action-btn ${u.isFrozen ? 'unfreeze' : 'freeze'}`} onClick={() => handleFreeze(u._id)} title={u.isFrozen ? 'Unfreeze' : 'Freeze'}><AlertCircle size={16} /></button>
+                                    <button className={`action-btn ${u.isBanned ? 'unban' : 'ban'}`} onClick={() => u.isBanned ? handleUnban(u._id) : setBanModal({ isOpen: true, userId: u._id, username: u.username, reason: '' })} title={u.isBanned ? 'Lift Ban' : 'Ban User'}><XCircle size={16} /></button>
+                                    <button className="action-btn reset" onClick={() => handleResetPassword(u._id)} title="Reset Password"><Lock size={16} /></button>
                                 </td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="6" style={{ textAlign: 'center', padding: '100px 0', color: '#8b949e' }}>
+                            <td colSpan="6" style={{ textAlign: 'center', padding: '100px 0' }}>
                                 <div className="queue-empty">
-                                    <Search size={48} className="text-muted" style={{ marginBottom: '20px' }} />
-                                    <h2>{error ? error : "No Investigators Registered"}</h2>
-                                    <p>{error ? "Headquarters is having trouble retrieving records." : "The investigator directory is currently empty. New recruits will appear here."}</p>
+                                    <Search size={48} className="text-muted" />
+                                    <h2>{error || "No Investigators Found"}</h2>
                                 </div>
                             </td>
                         </tr>
-                    )
-                    }
+                    )}
                 </tbody>
             </table>
         </div>
@@ -1004,12 +945,8 @@ export default function AdminDashboard() {
     const renderAnalytics = () => (
         <div className="admin-analytics animate-fade-in">
             <div className="analytics-actions">
-                <button className="export-btn csv" onClick={downloadCSV}>
-                    <Download size={16} /> Export CSV
-                </button>
-                <button className="export-btn pdf" onClick={downloadPDF}>
-                    <FileText size={16} /> Synthesis PDF Report
-                </button>
+                <button className="export-btn csv" onClick={downloadCSV}><Download size={16} /> Export CSV</button>
+                <button className="export-btn pdf" onClick={downloadPDF}><FileText size={16} /> Synthesis PDF Report</button>
             </div>
             <div className="analytics-grid" id="analytics-report-area">
                 <div className="stat-card large">
@@ -1031,12 +968,7 @@ export default function AdminDashboard() {
                         {analytics?.categoryStats.map(c => (
                             <div key={c._id} className="cat-item">
                                 <span className="cat-name">{c._id}</span>
-                                <div className="progress-bg">
-                                    <div
-                                        className={`progress-bar ${c.avgAccuracy < 60 ? 'danger' : c.avgAccuracy < 80 ? 'warning' : 'success'}`}
-                                        style={{ width: `${c.avgAccuracy}%` }}
-                                    ></div>
-                                </div>
+                                <div className="progress-bg"><div className={`progress-bar ${c.avgAccuracy < 60 ? 'danger' : c.avgAccuracy < 80 ? 'warning' : 'success'}`} style={{ width: `${c.avgAccuracy}%` }}></div></div>
                                 <strong className="accuracy-val">{Math.round(c.avgAccuracy)}%</strong>
                             </div>
                         ))}
@@ -1066,63 +998,29 @@ export default function AdminDashboard() {
                     <form onSubmit={handleCreateEvent} className="event-form">
                         <div className="form-group">
                             <label>Operation Title</label>
-                            <input
-                                type="text"
-                                placeholder="e.g., XP Overload Weekend"
-                                value={newEvent.title}
-                                onChange={e => setNewEvent({ ...newEvent, title: e.target.value })}
-                                required
-                            />
+                            <input type="text" placeholder="e.g., XP Overload" value={newEvent.title} onChange={e => setNewEvent({ ...newEvent, title: e.target.value })} required />
                         </div>
                         <div className="form-group">
                             <label>Description</label>
-                            <textarea
-                                placeholder="Describe the mission parameters..."
-                                value={newEvent.description}
-                                onChange={e => setNewEvent({ ...newEvent, description: e.target.value })}
-                                required
-                            />
+                            <textarea placeholder="Mission parameters..." value={newEvent.description} onChange={e => setNewEvent({ ...newEvent, description: e.target.value })} required />
                         </div>
                         <div className="form-row">
                             <div className="form-group">
-                                <label>Event Type</label>
-                                <select value={newEvent.type} onChange={e => setNewEvent({ ...newEvent, type: e.target.value })}>
-                                    <option value="XP_BOOST">XP Boost (Global Multiplier)</option>
-                                    <option value="ZERO_DAY_FRIDAY">Zero-Day Friday</option>
-                                    <option value="CHALLENGE_WEEKEND">Challenge Weekend</option>
-                                    <option value="SYSTEM_MAINTENANCE">Maintenance Mode</option>
-                                </select>
+                                <label>Multiplier</label>
+                                <input type="number" step="0.1" value={newEvent.multiplier} onChange={e => setNewEvent({ ...newEvent, multiplier: e.target.value })} />
                             </div>
                             <div className="form-group">
-                                <label>Multiplier</label>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    value={newEvent.multiplier}
-                                    onChange={e => setNewEvent({ ...newEvent, multiplier: e.target.value })}
-                                />
+                                <label>Expiry</label>
+                                <input type="datetime-local" value={newEvent.expiresAt} onChange={e => setNewEvent({ ...newEvent, expiresAt: e.target.value })} required />
                             </div>
                         </div>
-                        <div className="form-group">
-                            <label>Expiration Date</label>
-                            <input
-                                type="datetime-local"
-                                value={newEvent.expiresAt}
-                                onChange={e => setNewEvent({ ...newEvent, expiresAt: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <button type="submit" className="btn-deploy">Deploy Global Operation</button>
+                        <button type="submit" className="btn-deploy">Deploy Operation</button>
                     </form>
-
                     <div className="active-events-list">
                         <h4>Active Operations</h4>
                         {events.filter(e => new Date(e.expiresAt) > new Date()).map(event => (
                             <div key={event._id} className="event-item">
-                                <div className="event-info">
-                                    <strong>{event.title}</strong>
-                                    <span>{event.type} — {event.multiplier}x Multiplier</span>
-                                </div>
+                                <span>{event.title} — {event.multiplier}x</span>
                                 <button className="btn-cancel-event" onClick={() => handleCancelEvent(event._id)}>Cancel</button>
                             </div>
                         ))}
@@ -1131,160 +1029,33 @@ export default function AdminDashboard() {
 
                 <div className="ops-card">
                     <h3><Radio size={18} /> Tactical Controls</h3>
-                    <div className="control-groups">
-                        <div className="control-item">
-                            <div className="control-text">
-                                <strong>Maintenance Mode</strong>
-                                <p>Redirect all non-admin traffic to the lockdown page.</p>
-                                <div className="return-time-input" style={{ marginTop: '12px' }}>
-                                    <label style={{ fontSize: '0.7rem', color: '#8b949e', display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Expected Return</label>
-                                    <input 
-                                        type="datetime-local" 
-                                        value={expectedReturn}
-                                        onChange={(e) => setExpectedReturn(e.target.value)}
-                                        style={{ 
-                                            background: 'rgba(255, 255, 255, 0.05)', 
-                                            border: '1px solid rgba(255, 255, 255, 0.1)', 
-                                            color: 'white', 
-                                            borderRadius: '6px', 
-                                            padding: '6px 10px',
-                                            fontSize: '0.85rem',
-                                            width: '100%',
-                                            outline: 'none'
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                            <button 
-                                className={`toggle-btn ${isMaintenanceMode ? 'active' : ''}`}
-                                onClick={handleToggleMaintenance}
-                            >
-                                {isMaintenanceMode ? 'SYSTEM LOCKED' : 'SYSTEM LIVE'}
-                            </button>
+                    <div className="control-item">
+                        <div className="control-text">
+                            <strong>Maintenance Mode</strong>
+                            <p>Lock platform for all non-admins.</p>
                         </div>
+                        <button className={`toggle-btn ${isMaintenanceMode ? 'active' : ''}`} onClick={handleToggleMaintenance}>
+                            {isMaintenanceMode ? 'SYSTEM LOCKED' : 'SYSTEM LIVE'}
+                        </button>
                     </div>
-
-                    <h3 style={{ marginTop: '2rem' }}><Zap size={18} /> Feature Toggles</h3>
-                    <p style={{ fontSize: '0.85rem', color: '#8b949e', marginBottom: '1.5rem' }}>Instantly enable/disable platform components.</p>
-                    <div className="feature-grid">
+                    <div className="feature-grid" style={{ marginTop: '1.5rem' }}>
                         {Object.entries(featureToggles).map(([key, value]) => (
                             <div key={key} className="feature-toggle-item">
                                 <span className="feature-label">{key.replace('_', ' ')}</span>
                                 <label className="switch">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={value} 
-                                        onChange={() => handleToggleFeatureFlag(key)} 
-                                    />
+                                    <input type="checkbox" checked={value} onChange={() => handleToggleFeatureFlag(key)} />
                                     <span className="slider"></span>
                                 </label>
                             </div>
                         ))}
                     </div>
-
-                    <h3 style={{ marginTop: '2rem' }}><Radio size={18} /> Emergency Broadcast</h3>
-                    <form onSubmit={handleBroadcast}>
-                        <textarea
-                            placeholder="Immediate transmission to all agents..."
-                            value={broadcast.message}
-                            onChange={e => setBroadcast({ ...broadcast, message: e.target.value })}
-                        />
-                        <div className="form-actions">
-                            <select value={broadcast.type} onChange={e => setBroadcast({ ...broadcast, type: e.target.value })}>
-                                <option value="info">Information</option>
-                                <option value="warning">Warning</option>
-                                <option value="danger">CRITICAL</option>
-                            </select>
-                            <button type="submit" className="btn-broadcast">Broadcast</button>
-                        </div>
-                    </form>
                 </div>
-
+                
                 <div className="ops-card large" style={{ gridColumn: 'span 2' }}>
-                    <div className="news-manager-header">
-                        <h3><Radio size={18} /> Global News Manager</h3>
-                        <p>Manage high-priority updates that appear on the agent dashboard.</p>
-                    </div>
-                    
-                    <div className="news-layout">
-                        <form onSubmit={handleCreateNews} className="news-form">
-                            <div className="form-group">
-                                <label>Headline</label>
-                                <input 
-                                    type="text" 
-                                    placeholder="e.g., Massive Breach Contained"
-                                    value={newNews.title}
-                                    onChange={e => setNewNews({...newNews, title: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>News Content</label>
-                                <textarea 
-                                    placeholder="Intel details go here..."
-                                    value={newNews.message}
-                                    onChange={e => setNewNews({...newNews, message: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Alert Type</label>
-                                    <select value={newNews.type} onChange={e => setNewNews({...newNews, type: e.target.value})}>
-                                        <option value="info">Info (Default)</option>
-                                        <option value="success">Success (Green)</option>
-                                        <option value="warning">Alert (Orange)</option>
-                                        <option value="emergency">Emergency (Red)</option>
-                                    </select>
-                                </div>
-                                <div className="form-group">
-                                    <label>Priority</label>
-                                    <input 
-                                        type="number" 
-                                        value={newNews.priority}
-                                        onChange={e => setNewNews({...newNews, priority: parseInt(e.target.value)})}
-                                    />
-                                </div>
-                            </div>
-                            <button type="submit" className="btn-deploy">Publish to Dashboard</button>
-                        </form>
-
-                        <div className="news-list-container">
-                            <h4>Active Intelligence Feed</h4>
-                            <div className="news-items-scroll">
-                                {newsItems.map(item => (
-                                    <div key={item._id} className={`news-item-card ${item.type} ${!item.isActive ? 'disabled' : ''}`}>
-                                        <div className="news-item-main">
-                                            <div className="news-item-header">
-                                                <span className={`news-type-tag ${item.type}`}>{item.type}</span>
-                                                <strong>{item.title}</strong>
-                                            </div>
-                                            <p>{item.message}</p>
-                                        </div>
-                                        <div className="news-item-actions">
-                                            <button onClick={() => handleToggleNews(item._id)} className="icon-btn">
-                                                {item.isActive ? <Eye size={16} /> : <XCircle size={16} />}
-                                            </button>
-                                            <button onClick={() => handleDeleteNews(item._id)} className="icon-btn delete">
-                                                <X size={16} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                                {newsItems.length === 0 && <p className="text-muted">No news intel published yet.</p>}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="ops-card" style={{ gridColumn: 'span 2' }}>
                     <div className="audit-log-section">
-                        <div className="section-header">
-                            <h4>Mission Logs</h4>
-                            <button className="text-btn" onClick={handleClearLogs}>Clear History</button>
-                        </div>
+                        <h4>Mission Logs</h4>
                         <div className="mini-log-list">
-                            {logs.slice(0, 10).map(log => (
+                            {logs.slice(0, 15).map(log => (
                                 <div key={log._id} className="mini-log-entry">
                                     <span className="log-time">{new Date(log.timestamp).toLocaleTimeString()}</span>
                                     <span className="log-text">{log.details}</span>
@@ -1303,31 +1074,18 @@ export default function AdminDashboard() {
                 <div className="queue-empty">
                     <CheckCircle size={48} className="text-muted" />
                     <h2>Locker Empty</h2>
-                    <p>There are no uploaded images to review at this time.</p>
                 </div>
             ) : (
                 <div className="asset-grid">
                     {assets.map(asset => (
                         <div key={`${asset.type}-${asset._id}`} className="asset-card">
                             <div className="asset-image-container">
-                                <img src={asset.url} alt="Uploaded Asset" className="asset-img" />
-                                <div className="asset-overlay">
-                                    <button
-                                        className="btn-takedown"
-                                        onClick={() => handleAssetTakedown(asset._id, asset.type)}
-                                        title="Take Down Image"
-                                    >
-                                        <XCircle size={32} />
-                                    </button>
-                                </div>
+                                <img src={asset.url} alt="Evidence" className="asset-img" />
+                                <div className="asset-overlay"><button className="btn-takedown" onClick={() => handleAssetTakedown(asset._id, asset.type)}><XCircle size={32} /></button></div>
                             </div>
                             <div className="asset-info">
-                                <span className={`asset-type-badge ${asset.type === 'user_profile' ? 'user' : 'scenario'}`}>
-                                    {asset.type === 'user_profile' ? 'Profile Photo' : 'Scenario Asset'}
-                                </span>
-                                <strong>Uploader: {asset.uploader}</strong>
+                                <strong>{asset.uploader}</strong>
                                 <span className="text-muted text-small">{asset.context}</span>
-                                <span className="text-muted text-small">{new Date(asset.date).toLocaleDateString()}</span>
                             </div>
                         </div>
                     ))}
@@ -1336,303 +1094,70 @@ export default function AdminDashboard() {
         </div>
     );
 
-    return (
-        <div className="admin-dashboard-page">
-            <aside className="admin-sidebar">
-                <div className="sidebar-brand">
-                    <Shield size={24} className="text-primary" />
-                    <span>HQ ADMIN</span>
-                </div>
-
-                <nav className="sidebar-nav">
-                    <button className={`nav-item ${activeTab === 'moderation' ? 'active' : ''}`} onClick={() => setActiveTab('moderation')}>
-                        <Clock size={18} /> Moderation Queue
+    const renderVitals = () => (
+        <div className="admin-vitals animate-fade-in">
+            <div className="vitals-grid">
+                <VitalsCard title="Database Core" icon={Database} pulse={true}>
+                    <div className="metric-row"><span>Data Size</span><strong>{vitals?.database?.dataSize || '...'}</strong></div>
+                    <div className="metric-row"><span>Storage</span><strong>{vitals?.database?.storageSize || '...'}</strong></div>
+                    <div className="metric-row"><span>Collections</span><strong>{vitals?.database?.collections || '0'}</strong></div>
+                </VitalsCard>
+                <VitalsCard title="Connection Cluster" icon={Server}>
+                    <div className="metric-row"><span>Active Links</span><strong>{vitals?.server?.connections?.current || '0'}</strong></div>
+                    <div className="metric-row"><span>Available</span><strong>{vitals?.server?.connections?.available || '0'}</strong></div>
+                </VitalsCard>
+                <VitalsCard title="System Performance" icon={Activity}>
+                    <div className="metric-row"><span>Uptime</span><strong>{vitals?.server?.uptime || '...'}</strong></div>
+                    <div className="metric-row"><span>Memory</span><strong>{vitals?.server?.mem?.resident || '...'}</strong></div>
+                </VitalsCard>
+                <div className="vitals-card maintenance-card">
+                    <div className="vitals-header"><RefreshCw size={18} className={syncing ? 'spin' : ''} /><h3>Data Integrity</h3></div>
+                    <p>Rebuild level parity across all agents and teams.</p>
+                    <button className={`sync-btn ${syncing ? 'syncing' : ''}`} onClick={handleRecalculateScores} disabled={syncing}>
+                        {syncing ? 'Synchronizing...' : 'Global Score Sync'}
                     </button>
-                    <button className={`nav-item ${activeTab === 'evidence' ? 'active' : ''}`} onClick={() => setActiveTab('evidence')}>
-                        <Eye size={18} /> Evidence Locker
-                    </button>
-                    <button className={`nav-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
-                        <Shield size={18} /> User Directory
-                    </button>
-                    <button className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>
-                        <BarChart2 size={18} /> Analytics
-                    </button>
-                    <button className={`nav-item ${activeTab === 'operations' ? 'active' : ''}`} onClick={() => setActiveTab('operations')}>
-                        <Zap size={18} /> Global Operations
-                    </button>
-                    <button className={`nav-item ${activeTab === 'vitals' ? 'active' : ''}`} onClick={() => setActiveTab('vitals')}>
-                        <Activity size={18} /> System Health
-                    </button>
-                </nav>
-
-                <div className="sidebar-footer">
-                    <div className="user-info">
-                        <div className="user-avatar">{user.username[0]}</div>
-                        <div className="user-details">
-                            <span className="username">{user.username}</span>
-                            <span className="role">Administrator</span>
-                        </div>
-                    </div>
-                    <button className="logout-btn" onClick={handleLogout}>
-                        <LogOut size={16} /> Logout
-                    </button>
-                </div>
-            </aside>
-
-            <main className="admin-main">
-                {renderHeader()}
-                <div className="admin-content">
-                    {loading ? (
-                        <div className="loading-state">
-                            <div className="spinner"></div>
-                            <p>Loading intel...</p>
-                        </div>
-                    ) : (
-                        <>
-                            {activeTab === 'moderation' && renderModeration()}
-                            {activeTab === 'evidence' && renderEvidenceLocker()}
-                            {activeTab === 'users' && renderUsers()}
-                             {activeTab === 'analytics' && renderAnalytics()}
-                            {activeTab === 'operations' && renderOperations()}
-                            {activeTab === 'vitals' && renderVitals()}
-                        </>
-                    )}
-                </div>
-            </main>
-
-            {activeScenario && (
-                <div className="review-overlay" onClick={() => setActiveScenario(null)}>
-                    <div className="review-modal" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2>Review: {activeScenario.title}</h2>
-                            <button className="close-btn" onClick={() => setActiveScenario(null)}>&times;</button>
-                        </div>
-                        <div className="modal-body">
-                            <div className="review-section author-info-section">
-                                <h3>Author Details</h3>
-                                <div className="author-card">
-                                    <div className="author-avatar">
-                                        {activeScenario.authorId?.profilePhoto ? (
-                                            <img src={activeScenario.authorId.profilePhoto} alt="" />
-                                        ) : (
-                                            <span>{activeScenario.authorId?.username?.[0] || '?'}</span>
-                                        )}
-                                    </div>
-                                    <div className="author-text">
-                                        <strong>{activeScenario.authorId?.username || 'Unknown User'}</strong>
-                                        <span className="author-email">{activeScenario.authorId?.email || 'No email provided'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="review-section">
-                                <h3>Visual Content</h3>
-                                <pre className="content-preview">
-                                    {JSON.stringify(activeScenario.content?.visualData, null, 2)}
-                                </pre>
-                            </div>
-                            <div className="review-section">
-                                <h3>Decision Path</h3>
-                                <div className="options-preview">
-                                    {activeScenario.content?.options.map((opt, i) => (
-                                        <div key={i} className={`opt-preview ${opt.isCorrect ? 'correct' : 'mistake'}`}>
-                                            <strong>{opt.isCorrect ? 'Correct:' : 'Trap:'}</strong> {opt.text}
-                                            <p className="feedback">{opt.feedback}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="review-section">
-                                <h3>Educational Summary</h3>
-                                <p className="explanation">{activeScenario.content?.educationalExplanation}</p>
-                            </div>
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn-reject" onClick={() => handleModerate(activeScenario._id, 'rejected')}>Reject Scenario</button>
-                            <button className="btn-approve" onClick={() => handleModerate(activeScenario._id, 'approved')}>Approve Scenario</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-            {banModal.isOpen && (
-                <div className="review-overlay" onClick={() => setBanModal({ ...banModal, isOpen: false })}>
-                    <div className="review-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '450px' }}>
-                        <div className="modal-header">
-                            <h2>Restrict Agent Access</h2>
-                            <button className="close-btn" onClick={() => setBanModal({ ...banModal, isOpen: false })}>&times;</button>
-                        </div>
-                        <div className="modal-body">
-                            <p style={{ color: '#8b949e', marginBottom: '1.5rem' }}>
-                                You are about to permanently suspend <strong>{banModal.username}</strong> from the platform. This action will block all future login attempts.
-                            </p>
-                            <div className="form-group">
-                                <label style={{ color: '#e06c75', fontWeight: '600' }}>Reason for Suspension</label>
-                                <textarea
-                                    placeholder="e.g., Conduct unbecoming of an agent; Data tampering detected."
-                                    value={banModal.reason}
-                                    onChange={e => setBanModal({ ...banModal, reason: e.target.value })}
-                                    style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #e06c75', height: '100px' }}
-                                />
-                            </div>
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn-view" onClick={() => setBanModal({ ...banModal, isOpen: false })}>Cancel</button>
-                            <button className="btn-reject" onClick={handleBan}>Apply Suspension</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-    const renderVitals = () => {
-        return (
-            <div className="admin-vitals animate-fade-in">
-                <div className="vitals-grid">
-                    <VitalsCard title="Database Core" icon={Database} pulse={true}>
-                        <div className="metric-row">
-                            <span>Data Footprint</span>
-                            <strong>{vitals?.database.dataSize || '...'}</strong>
-                        </div>
-                        <div className="metric-row">
-                            <span>Physical Storage</span>
-                            <strong>{vitals?.database.storageSize || '...'}</strong>
-                        </div>
-                        <div className="metric-row">
-                            <span>Index Volume</span>
-                            <strong>{vitals?.database.indexSize || '...'}</strong>
-                        </div>
-                        <div className="metric-row">
-                            <span>Live Collections</span>
-                            <strong>{vitals?.database.collections || '0'}</strong>
-                        </div>
-                    </VitalsCard>
-
-                    <VitalsCard title="Connection Cluster" icon={Server}>
-                        <div className="metric-row">
-                            <span>Active Links</span>
-                            <div className="connection-counter">
-                                <div className="pulse-indicator"></div>
-                                <strong>{vitals?.server.connections.current || '0'}</strong>
-                            </div>
-                        </div>
-                        <div className="metric-row">
-                            <span>Available Capacity</span>
-                            <strong>{vitals?.server.connections.available || '0'}</strong>
-                        </div>
-                        <progress className="connection-bar" value={vitals?.server.connections.current} max={(vitals?.server.connections.current || 0) + (vitals?.server.connections.available || 0)}></progress>
-                    </VitalsCard>
-
-                    <VitalsCard title="System Performance" icon={Activity}>
-                        <div className="metric-row">
-                            <span>HQ Node Uptime</span>
-                            <strong>{vitals?.server.uptime || '...'}</strong>
-                        </div>
-                        <div className="metric-row">
-                            <span>Resident Memory</span>
-                            <strong>{vitals?.server.mem.resident || '...'}</strong>
-                        </div>
-                        <div className="metric-row">
-                            <span>Virtual Memory</span>
-                            <strong>{vitals?.server.mem.virtual || '...'}</strong>
-                        </div>
-                        <div className="metric-row">
-                            <span>Kernel Version</span>
-                            <strong style={{ fontSize: '0.75rem', opacity: 0.6 }}>{vitals?.server.version || '...'}</strong>
-                        </div>
-                    </VitalsCard>
-
-                    <div className="vitals-card maintenance-card">
-                        <div className="vitals-header">
-                            <RefreshCw size={18} className={syncing ? 'spin' : ''} />
-                            <h3>Data Integrity</h3>
-                        </div>
-                        <p>Re-evaluate all agent XP/Levels and rebuild team standings from individual member dossiers.</p>
-                        <button 
-                            className={`sync-btn ${syncing ? 'syncing' : ''}`} 
-                            onClick={handleRecalculateScores}
-                            disabled={syncing}
-                        >
-                            {syncing ? 'Synchronizing Dossiers...' : 'Initiate Global Score Sync'}
-                        </button>
-                        {syncing && <div className="sync-progress-bar"></div>}
-                    </div>
-                </div>
-
-                <div className="audit-section">
-                    <div className="section-header">
-                        <h4>Internal Audit (Last 10 Entries)</h4>
-                        <button className="text-btn" onClick={() => fetchLogs()}>Refresh Logs</button>
-                    </div>
-                    <div className="vitals-log-list">
-                        {logs.slice(0, 10).map(log => (
-                            <div key={log._id} className="vitals-log-entry">
-                                <span className="log-badge">{log.action}</span>
-                                <span className="log-msg">{log.details}</span>
-                                <span className="log-ts">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                            </div>
-                        ))}
-                    </div>
                 </div>
             </div>
-        );
-    };
+            <div className="audit-section">
+                <h4>Infrastructure Audit</h4>
+                <div className="vitals-log-list">
+                    {logs.slice(0, 10).map(log => (
+                        <div key={log._id} className="vitals-log-entry">
+                            <span className="log-badge">{log.action}</span>
+                            <span className="log-msg">{log.details}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <div className="admin-dashboard-page">
             <aside className="admin-sidebar">
-                <div className="sidebar-brand">
-                    <Shield size={24} className="text-primary" />
-                    <span>HQ ADMIN</span>
-                </div>
-
+                <div className="sidebar-brand"><Shield size={24} className="text-primary" /><span>HQ ADMIN</span></div>
                 <nav className="sidebar-nav">
-                    <button className={`nav-item ${activeTab === 'moderation' ? 'active' : ''}`} onClick={() => setActiveTab('moderation')}>
-                        <Clock size={18} /> Moderation Queue
-                    </button>
-                    <button className={`nav-item ${activeTab === 'evidence' ? 'active' : ''}`} onClick={() => setActiveTab('evidence')}>
-                        <Eye size={18} /> Evidence Locker
-                    </button>
-                    <button className={`nav-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
-                        <Shield size={18} /> User Directory
-                    </button>
-                    <button className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>
-                        <BarChart2 size={18} /> Analytics
-                    </button>
-                    <button className={`nav-item ${activeTab === 'operations' ? 'active' : ''}`} onClick={() => setActiveTab('operations')}>
-                        <Zap size={18} /> Global Operations
-                    </button>
-                    <button className={`nav-item ${activeTab === 'vitals' ? 'active' : ''}`} onClick={() => setActiveTab('vitals')}>
-                        <Activity size={18} /> System Health
-                    </button>
+                    <button className={`nav-item ${activeTab === 'moderation' ? 'active' : ''}`} onClick={() => setActiveTab('moderation')}><Clock size={18} /> Moderation Queue</button>
+                    <button className={`nav-item ${activeTab === 'evidence' ? 'active' : ''}`} onClick={() => setActiveTab('evidence')}><Eye size={18} /> Evidence Locker</button>
+                    <button className={`nav-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}><Shield size={18} /> User Directory</button>
+                    <button className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}><BarChart2 size={18} /> Analytics</button>
+                    <button className={`nav-item ${activeTab === 'operations' ? 'active' : ''}`} onClick={() => setActiveTab('operations')}><Zap size={18} /> Global Operations</button>
+                    <button className={`nav-item ${activeTab === 'vitals' ? 'active' : ''}`} onClick={() => setActiveTab('vitals')}><Activity size={18} /> System Health</button>
                 </nav>
-
                 <div className="sidebar-footer">
-                    <div className="user-info">
-                        <div className="user-avatar">{user.username[0]}</div>
-                        <div className="user-details">
-                            <span className="username">{user.username}</span>
-                            <span className="role">Administrator</span>
-                        </div>
-                    </div>
-                    <button className="logout-btn" onClick={logout}>
-                        <LogOut size={16} /> Logout
-                    </button>
+                    <div className="user-info"><div className="user-avatar">{user.username[0]}</div><div className="user-details"><span className="username">{user.username}</span><span className="role">Administrator</span></div></div>
+                    <button className="logout-btn" onClick={handleLogout}><LogOut size={16} /> Logout</button>
                 </div>
             </aside>
-
             <main className="admin-main">
                 {renderHeader()}
                 <div className="admin-content">
-                    {loading ? (
-                        <div className="loading-state">
-                            <div className="spinner"></div>
-                            <p>Loading intel...</p>
-                        </div>
-                    ) : (
+                    {loading ? <div className="loading-state"><div className="spinner"></div><p>Loading intel...</p></div> : (
                         <>
                             {activeTab === 'moderation' && renderModeration()}
                             {activeTab === 'evidence' && renderEvidenceLocker()}
                             {activeTab === 'users' && renderUsers()}
-                             {activeTab === 'analytics' && renderAnalytics()}
+                            {activeTab === 'analytics' && renderAnalytics()}
                             {activeTab === 'operations' && renderOperations()}
                             {activeTab === 'vitals' && renderVitals()}
                         </>
@@ -1643,81 +1168,28 @@ export default function AdminDashboard() {
             {activeScenario && (
                 <div className="review-overlay" onClick={() => setActiveScenario(null)}>
                     <div className="review-modal" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2>Review: {activeScenario.title}</h2>
-                            <button className="close-btn" onClick={() => setActiveScenario(null)}>&times;</button>
-                        </div>
+                        <div className="modal-header"><h2>Review: {activeScenario.title}</h2><button className="close-btn" onClick={() => setActiveScenario(null)}>&times;</button></div>
                         <div className="modal-body">
-                            <div className="review-section author-info-section">
-                                <h3>Author Details</h3>
-                                <div className="author-card">
-                                    <div className="author-avatar">
-                                        {activeScenario.authorId?.profilePhoto ? (
-                                            <img src={activeScenario.authorId.profilePhoto} alt="" />
-                                        ) : (
-                                            <span>{activeScenario.authorId?.username?.[0] || '?'}</span>
-                                        )}
-                                    </div>
-                                    <div className="author-text">
-                                        <strong>{activeScenario.authorId?.username || 'Unknown User'}</strong>
-                                        <span className="author-email">{activeScenario.authorId?.email || 'No email provided'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="review-section">
-                                <h3>Visual Content</h3>
-                                <pre className="content-preview">
-                                    {JSON.stringify(activeScenario.content?.visualData, null, 2)}
-                                </pre>
-                            </div>
-                            <div className="review-section">
-                                <h3>Decision Path</h3>
-                                <div className="options-preview">
-                                    {activeScenario.content?.options.map((opt, i) => (
-                                        <div key={i} className={`opt-preview ${opt.isCorrect ? 'correct' : 'mistake'}`}>
-                                            <strong>{opt.isCorrect ? 'Correct:' : 'Trap:'}</strong> {opt.text}
-                                            <p className="feedback">{opt.feedback}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="review-section">
-                                <h3>Educational Summary</h3>
-                                <p className="explanation">{activeScenario.content?.educationalExplanation}</p>
-                            </div>
+                            <div className="author-card"><div className="author-avatar">{activeScenario.authorId?.username?.[0] || '?'}</div><strong>{activeScenario.authorId?.username || 'Unknown'}</strong></div>
+                            <div className="review-section"><h3>Educational Summary</h3><p className="explanation">{activeScenario.content?.educationalExplanation}</p></div>
                         </div>
                         <div className="modal-footer">
-                            <button className="btn-reject" onClick={() => handleModerate(activeScenario._id, 'rejected')}>Reject Scenario</button>
-                            <button className="btn-approve" onClick={() => handleModerate(activeScenario._id, 'approved')}>Approve Scenario</button>
+                            <button className="btn-reject" onClick={() => handleModerate(activeScenario._id, 'rejected')}>Reject</button>
+                            <button className="btn-approve" onClick={() => handleModerate(activeScenario._id, 'approved')}>Approve</button>
                         </div>
                     </div>
                 </div>
             )}
+
             {banModal.isOpen && (
                 <div className="review-overlay" onClick={() => setBanModal({ ...banModal, isOpen: false })}>
                     <div className="review-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '450px' }}>
-                        <div className="modal-header">
-                            <h2>Restrict Agent Access</h2>
-                            <button className="close-btn" onClick={() => setBanModal({ ...banModal, isOpen: false })}>&times;</button>
-                        </div>
+                        <div className="modal-header"><h2>Restrict Agent Access</h2><button className="close-btn" onClick={() => setBanModal({ ...banModal, isOpen: false })}>&times;</button></div>
                         <div className="modal-body">
-                            <p style={{ color: '#8b949e', marginBottom: '1.5rem' }}>
-                                You are about to permanently suspend <strong>{banModal.username}</strong> from the platform. This action will block all future login attempts.
-                            </p>
-                            <div className="form-group">
-                                <label style={{ color: '#e06c75', fontWeight: '600' }}>Reason for Suspension</label>
-                                <textarea
-                                    placeholder="e.g., Conduct unbecoming of an agent; Data tampering detected."
-                                    value={banModal.reason}
-                                    onChange={e => setBanModal({ ...banModal, reason: e.target.value })}
-                                    style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #e06c75', height: '100px' }}
-                                />
-                            </div>
+                            <p>Suspending <strong>{banModal.username}</strong> permanently.</p>
+                            <textarea placeholder="Reason..." value={banModal.reason} onChange={e => setBanModal({ ...banModal, reason: e.target.value })} style={{ width: '100%', height: '100px', marginTop: '1rem' }} />
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn-view" onClick={() => setBanModal({ ...banModal, isOpen: false })}>Cancel</button>
-                            <button className="btn-reject" onClick={handleBan}>Apply Suspension</button>
-                        </div>
+                        <div className="modal-footer"><button className="btn-view" onClick={() => setBanModal({ ...banModal, isOpen: false })}>Cancel</button><button className="btn-reject" onClick={handleBan}>Apply Ban</button></div>
                     </div>
                 </div>
             )}
@@ -1727,12 +1199,7 @@ export default function AdminDashboard() {
 
 const VitalsCard = ({ title, icon: Icon, children, pulse }) => (
     <div className={`vitals-card ${pulse ? 'pulse' : ''}`}>
-        <div className="vitals-header">
-            <Icon size={18} />
-            <h3>{title}</h3>
-        </div>
-        <div className="vitals-content">
-            {children}
-        </div>
+        <div className="vitals-header"><Icon size={18} /><h3>{title}</h3></div>
+        <div className="vitals-content">{children}</div>
     </div>
 );
