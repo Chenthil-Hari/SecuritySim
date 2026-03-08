@@ -377,3 +377,214 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Role Badges & Promotion */
+.member-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.role-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.role-badge.owner {
+    background: rgba(var(--warning-rgb), 0.2);
+    color: var(--warning);
+    border: 1px solid rgba(var(--warning-rgb), 0.4);
+}
+
+.role-badge.principal-investigator {
+    background: rgba(var(--primary-rgb), 0.2);
+    color: var(--primary);
+    border: 1px solid rgba(var(--primary-rgb), 0.4);
+}
+
+.role-badge.security-researcher {
+    background: rgba(var(--success-rgb), 0.15);
+    color: var(--success);
+    border: 1px solid rgba(var(--success-rgb), 0.3);
+}
+
+.role-badge.threat-analyst {
+    background: rgba(0, 240, 255, 0.1);
+    color: #00f0ff;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.role-badge.technical-operative {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+}
+
+/* Management Modal */
+.roster-member.manageable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.roster-member.manageable:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.15);
+}
+
+.roster-member.manageable::after {
+    content: 'Manage';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.65rem;
+    color: var(--primary);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.roster-member.manageable:hover::after {
+    opacity: 1;
+}
+
+.mgmt-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: var(--space-md);
+}
+
+.mgmt-modal {
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 450px;
+    overflow: hidden;
+    animation: modalSlide 0.3s ease-out;
+}
+
+@keyframes modalSlide {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.mgmt-modal header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.mgmt-modal header h3 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.close-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+    color: var(--danger);
+}
+
+.mgmt-options {
+    padding: 1.5rem;
+}
+
+.mgmt-section {
+    margin-bottom: 1.5rem;
+}
+
+.mgmt-section label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.role-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.role-btn {
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    background: var(--surface-light);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.role-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.05);
+}
+
+.role-btn.active {
+    background: rgba(var(--primary-rgb), 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.2);
+}
+
+.mgmt-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 1.5rem 0;
+}
+
+.kick-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: var(--radius-md);
+}
+
+@media (max-width: 600px) {
+    .team-stats-bar {
+        grid-template-columns: 1fr;
+    }
+}
