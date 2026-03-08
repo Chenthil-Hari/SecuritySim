@@ -7,12 +7,18 @@ import nodemailer from 'nodemailer';
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST || 'smtp.titan.email',
     port: parseInt(process.env.EMAIL_PORT) || 465,
-    secure: true, // Use SSL/TLS
+    secure: parseInt(process.env.EMAIL_PORT) === 465, // Use SSL/TLS for 465, otherwise STARTTLS
     auth: {
         user: process.env.EMAIL_USER || 'info@hari07.tech',
-        pass: process.env.EMAIL_PASS // The Titan Mail password or App Password
-    }
+        pass: process.env.EMAIL_PASS
+    },
+    // For Vercel/Serverless, we typically want to disable pooling to ensure
+    // connections are cleared after the function execution
+    pool: false,
+    timeout: 10000 // 10s timeout
 });
+
+console.log(`📡 Mail System Initialized: ${process.env.EMAIL_HOST || 'smtp.titan.email'}:${process.env.EMAIL_PORT || 465} (User: ${process.env.EMAIL_USER || 'info@hari07.tech'})`);
 
 /**
  * Send a professional formatted email from info@hari07.tech

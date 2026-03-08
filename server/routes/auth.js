@@ -81,7 +81,13 @@ router.post('/signup', async (req, res) => {
         await newUser.save();
 
         // Send OTP Email
-        await sendEmail(email, 'SecuritySim Verification Sequence', emailTemplates.otp(otp));
+        const emailResult = await sendEmail(email, 'SecuritySim Verification Sequence', emailTemplates.otp(otp));
+        
+        if (!emailResult.success) {
+            console.error('📧 Critical: OTP Email delivery failed:', emailResult.error);
+            // We still create the user, but we warn in the logs. 
+            // The user can try "Resend Code" from the verification screen.
+        }
 
         const token = jwt.sign(
             { userId: newUser._id, username: newUser.username, role: newUser.role || 'user' },
@@ -255,7 +261,10 @@ router.post('/resend-otp', async (req, res) => {
         user.verificationOTPExpires = new Date(Date.now() + 15 * 60 * 1000);
         await user.save();
 
-        await sendEmail(email, 'SecuritySim Verification Sequence (New Code)', emailTemplates.otp(otp));
+        const emailResult = await sendEmail(email, 'SecuritySim Verification Sequence (New Code)', emailTemplates.otp(otp));
+        if (!emailResult.success) {
+            return res.status(500).json({ message: 'Mail delivery failed. Check system logs.', error: emailResult.error });
+        }
         res.json({ message: 'New verification code deployed to your inbox' });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -280,7 +289,13 @@ router.post('/forgot-password', async (req, res) => {
         user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
         await user.save();
 
-        await sendEmail(email, 'SecuritySim Password Recovery Protocol', emailTemplates.passwordReset(token));
+        const emailResult = await sendEmail(email, 'SecuritySim Password Recovery Protocol', emailTemplates.passwordReset(token));
+        if (!emailResult.success) {
+            // For security, we might still want to return the same generic message, 
+            // but for debugging, let's at least log it and return 500 if it's a hard fail.
+            console.error('📧 Password Reset delivery failed:', emailResult.error);
+            return res.status(500).json({ message: 'Mail delivery failed. Please contact support.' });
+        }
         res.json({ message: 'Recovery link deployed to your inbox' });
     } catch (error) {
         res.status(500).json({ message: error.message });
