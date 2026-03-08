@@ -449,6 +449,27 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleVerifyUser = async (userId) => {
+        if (!confirm("Manually verify this investigator's identity? This will bypass OTP verification.")) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/admin/users/${userId}/verify`), {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                setUsers(users.map(u => u._id === userId ? { ...u, isVerified: true } : u));
+                alert("Agent identity manually verified.");
+                fetchLogs();
+            } else {
+                const data = await res.json();
+                alert("Verification failed: " + data.message);
+            }
+        } catch (err) {
+            alert("Error verifying user: " + err.message);
+        }
+    };
+
     const handleBan = async () => {
         if (!banModal.reason) return alert("Please provide a reason for the enforcement action.");
         try {
@@ -921,6 +942,9 @@ export default function AdminDashboard() {
                                     </span>
                                 </td>
                                 <td className="actions-cell">
+                                    {!u.isVerified && (
+                                        <button className="action-btn verify" onClick={() => handleVerifyUser(u._id)} title="Force Verify Identity"><Shield size={16} /></button>
+                                    )}
                                     <button className={`action-btn ${u.isFrozen ? 'unfreeze' : 'freeze'}`} onClick={() => handleFreeze(u._id)} title={u.isFrozen ? 'Unfreeze' : 'Freeze'}><AlertCircle size={16} /></button>
                                     <button className={`action-btn ${u.isBanned ? 'unban' : 'ban'}`} onClick={() => u.isBanned ? handleUnban(u._id) : setBanModal({ isOpen: true, userId: u._id, username: u.username, reason: '' })} title={u.isBanned ? 'Lift Ban' : 'Ban User'}><XCircle size={16} /></button>
                                     <button className="action-btn reset" onClick={() => handleResetPassword(u._id)} title="Reset Password"><Lock size={16} /></button>

@@ -497,6 +497,32 @@ router.patch('/users/:id/unban', authenticateToken, isAdmin, async (req, res) =>
     }
 });
 
+// PATCH /api/admin/users/:id/verify — Force verify an agent
+router.patch('/users/:id/verify', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        user.isVerified = true;
+        user.verificationOTP = undefined;
+        user.verificationOTPExpires = undefined;
+        
+        user.enforcementHistory.push({
+            action: 'force_verify',
+            reason: 'Manual identity verification override by administrator',
+            adminName: req.user.username,
+            timestamp: new Date()
+        });
+
+        await user.save();
+        await logAction(req.user, 'force_verify', `Manually verified identity for user ${user.username}`, user._id);
+
+        res.json({ message: `Identity verified for user ${user.username}`, isVerified: true });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // GET /api/admin/vitals — Server Health Metrics
 router.get('/vitals', authenticateToken, isAdmin, async (req, res) => {
     try {

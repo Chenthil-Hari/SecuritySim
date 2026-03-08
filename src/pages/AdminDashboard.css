@@ -568,6 +568,7 @@
 .action-btn.unfreeze { color: #3fb950; border-color: #3fb950; }
 .action-btn.ban:hover { color: #f85149; border-color: #f85149; background: rgba(248, 81, 73, 0.1); }
 .action-btn.unban { color: #3fb950; border-color: #3fb950; background: rgba(46, 160, 67, 0.1); }
+.action-btn.verify:hover { color: var(--primary); border-color: var(--primary); background: rgba(0, 240, 255, 0.1); }
 .action-btn.reset:hover { color: var(--primary); border-color: var(--primary); }
 
 .review-section.author-info-section {
