@@ -105,7 +105,7 @@ router.post('/signup', async (req, res) => {
                 country: newUser.country,
                 role: newUser.role || 'user',
                 isFrozen: newUser.isFrozen || false,
-                isVerified: false
+                isVerified: newUser.isVerified ?? false
             }
         });
     } catch (error) {
@@ -171,7 +171,7 @@ router.post('/login', async (req, res) => {
                 country: user.country,
                 role: user.role || 'user',
                 isFrozen: user.isFrozen || false,
-                isVerified: user.isVerified
+                isVerified: user.isVerified ?? true
             }
         });
     } catch (error) {
