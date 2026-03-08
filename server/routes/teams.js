@@ -42,7 +42,7 @@ router.post('/create', authMiddleware, async (req, res) => {
             inviteCode: generateInviteCode(),
             ownerId: user._id,
             members: [user._id],
-            memberRoles: [{ userId: user._id, role: 'Principal Investigator' }] // Owner starts as Principal Investigator
+            memberRoles: [{ userId: user._id, role: 'Principal Investigator' }] // Owner can still have a role
         });
 
         await newTeam.save();
@@ -119,7 +119,7 @@ router.get('/my-team', authMiddleware, async (req, res) => {
             if (!hasRole) {
                 team.memberRoles.push({ 
                     userId: member._id, 
-                    role: member._id.toString() === team.ownerId.toString() ? 'Principal Investigator' : 'Technical Operative' 
+                    role: 'Technical Operative' 
                 });
                 roleUpdated = true;
             }
@@ -195,9 +195,44 @@ router.post('/promote', authMiddleware, async (req, res) => {
         }
 
         await team.save();
-        res.json({ message: `Successfully promoted member to ${newRole}`, team });
+        res.json({ message: `Successfully updated member role to ${newRole}`, team });
     } catch (error) {
-        res.status(500).json({ message: 'Error promoting member', error: error.message });
+        res.status(500).json({ message: 'Error updating member role', error: error.message });
+    }
+});
+
+// POST /api/teams/remove
+router.post('/remove', authMiddleware, async (req, res) => {
+    try {
+        const { targetUserId } = req.body;
+
+        const team = await Team.findOne({ ownerId: req.userId });
+        if (!team) {
+            return res.status(403).json({ message: 'Only the team owner can remove members.' });
+        }
+
+        if (targetUserId.toString() === req.userId.toString()) {
+            return res.status(400).json({ message: 'You cannot remove yourself. Use the leave team option instead.' });
+        }
+
+        // Remove user from members array
+        team.members = team.members.filter(id => id && id.toString() !== targetUserId.toString());
+        
+        // Remove role entry
+        team.memberRoles = team.memberRoles.filter(r => r.userId.toString() !== targetUserId.toString());
+
+        await team.save();
+
+        // Update the user document
+        const user = await User.findById(targetUserId);
+        if (user) {
+            user.teamId = null;
+            await user.save();
+        }
+
+        res.json({ message: 'Member removed successfully', team });
+    } catch (error) {
+        res.status(500).json({ message: 'Error removing member', error: error.message });
     }
 });
 

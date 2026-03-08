@@ -20,6 +20,7 @@ export default function Teams() {
     const [inviteCodeForm, setInviteCodeForm] = useState('');
 
     const [copied, setCopied] = useState(false);
+    const [managedMember, setManagedMember] = useState(null);
 
     useEffect(() => {
         fetchMyTeam();
@@ -129,6 +130,53 @@ export default function Teams() {
         navigator.clipboard.writeText(team.inviteCode);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleRoleChange = async (targetUserId, newRole) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/teams/promote'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ targetUserId, newRole })
+            });
+            if (res.ok) {
+                await fetchMyTeam();
+                setManagedMember(null);
+            } else {
+                const data = await res.json();
+                alert(data.message || "Action failed");
+            }
+        } catch (err) {
+            alert("Error updating member");
+        }
+    };
+
+    const handleRemoveMember = async (targetUserId) => {
+        if (!window.confirm("Are you sure you want to remove this member from the team?")) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/teams/remove'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ targetUserId })
+            });
+            if (res.ok) {
+                await fetchMyTeam();
+                setManagedMember(null);
+            } else {
+                const data = await res.json();
+                alert(data.message || "Removal failed");
+            }
+        } catch (err) {
+            alert("Error removing member");
+        }
     };
 
     if (loading) return <div className="page-loader"><Loader /></div>;
@@ -284,7 +332,15 @@ export default function Teams() {
                         <h3>Active Roster ({team.members.length}/10)</h3>
                         <div className="roster-grid">
                             {team.members.map(member => (
-                                <div key={member._id} className={`roster-member ${member._id === user.id ? 'current-user' : ''}`}>
+                                <div 
+                                    key={member._id} 
+                                    className={`roster-member ${member._id === user.id ? 'current-user' : ''} ${user.id === team.ownerId && member._id !== user.id ? 'manageable' : ''}`}
+                                    onClick={() => {
+                                        if (user.id === team.ownerId && member._id !== user.id) {
+                                            setManagedMember(member);
+                                        }
+                                    }}
+                                >
                                     <div className="member-avatar">
                                         {member.profilePhoto ? (
                                             <img src={member.profilePhoto} alt={member.username} />
@@ -295,6 +351,7 @@ export default function Teams() {
                                     <div className="member-details">
                                         <div className="member-name-row">
                                             <h4>{member.username}</h4>
+                                            {member._id === team.ownerId && <span className="role-badge owner">Owner</span>}
                                             {team.memberRoles?.find(r => r.userId.toString() === member._id.toString())?.role && (
                                                 <span className={`role-badge ${(team.memberRoles.find(r => r.userId.toString() === member._id.toString()).role).toLowerCase().replace(/\s+/g, '-')}`}>
                                                     {team.memberRoles.find(r => r.userId.toString() === member._id.toString()).role}
@@ -305,53 +362,45 @@ export default function Teams() {
                                             <span>Level {member.level}</span>
                                             <span>Score: {member.score.toLocaleString()}</span>
                                         </div>
-                                        
-                                        {/* Promotion Controls for Owner */}
-                                        {user.id === team.ownerId && member._id !== user.id && (
-                                            <div className="promotion-controls">
-                                                <select 
-                                                    onChange={async (e) => {
-                                                        const newRole = e.target.value;
-                                                        if (!newRole) return;
-                                                        try {
-                                                            const token = localStorage.getItem('token');
-                                                            const res = await fetch(buildApiUrl('/api/teams/promote'), {
-                                                                method: 'POST',
-                                                                headers: {
-                                                                    'Content-Type': 'application/json',
-                                                                    'Authorization': `Bearer ${token}`
-                                                                },
-                                                                body: JSON.stringify({ 
-                                                                    targetUserId: member._id, 
-                                                                    newRole 
-                                                                })
-                                                            });
-                                                            if (res.ok) await fetchMyTeam();
-                                                            else {
-                                                                const data = await res.json();
-                                                                alert(data.message || "Promotion failed");
-                                                            }
-                                                        } catch (err) {
-                                                            alert("Error promoting member");
-                                                        }
-                                                    }}
-                                                    value={team.memberRoles?.find(r => r.userId.toString() === member._id.toString())?.role || "Technical Operative"}
-                                                    className="promote-select"
-                                                >
-                                                    <option value="Principal Investigator">Principal Investigator</option>
-                                                    <option value="Security Researcher">Security Researcher</option>
-                                                    <option value="Threat Analyst">Threat Analyst</option>
-                                                    <option value="Technical Operative">Technical Operative</option>
-                                                </select>
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
+
+                    {/* Management Modal */}
+                    {managedMember && (
+                        <div className="mgmt-modal-overlay" onClick={() => setManagedMember(null)}>
+                            <div className="mgmt-modal" onClick={e => e.stopPropagation()}>
+                                <header>
+                                    <h3>Manage {managedMember.username}</h3>
+                                    <button className="close-btn" onClick={() => setManagedMember(null)}><LogOut size={16} /></button>
+                                </header>
+                                <div className="mgmt-options">
+                                    <div className="mgmt-section">
+                                        <label>Assign Role</label>
+                                        <div className="role-buttons">
+                                            {['Principal Investigator', 'Security Researcher', 'Threat Analyst', 'Technical Operative'].map(role => (
+                                                <button 
+                                                    key={role}
+                                                    className={`role-btn ${team.memberRoles?.find(r => r.userId.toString() === managedMember._id.toString())?.role === role ? 'active' : ''}`}
+                                                    onClick={() => handleRoleChange(managedMember._id, role)}
+                                                >
+                                                    {role}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="mgmt-divider"></div>
+                                    <button className="btn-danger kick-btn" onClick={() => handleRemoveMember(managedMember._id)}>
+                                        <LogOut size={16} /> Remove from Team
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
     );
-}
+};
