@@ -43,11 +43,8 @@ const VerifyEmail = () => {
             const data = await res.json();
             
             if (res.ok) {
-                setMessage(data.message);
                 updateUser({ isVerified: true });
-                setTimeout(() => {
-                    navigate('/dashboard');
-                }, 2000);
+                navigate('/dashboard');
             } else {
                 setError(data.message || 'Verification failed');
             }
