@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, CheckCircle, XCircle, Eye, AlertCircle, Clock, Search, LogOut, ExternalLink, Lock, BarChart2, Radio, Star, X, Zap } from 'lucide-react';
+import { Shield, CheckCircle, XCircle, Eye, AlertCircle, Clock, Search, LogOut, ExternalLink, Lock, BarChart2, Radio, Star, X, Zap, Download, FileText } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { useAuth } from '../context/AuthContext';
 import { buildApiUrl } from '../utils/api';
 import './AdminDashboard.css';
@@ -655,6 +657,74 @@ export default function AdminDashboard() {
         navigate('/admin');
     };
 
+    const downloadCSV = () => {
+        if (!analytics) return;
+        
+        // 1. Growth Data
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "INVESTIGATOR GROWTH REPORT\n";
+        csvContent += "Date,New Registrations\n";
+        analytics.registrations.forEach(r => {
+            csvContent += `${r._id},${r.count}\n`;
+        });
+
+        // 2. Performance Data
+        csvContent += "\nPLATFORM PERFORMANCE (ACCURACY)\n";
+        csvContent += "Category,Avg Accuracy %,Total Attempts\n";
+        analytics.categoryStats.forEach(c => {
+            csvContent += `${c._id},${Math.round(c.avgAccuracy)}%,${c.totalAttempts}\n`;
+        });
+
+        // 3. Locale Distribution
+        csvContent += "\nGEOGRAPHIC DISTRIBUTION\n";
+        csvContent += "Country,Agent Count\n";
+        analytics.countries.forEach(c => {
+            csvContent += `${c._id || 'Undisclosed'},${c.count}\n`;
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `SecuritySim_Intelligence_Report_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const downloadPDF = async () => {
+        const element = document.getElementById('analytics-report-area');
+        if (!element) return;
+
+        try {
+            const canvas = await html2canvas(element, {
+                backgroundColor: '#0d1117',
+                scale: 2,
+                logging: false,
+                useCORS: true
+            });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            
+            pdf.setDrawColor(0, 240, 255);
+            pdf.rect(5, 5, pdfWidth - 10, pdfHeight + 10);
+            pdf.setFontSize(18);
+            pdf.setTextColor(0, 240, 255);
+            pdf.text("HQ TACTICAL INTELLIGENCE REPORT", 10, 20);
+            pdf.setFontSize(10);
+            pdf.setTextColor(139, 148, 158);
+            pdf.text(`Generated: ${new Date().toLocaleString()} | Administrator: ${user.username}`, 10, 28);
+            
+            pdf.addImage(imgData, 'PNG', 10, 35, pdfWidth - 20, pdfHeight);
+            pdf.save(`SecuritySim_Global_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+        } catch (err) {
+            console.error("PDF Export Failure:", err);
+            alert("Report synthesis failed. Check console for telemetry errors.");
+        }
+    };
+
     if (user?.role !== 'admin') return null;
 
     const renderHeader = () => (
@@ -890,7 +960,15 @@ export default function AdminDashboard() {
 
     const renderAnalytics = () => (
         <div className="admin-analytics animate-fade-in">
-            <div className="analytics-grid">
+            <div className="analytics-actions">
+                <button className="export-btn csv" onClick={downloadCSV}>
+                    <Download size={16} /> Export CSV
+                </button>
+                <button className="export-btn pdf" onClick={downloadPDF}>
+                    <FileText size={16} /> Synthesis PDF Report
+                </button>
+            </div>
+            <div className="analytics-grid" id="analytics-report-area">
                 <div className="stat-card large">
                     <h3>User Growth (Last 7 Days)</h3>
                     <div className="chart-placeholder">
