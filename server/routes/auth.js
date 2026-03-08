@@ -49,6 +49,7 @@ router.get('/system-status', async (req, res) => {
 
 // Signup Route
 router.post('/signup', async (req, res) => {
+    console.log('📝 Signup attempt:', req.body.email);
     try {
         const { username, email, password, country } = req.body;
 
@@ -249,6 +250,7 @@ router.post('/verify-email', async (req, res) => {
 
 // POST /api/auth/resend-otp
 router.post('/resend-otp', async (req, res) => {
+    console.log('🔄 Resend OTP attempt for:', req.body.email);
     try {
         const { email } = req.body;
         const user = await User.findOne({ email });
