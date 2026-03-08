@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, CheckCircle, XCircle, Eye, AlertCircle, Clock, Search, LogOut, ExternalLink, Lock, BarChart2, Radio, Star, X, Zap, Download, FileText } from 'lucide-react';
+import { Shield, CheckCircle, XCircle, Eye, AlertCircle, Clock, Search, LogOut, ExternalLink, Lock, BarChart2, Radio, Star, X, Zap, Download, FileText, Activity, Database, RefreshCw, Server } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useAuth } from '../context/AuthContext';
@@ -32,6 +32,8 @@ export default function AdminDashboard() {
     const [newsItems, setNewsItems] = useState([]);
     const [newNews, setNewNews] = useState({ title: '', message: '', type: 'info', priority: 0, expiresAt: '' });
     const [banModal, setBanModal] = useState({ isOpen: false, userId: null, username: '', reason: '' });
+    const [vitals, setVitals] = useState(null);
+    const [syncing, setSyncing] = useState(false);
 
     useEffect(() => {
         if (user?.role !== 'admin') {
@@ -55,6 +57,9 @@ export default function AdminDashboard() {
             }
             else if (activeTab === 'evidence') {
                 fetchAssets();
+            }
+            else if (activeTab === 'vitals') {
+                fetchVitals();
             }
         };
 
@@ -152,6 +157,44 @@ export default function AdminDashboard() {
             setError("Mission Log link offline.");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchVitals = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/vitals'), {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) setVitals(await res.json());
+        } catch (err) {
+            console.error("Vitals Error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRecalculateScores = async () => {
+        if (!confirm("This will rebuild level/score parity across all agents and teams. Proceed with global synchronization?")) return;
+        setSyncing(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/vitals/recalculate-scores'), {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert(`Success: ${data.message}\nAgents Adjusted: ${data.results.usersAdjusted}\nTeams Adjusted: ${data.results.teamsAdjusted}`);
+                fetchLogs();
+            } else {
+                alert("Operation failed: " + data.message);
+            }
+        } catch (err) {
+            alert("Maintenance Error: " + err.message);
+        } finally {
+            setSyncing(false);
         }
     };
 
@@ -1317,6 +1360,9 @@ export default function AdminDashboard() {
                     <button className={`nav-item ${activeTab === 'operations' ? 'active' : ''}`} onClick={() => setActiveTab('operations')}>
                         <Zap size={18} /> Global Operations
                     </button>
+                    <button className={`nav-item ${activeTab === 'vitals' ? 'active' : ''}`} onClick={() => setActiveTab('vitals')}>
+                        <Activity size={18} /> System Health
+                    </button>
                 </nav>
 
                 <div className="sidebar-footer">
@@ -1346,8 +1392,9 @@ export default function AdminDashboard() {
                             {activeTab === 'moderation' && renderModeration()}
                             {activeTab === 'evidence' && renderEvidenceLocker()}
                             {activeTab === 'users' && renderUsers()}
-                            {activeTab === 'analytics' && renderAnalytics()}
+                             {activeTab === 'analytics' && renderAnalytics()}
                             {activeTab === 'operations' && renderOperations()}
+                            {activeTab === 'vitals' && renderVitals()}
                         </>
                     )}
                 </div>
@@ -1434,6 +1481,111 @@ export default function AdminDashboard() {
                     </div>
                 </div>
             )}
+        </div>
+    );
+}
+
+const VitalsCard = ({ title, icon: Icon, children, pulse }) => (
+    <div className={`vitals-card ${pulse ? 'pulse' : ''}`}>
+        <div className="vitals-header">
+            <Icon size={18} />
+            <h3>{title}</h3>
+        </div>
+        <div className="vitals-content">
+            {children}
+        </div>
+    </div>
+);
+
+function renderVitals() {
+    return (
+        <div className="admin-vitals animate-fade-in">
+            <div className="vitals-grid">
+                <VitalsCard title="Database Core" icon={Database} pulse={true}>
+                    <div className="metric-row">
+                        <span>Data Footprint</span>
+                        <strong>{vitals?.database.dataSize || '...'}</strong>
+                    </div>
+                    <div className="metric-row">
+                        <span>Physical Storage</span>
+                        <strong>{vitals?.database.storageSize || '...'}</strong>
+                    </div>
+                    <div className="metric-row">
+                        <span>Index Volume</span>
+                        <strong>{vitals?.database.indexSize || '...'}</strong>
+                    </div>
+                    <div className="metric-row">
+                        <span>Live Collections</span>
+                        <strong>{vitals?.database.collections || '0'}</strong>
+                    </div>
+                </VitalsCard>
+
+                <VitalsCard title="Connection Cluster" icon={Server}>
+                    <div className="metric-row">
+                        <span>Active Links</span>
+                        <div className="connection-counter">
+                            <div className="pulse-indicator"></div>
+                            <strong>{vitals?.server.connections.current || '0'}</strong>
+                        </div>
+                    </div>
+                    <div className="metric-row">
+                        <span>Available Capacity</span>
+                        <strong>{vitals?.server.connections.available || '0'}</strong>
+                    </div>
+                    <progress className="connection-bar" value={vitals?.server.connections.current} max={vitals?.server.connections.current + vitals?.server.connections.available}></progress>
+                </VitalsCard>
+
+                <VitalsCard title="System Performance" icon={Activity}>
+                    <div className="metric-row">
+                        <span>HQ Node Uptime</span>
+                        <strong>{vitals?.server.uptime || '...'}</strong>
+                    </div>
+                    <div className="metric-row">
+                        <span>Resident Memory</span>
+                        <strong>{vitals?.server.mem.resident || '...'}</strong>
+                    </div>
+                    <div className="metric-row">
+                        <span>Virtual Memory</span>
+                        <strong>{vitals?.server.mem.virtual || '...'}</strong>
+                    </div>
+                    <div className="metric-row">
+                        <span>Kernel Version</span>
+                        <strong style={{ fontSize: '0.75rem', opacity: 0.6 }}>{vitals?.server.version || '...'}</strong>
+                    </div>
+                </VitalsCard>
+
+                <div className="vitals-card maintenance-card">
+                    <div className="vitals-header">
+                        <RefreshCw size={18} className={syncing ? 'spin' : ''} />
+                        <h3>Data Integrity</h3>
+                    </div>
+                    <p>Re-evaluate all agent XP/Levels and rebuild team standings from individual member dossiers.</p>
+                    <button 
+                        className={`sync-btn ${syncing ? 'syncing' : ''}`} 
+                        onClick={handleRecalculateScores}
+                        disabled={syncing}
+                    >
+                        {syncing ? 'Synchronizing Dossiers...' : 'Initiate Global Score Sync'}
+                    </button>
+                    {syncing && <div className="sync-progress-bar"></div>}
+                </div>
+            </div>
+
+            <div className="audit-section">
+                <div className="section-header">
+                    <h4>Internal Audit (Last 10 Entries)</h4>
+                    <button className="text-btn" onClick={() => fetchLogs()}>Refresh Logs</button>
+                </div>
+                <div className="vitals-log-list">
+                    {logs.slice(0, 10).map(log => (
+                        <div key={log._id} className="vitals-log-entry">
+                            <span className="log-badge">{log.action}</span>
+                            <span className="log-msg">{log.details}</span>
+                            <span className="log-ts">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }

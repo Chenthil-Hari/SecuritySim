@@ -497,4 +497,85 @@ router.patch('/users/:id/unban', authenticateToken, isAdmin, async (req, res) =>
     }
 });
 
+// GET /api/admin/vitals — Server Health Metrics
+router.get('/vitals', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const db = User.db.db;
+        const stats = await db.stats();
+        const serverStatus = await db.admin().serverStatus();
+        
+        res.json({
+            database: {
+                name: stats.db,
+                collections: stats.collections,
+                objects: stats.objects,
+                avgObjSize: (stats.avgObjSize / 1024).toFixed(2) + " KB",
+                dataSize: (stats.dataSize / (1024 * 1024)).toFixed(2) + " MB",
+                storageSize: (stats.storageSize / (1024 * 1024)).toFixed(2) + " MB",
+                indexSize: (stats.indexSize / (1024 * 1024)).toFixed(2) + " MB"
+            },
+            server: {
+                version: serverStatus.version,
+                uptime: Math.floor(serverStatus.uptime / 3600) + " Hours",
+                connections: {
+                    current: serverStatus.connections.current,
+                    available: serverStatus.connections.available
+                },
+                mem: {
+                    resident: serverStatus.mem.resident + " MB",
+                    virtual: serverStatus.mem.virtual + " MB"
+                }
+            },
+            timestamp: new Date()
+        });
+    } catch (error) {
+        console.error("Vitals Error:", error);
+        res.status(500).json({ message: "Failed to probe server vitals" });
+    }
+});
+
+// POST /api/admin/vitals/recalculate-scores — Maintenance Sync
+router.post('/vitals/recalculate-scores', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        let userAdjustments = 0;
+        let teamAdjustments = 0;
+
+        // 1. Sync User Levels/XP
+        const users = await User.find({});
+        for (const user of users) {
+            const expectedLevel = Math.floor((user.xp || 0) / 100) + 1;
+            if (user.level !== expectedLevel) {
+                user.level = expectedLevel;
+                await user.save();
+                userAdjustments++;
+            }
+        }
+
+        // 2. Sync Team Scores
+        const teams = await Team.find({});
+        for (const team of teams) {
+            const members = await User.find({ teamId: team._id });
+            const calculatedScore = members.reduce((sum, m) => sum + (m.score || 0), 0);
+            if (team.totalScore !== calculatedScore) {
+                team.totalScore = calculatedScore;
+                await team.save();
+                teamAdjustments++;
+            }
+        }
+
+        await logAction(req.user, 'SYSTEM_MAINTENANCE', `Manual Score Sync complete. Adjustments: ${userAdjustments} agents, ${teamAdjustments} teams.`);
+
+        res.json({
+            message: "Data integrity restored.",
+            results: {
+                usersAdjusted: userAdjustments,
+                teamsAdjusted: teamAdjustments
+            }
+        });
+    } catch (error) {
+        console.error("Sync Error:", error);
+        res.status(500).json({ message: "Score synchronization failed due to internal error." });
+    }
+});
+
 export default router;
