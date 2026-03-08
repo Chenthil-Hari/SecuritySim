@@ -120,6 +120,20 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isBanned: {
+        type: Boolean,
+        default: false
+    },
+    banReason: {
+        type: String,
+        default: ''
+    },
+    enforcementHistory: [{
+        action: String, // 'ban' or 'unban'
+        reason: String,
+        adminName: String,
+        timestamp: { type: Date, default: Date.now }
+    }],
     lastSeen: {
         type: Date,
         default: Date.now

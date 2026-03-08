@@ -539,6 +539,12 @@
     color: #f85149;
 }
 
+.status-badge.banned {
+    background: #f85149;
+    color: white;
+    box-shadow: 0 0 10px rgba(248, 81, 73, 0.3);
+}
+
 .actions-cell {
     display: flex;
     gap: 8px;
@@ -560,6 +566,8 @@
 
 .action-btn.freeze:hover { color: #f85149; border-color: #f85149; }
 .action-btn.unfreeze { color: #3fb950; border-color: #3fb950; }
+.action-btn.ban:hover { color: #f85149; border-color: #f85149; background: rgba(248, 81, 73, 0.1); }
+.action-btn.unban { color: #3fb950; border-color: #3fb950; background: rgba(46, 160, 67, 0.1); }
 .action-btn.reset:hover { color: var(--primary); border-color: var(--primary); }
 
 .review-section.author-info-section {

@@ -444,4 +444,57 @@ router.delete('/news/:id', authenticateToken, isAdmin, async (req, res) => {
     }
 });
 
+// --- User Enforcement (Banning) ---
+router.patch('/users/:id/ban', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { reason } = req.body;
+        if (!reason) return res.status(400).json({ message: "Ban reason is required" });
+
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        if (user.role === 'admin') {
+            return res.status(403).json({ message: "Cannot ban an administrator" });
+        }
+
+        user.isBanned = true;
+        user.banReason = reason;
+        user.enforcementHistory.push({
+            action: 'ban',
+            reason,
+            adminName: req.user.username,
+            timestamp: new Date()
+        });
+
+        await user.save();
+        await logAction(req.user, 'ban_user', `Banned user ${user.username}. Reason: ${reason}`, user._id);
+
+        res.json({ message: `User ${user.username} has been permanently banned`, isBanned: true });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.patch('/users/:id/unban', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        user.isBanned = false;
+        user.enforcementHistory.push({
+            action: 'unban',
+            reason: 'Enforcement action lifted by administrator',
+            adminName: req.user.username,
+            timestamp: new Date()
+        });
+
+        await user.save();
+        await logAction(req.user, 'unban_user', `Lifted ban for user ${user.username}`, user._id);
+
+        res.json({ message: `Ban lifted for user ${user.username}`, isBanned: false });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 export default router;

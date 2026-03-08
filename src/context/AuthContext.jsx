@@ -35,13 +35,17 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify({ email, password }),
             });
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Login failed');
+            if (!response.ok) {
+                const err = new Error(data.message || 'Login failed');
+                err.reason = data.reason;
+                throw err;
+            }
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
             setUser(data.user);
             return { success: true };
         } catch (error) {
-            return { success: false, error: error.message };
+            return { success: false, error: error.message, reason: error.reason };
         }
     };
 

@@ -8,6 +8,7 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [banReason, setBanReason] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -21,6 +22,7 @@ const Login = () => {
             navigate('/dashboard');
         } else {
             setError(result.error || 'Failed to login');
+            setBanReason(result.reason || '');
             setIsLoading(false);
         }
     };
@@ -36,7 +38,16 @@ const Login = () => {
                     <h2>Welcome Back</h2>
                     <p>Sign in to continue your secure journey</p>
                 </div>
-                {error && <div className="auth-error">{error}</div>}
+                {error && (
+                    <div className={`auth-error ${banReason ? 'suspension-alert' : ''}`}>
+                        <div className="error-message">{error}</div>
+                        {banReason && (
+                            <div className="suspension-reason">
+                                <strong>Reason:</strong> {banReason}
+                            </div>
+                        )}
+                    </div>
+                )}
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="form-group">
                         <label htmlFor="email">Email</label>

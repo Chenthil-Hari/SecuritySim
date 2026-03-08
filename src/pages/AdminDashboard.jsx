@@ -29,6 +29,7 @@ export default function AdminDashboard() {
     const [featureToggles, setFeatureToggles] = useState({ teams: true, warrooms: true, pvp: true, ugc: true, threat_map: true });
     const [newsItems, setNewsItems] = useState([]);
     const [newNews, setNewNews] = useState({ title: '', message: '', type: 'info', priority: 0, expiresAt: '' });
+    const [banModal, setBanModal] = useState({ isOpen: false, userId: null, username: '', reason: '' });
 
     useEffect(() => {
         if (user?.role !== 'admin') {
@@ -402,6 +403,47 @@ export default function AdminDashboard() {
             }
         } catch (err) {
             alert("Error updating user status: " + err.message);
+        }
+    };
+
+    const handleBan = async () => {
+        if (!banModal.reason) return alert("Please provide a reason for the enforcement action.");
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/admin/users/${banModal.userId}/ban`), {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ reason: banModal.reason })
+            });
+            if (res.ok) {
+                setUsers(users.map(u => u._id === banModal.userId ? { ...u, isBanned: true, banReason: banModal.reason } : u));
+                setBanModal({ isOpen: false, userId: null, username: '', reason: '' });
+                alert("Agent permanently suspended.");
+                fetchLogs();
+            }
+        } catch (err) {
+            alert("Ban Error: " + err.message);
+        }
+    };
+
+    const handleUnban = async (userId) => {
+        if (!confirm("Lift the suspension for this agent?")) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/admin/users/${userId}/unban`), {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                setUsers(users.map(u => u._id === userId ? { ...u, isBanned: false } : u));
+                alert("Agent access restored.");
+                fetchLogs();
+            }
+        } catch (err) {
+            alert("Unban Error: " + err.message);
         }
     };
 
@@ -799,18 +841,25 @@ export default function AdminDashboard() {
                                 </td>
                                 <td>{u.teamId?.name || <span className="text-muted">No Team</span>}</td>
                                 <td>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'Unknown'}</td>
-                                <td>
-                                    <span className={`status-badge ${u.isFrozen ? 'frozen' : 'active'}`}>
-                                        {u.isFrozen ? 'Terminal Locked' : 'Active'}
+                                 <td>
+                                    <span className={`status-badge ${u.isBanned ? 'banned' : u.isFrozen ? 'frozen' : 'active'}`}>
+                                        {u.isBanned ? 'BANNED' : u.isFrozen ? 'Terminal Locked' : 'Active'}
                                     </span>
                                 </td>
-                                <td className="actions-cell">
+                                 <td className="actions-cell">
                                     <button
                                         className={`action-btn ${u.isFrozen ? 'unfreeze' : 'freeze'}`}
                                         onClick={() => handleFreeze(u._id)}
                                         title={u.isFrozen ? 'Unfreeze' : 'Freeze'}
                                     >
                                         <AlertCircle size={16} />
+                                    </button>
+                                    <button
+                                        className={`action-btn ${u.isBanned ? 'unban' : 'ban'}`}
+                                        onClick={() => u.isBanned ? handleUnban(u._id) : setBanModal({ isOpen: true, userId: u._id, username: u.username, reason: '' })}
+                                        title={u.isBanned ? 'Lift Ban' : 'Ban User'}
+                                    >
+                                        <XCircle size={16} />
                                     </button>
                                     <button
                                         className="action-btn reset"
@@ -1275,6 +1324,34 @@ export default function AdminDashboard() {
                         <div className="modal-footer">
                             <button className="btn-reject" onClick={() => handleModerate(activeScenario._id, 'rejected')}>Reject Scenario</button>
                             <button className="btn-approve" onClick={() => handleModerate(activeScenario._id, 'approved')}>Approve Scenario</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {banModal.isOpen && (
+                <div className="review-overlay" onClick={() => setBanModal({ ...banModal, isOpen: false })}>
+                    <div className="review-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '450px' }}>
+                        <div className="modal-header">
+                            <h2>Restrict Agent Access</h2>
+                            <button className="close-btn" onClick={() => setBanModal({ ...banModal, isOpen: false })}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            <p style={{ color: '#8b949e', marginBottom: '1.5rem' }}>
+                                You are about to permanently suspend <strong>{banModal.username}</strong> from the platform. This action will block all future login attempts.
+                            </p>
+                            <div className="form-group">
+                                <label style={{ color: '#e06c75', fontWeight: '600' }}>Reason for Suspension</label>
+                                <textarea
+                                    placeholder="e.g., Conduct unbecoming of an agent; Data tampering detected."
+                                    value={banModal.reason}
+                                    onChange={e => setBanModal({ ...banModal, reason: e.target.value })}
+                                    style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #e06c75', height: '100px' }}
+                                />
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn-view" onClick={() => setBanModal({ ...banModal, isOpen: false })}>Cancel</button>
+                            <button className="btn-reject" onClick={handleBan}>Apply Suspension</button>
                         </div>
                     </div>
                 </div>

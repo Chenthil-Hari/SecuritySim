@@ -80,6 +80,28 @@
     animation: slideDown 0.3s ease;
 }
 
+.auth-error.suspension-alert {
+    background: rgba(140, 20, 20, 0.3);
+    border: 1px solid #ff4d4d;
+    color: #ff4d4d;
+    padding: 1.25rem;
+}
+
+.error-message {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.suspension-reason {
+    font-size: 0.9rem;
+    color: #ffb3b3;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 77, 77, 0.2);
+}
+
 .auth-form {
     display: flex;
     flex-direction: column;

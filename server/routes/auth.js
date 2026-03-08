@@ -129,6 +129,13 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
+        if (user.isBanned) {
+            return res.status(403).json({ 
+                message: 'Access Denied: Your account has been permanently suspended.',
+                reason: user.banReason || 'Violation of platform Terms of Service.'
+            });
+        }
+
         const token = jwt.sign(
             { userId: user._id, username: user.username, role: user.role || 'user' },
             process.env.JWT_SECRET || 'fallback_secret',
