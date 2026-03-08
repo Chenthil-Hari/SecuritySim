@@ -184,6 +184,27 @@ const Profile = () => {
         }
     };
 
+    const handleVerifyEmail = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/auth/resend-otp'), {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ email: user?.email })
+            });
+            if (res.ok) {
+                navigate('/verify-email');
+            } else {
+                alert('Failed to initiate verification sequence.');
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     const handleUpdateCustomization = (update) => {
         dispatch({
             type: 'UPDATE_CUSTOMIZATION',
@@ -340,7 +361,18 @@ const Profile = () => {
                             </div>
                         )}
                     </div>
-                    <p className="profile-email">{isOwnProfile ? user?.email : 'Classified Agent'}</p>
+                    <p className="profile-email">
+                        {isOwnProfile ? user?.email : 'Classified Agent'}
+                        {isOwnProfile && (
+                            profileData?.isVerified ? (
+                                <span className="verification-badge verified"><Shield size={10} /> Verified</span>
+                            ) : (
+                                <button className="verification-badge unverified" onClick={handleVerifyEmail}>
+                                    <Shield size={10} /> Verify Now
+                                </button>
+                            )
+                        )}
+                    </p>
                     <div className="profile-meta">
                         <span className="rank-badge" style={{ color: getRank(profileData?.level || level).color }}>{getRank(profileData?.level || level).icon} {getRank(profileData?.level || level).title}</span>
                         <span><MapPin size={14} /> {profileData?.country || 'Global'}</span>
