@@ -27,6 +27,7 @@ console.log(`📡 Mail System Initialized: ${process.env.EMAIL_HOST || 'smtp.tit
  * @param {string} html - HTML content of the email
  */
 export const sendEmail = async (to, subject, html) => {
+    console.log(`📡 Attempting to send email [${subject}] to: ${to}...`);
     try {
         const mailOptions = {
             from: `"SecuritySim Headquarters" <${process.env.EMAIL_USER || 'info@hari07.tech'}>`,
