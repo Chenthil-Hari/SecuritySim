@@ -158,6 +158,31 @@ router.put('/sync', authMiddleware, async (req, res) => {
         }
 
         await user.save();
+
+        // Proactive Team Score Sync: Update Team's total score if user is in a team
+        if (user.teamId && incrementalScore !== undefined) {
+            try {
+                const Team = (await import('../models/Team.js')).default;
+                const team = await Team.findById(user.teamId);
+                if (team) {
+                    // Recalculate or just increment? 
+                    // Best to recalculate to avoid drift, but increment is faster.
+                    // Let's do a quick increment for performance, but teams.js /my-team already handles drift.
+                    const finalIncrement = Math.round(incrementalScore * (user.multiplier || 1.0)); // Rough estimate if multiplier was used
+                    team.totalScore += (user.score - (user.score - (incrementalScore || 0))); // More accurate: use the actual change
+                    
+                    // Actually, let's just use the finalIncrement logic from above if we can, 
+                    // or better yet, just re-verify the sum of members to be 100% sure.
+                    const User = (await import('../models/User.js')).default;
+                    const members = await User.find({ teamId: team._id }).select('score');
+                    team.totalScore = members.reduce((sum, m) => sum + (m.score || 0), 0);
+                    await team.save();
+                }
+            } catch (teamErr) {
+                console.error("Failed to sync team score:", teamErr);
+            }
+        }
+
         res.json({ message: 'Profile synced successfully', user });
     } catch (error) {
         res.status(500).json({ message: 'Error syncing profile', error: error.message });

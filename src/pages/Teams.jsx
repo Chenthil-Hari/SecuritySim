@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import { buildApiUrl } from '../utils/api';
-import { Users, UserPlus, ShieldPlus, LogOut, Copy, Trophy, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Users, UserPlus, ShieldPlus, LogOut, Copy, Trophy, CheckCircle2, ArrowLeft, Shield, Play } from 'lucide-react';
 import Loader from '../components/Loader';
 import './Teams.css';
 
@@ -209,6 +209,30 @@ export default function Teams() {
                         <button className="btn btn-danger leave-btn" type="button" onClick={handleLeaveTeam}>
                             <LogOut size={16} /> Leave Team
                         </button>
+                    </div>
+
+                    <div className="team-stats-bar">
+                        <div className="stat-pill">
+                            <Users size={18} />
+                            <div className="stat-val">
+                                <span>{team.members.length} / 10</span>
+                                <label>Deployed Agents</label>
+                            </div>
+                        </div>
+                        <div className="stat-pill">
+                            <Trophy size={18} />
+                            <div className="stat-val">
+                                <span>{Math.round(team.members.reduce((sum, m) => sum + m.level, 0) / team.members.length)}</span>
+                                <label>Avg. Agent Level</label>
+                            </div>
+                        </div>
+                        <div className="stat-pill">
+                            <Shield size={18} />
+                            <div className="stat-val">
+                                <span>{team.totalScore.toLocaleString()}</span>
+                                <label>Net Security Score</label>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="team-warroom-prompt">

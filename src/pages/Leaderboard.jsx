@@ -13,20 +13,22 @@ const Leaderboard = () => {
     const [leaderboard, setLeaderboard] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [tab, setTab] = useState('global'); // 'global' or 'regional'
+    const [tab, setTab] = useState('global'); // 'global', 'regional', or 'teams'
 
     useEffect(() => {
         const fetchLeaderboard = async () => {
             setLoading(true);
             try {
-                let url = '/api/leaderboard';
+                let url = tab === 'teams' ? '/api/teams/leaderboard' : '/api/leaderboard';
 
                 // If on regional tab and user is logged in and has a country
                 if (tab === 'regional' && user && user.country && user.country !== 'Global') {
                     url += `?country=${encodeURIComponent(user.country)}`;
                 }
 
-                const response = await fetch(buildApiUrl(url));
+                const response = await fetch(buildApiUrl(url), {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
                 const contentType = response.headers.get("content-type");
                 
                 let data;
@@ -108,6 +110,12 @@ const Leaderboard = () => {
                     >
                         <MapPin size={16} /> Regional
                     </button>
+                    <button
+                        className={`tab-btn ${tab === 'teams' ? 'active' : ''}`}
+                        onClick={() => setTab('teams')}
+                    >
+                        <Users size={16} /> Teams
+                    </button>
                 </div>
 
                 {tab === 'regional' && (!user || !user.country || user.country === 'Global') && (
@@ -129,20 +137,24 @@ const Leaderboard = () => {
                 <div className="leaderboard-grid">
                     <div className="leaderboard-header-row">
                         <div className="col-rank">Rank</div>
-                        <div className="col-agent">Agent</div>
-                        <div className="col-region">Region</div>
+                        <div className="col-agent">{tab === 'teams' ? 'Defense Team' : 'Agent'}</div>
+                        <div className="col-region">{tab === 'teams' ? 'Members' : 'Region'}</div>
                         <div className="col-score">Score</div>
-                        <div className="col-level">Level</div>
-                        <div className="col-xp">XP</div>
-                        <div className="col-badges">Badges</div>
+                        {tab !== 'teams' && (
+                            <>
+                                <div className="col-level">Level</div>
+                                <div className="col-xp">XP</div>
+                                <div className="col-badges">Badges</div>
+                            </>
+                        )}
                     </div>
 
                     <div className="leaderboard-body">
                         {leaderboard.map((entry) => (
                             <div
                                 key={entry.id}
-                                className={`leaderboard-row ${user && user.id === entry.id ? 'current-user' : ''} ${entry.rank <= 3 ? 'top-3' : ''} ${entry.rank === 1 ? 'rank-1-row' : ''} ${entry.customization?.auraEnabled && entry.rank <= 50 ? 'has-aura' : ''}`}
-                                style={entry.customization?.auraEnabled && entry.rank <= 50 ? {
+                                className={`leaderboard-row ${user && (user.id === entry.id || user.teamId === entry.id) ? 'current-user' : ''} ${entry.rank <= 3 ? 'top-3' : ''} ${entry.rank === 1 ? 'rank-1-row' : ''} ${!tab.includes('teams') && entry.customization?.auraEnabled && entry.rank <= 50 ? 'has-aura' : ''}`}
+                                style={!tab.includes('teams') && entry.customization?.auraEnabled && entry.rank <= 50 ? {
                                     '--aura-color': entry.rank === 1 ? '255, 215, 0' : entry.rank <= 10 ? '0, 240, 255' : '124, 77, 255',
                                     '--aura-color-hex': entry.rank === 1 ? '#ffd700' : entry.rank <= 10 ? '#00f0ff' : '#7c4dff'
                                 } : {}}
@@ -152,55 +164,78 @@ const Leaderboard = () => {
                                     {getRankIcon(entry.rank)}
                                 </div>
                                 <div className="col-agent">
-                                    <div className="agent-cell">
-                                        <div className="agent-avatar-sm">
-                                            {entry.profilePhoto ? (
-                                                <img src={entry.profilePhoto} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                                            ) : (
-                                                entry.username.charAt(0).toUpperCase()
-                                            )}
+                                    {tab === 'teams' ? (
+                                        <div className="agent-cell">
+                                            <div className="agent-avatar-sm" style={{ background: 'var(--primary)', color: 'white' }}>
+                                                <Users size={18} />
+                                            </div>
+                                            <div className="agent-name">
+                                                <strong>{entry.name}</strong>
+                                                {user && user.teamId === entry.id && <span className="you-tag">YOUR TEAM</span>}
+                                            </div>
                                         </div>
-                                        <div className="agent-name">
-                                            <div className="agent-name-main">
-                                                <span title={getRank(entry.level).title}>{getRank(entry.level).icon}</span>
-                                                <Link to={`/profile/${entry.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                                                    <strong>{entry.username}</strong>
-                                                </Link>
-                                                {user && user.id === entry.id && <span className="you-tag">YOU</span>}
-
-                                                {entry.seasonalMedals && entry.seasonalMedals.length > 0 && (
-                                                    <div className="seasonal-medals">
-                                                        {entry.seasonalMedals.map((m, i) => (
-                                                            <div key={i} className="medal-tooltip" title={`Season Winner: ${m.season}`}>
-                                                                <Medal size={14} className={`rank-icon ${m.type}`} />
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                                    ) : (
+                                        <div className="agent-cell">
+                                            <div className="agent-avatar-sm">
+                                                {entry.profilePhoto ? (
+                                                    <img src={entry.profilePhoto} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    entry.username.charAt(0).toUpperCase()
                                                 )}
                                             </div>
-                                            {entry.unlockedTitles && entry.unlockedTitles.length > 0 && (
-                                                <span className="agent-title">{entry.unlockedTitles[entry.unlockedTitles.length - 1]}</span>
-                                            )}
+                                            <div className="agent-name">
+                                                <div className="agent-name-main">
+                                                    <span title={getRank(entry.level).title}>{getRank(entry.level).icon}</span>
+                                                    <Link to={`/profile/${entry.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                                                        <strong>{entry.username}</strong>
+                                                    </Link>
+                                                    {user && user.id === entry.id && <span className="you-tag">YOU</span>}
+
+                                                    {entry.seasonalMedals && entry.seasonalMedals.length > 0 && (
+                                                        <div className="seasonal-medals">
+                                                            {entry.seasonalMedals.map((m, i) => (
+                                                                <div key={i} className="medal-tooltip" title={`Season Winner: ${m.season}`}>
+                                                                    <Medal size={14} className={`rank-icon ${m.type}`} />
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {entry.unlockedTitles && entry.unlockedTitles.length > 0 && (
+                                                    <span className="agent-title">{entry.unlockedTitles[entry.unlockedTitles.length - 1]}</span>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                                 <div className="col-region">
-                                    <span className="region-badge">{entry.country || 'Global'}</span>
+                                    {tab === 'teams' ? (
+                                        <div className="member-count-cell">
+                                            <Users size={14} />
+                                            <span>{entry.memberCount}/10</span>
+                                        </div>
+                                    ) : (
+                                        <span className="region-badge">{entry.country || 'Global'}</span>
+                                    )}
                                 </div>
                                 <div className="col-score">
                                     <div className="score-cell">
                                         <Shield size={14} />
-                                        <span>{entry.score}</span>
+                                        <span>{entry.totalScore || entry.score}</span>
                                     </div>
                                 </div>
-                                <div className="col-level">{entry.level}</div>
-                                <div className="col-xp">
-                                    <div className="xp-cell">
-                                        <Zap size={14} />
-                                        <span>{entry.xp}</span>
-                                    </div>
-                                </div>
-                                <div className="col-badges">{entry.badgeCount}</div>
+                                {tab !== 'teams' && (
+                                    <>
+                                        <div className="col-level">{entry.level}</div>
+                                        <div className="col-xp">
+                                            <div className="xp-cell">
+                                                <Zap size={14} />
+                                                <span>{entry.xp}</span>
+                                            </div>
+                                        </div>
+                                        <div className="col-badges">{entry.badgeCount}</div>
+                                    </>
+                                )}
                             </div>
                         ))}
                     </div>

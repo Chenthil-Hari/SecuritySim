@@ -158,20 +158,20 @@ router.get('/leaderboard', async (req, res) => {
         const teams = await Team.find()
             .sort({ totalScore: -1 })
             .limit(100)
-            .select('name totalScore members createdAt')
-            .populate('members', 'username level'); // just minimal data for members
+            .populate('members', 'username level score profilePhoto');
 
-        // Calculate actual scores to ensure leaderboard is accurate at query time
-        const hydratedTeams = teams.map(team => {
-            const actualScore = team.members.reduce((sum, member) => sum + (member.score || 0), 0);
-            return {
-                id: team._id,
-                name: team.name,
-                totalScore: actualScore,
-                memberCount: team.members.length,
-                createdAt: team.createdAt
-            };
-        }).sort((a, b) => b.totalScore - a.totalScore); // Rely on calculated score
+        const hydratedTeams = teams.map((team, index) => ({
+            rank: index + 1,
+            id: team._id,
+            name: team.name,
+            totalScore: team.totalScore,
+            memberCount: team.members.length,
+            members: team.members.slice(0, 3).map(m => ({
+                username: m.username,
+                profilePhoto: m.profilePhoto
+            })),
+            createdAt: team.createdAt
+        }));
 
         res.json(hydratedTeams);
     } catch (error) {
