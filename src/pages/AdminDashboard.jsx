@@ -1483,6 +1483,246 @@ export default function AdminDashboard() {
             )}
         </div>
     );
+    const renderVitals = () => {
+        return (
+            <div className="admin-vitals animate-fade-in">
+                <div className="vitals-grid">
+                    <VitalsCard title="Database Core" icon={Database} pulse={true}>
+                        <div className="metric-row">
+                            <span>Data Footprint</span>
+                            <strong>{vitals?.database.dataSize || '...'}</strong>
+                        </div>
+                        <div className="metric-row">
+                            <span>Physical Storage</span>
+                            <strong>{vitals?.database.storageSize || '...'}</strong>
+                        </div>
+                        <div className="metric-row">
+                            <span>Index Volume</span>
+                            <strong>{vitals?.database.indexSize || '...'}</strong>
+                        </div>
+                        <div className="metric-row">
+                            <span>Live Collections</span>
+                            <strong>{vitals?.database.collections || '0'}</strong>
+                        </div>
+                    </VitalsCard>
+
+                    <VitalsCard title="Connection Cluster" icon={Server}>
+                        <div className="metric-row">
+                            <span>Active Links</span>
+                            <div className="connection-counter">
+                                <div className="pulse-indicator"></div>
+                                <strong>{vitals?.server.connections.current || '0'}</strong>
+                            </div>
+                        </div>
+                        <div className="metric-row">
+                            <span>Available Capacity</span>
+                            <strong>{vitals?.server.connections.available || '0'}</strong>
+                        </div>
+                        <progress className="connection-bar" value={vitals?.server.connections.current} max={(vitals?.server.connections.current || 0) + (vitals?.server.connections.available || 0)}></progress>
+                    </VitalsCard>
+
+                    <VitalsCard title="System Performance" icon={Activity}>
+                        <div className="metric-row">
+                            <span>HQ Node Uptime</span>
+                            <strong>{vitals?.server.uptime || '...'}</strong>
+                        </div>
+                        <div className="metric-row">
+                            <span>Resident Memory</span>
+                            <strong>{vitals?.server.mem.resident || '...'}</strong>
+                        </div>
+                        <div className="metric-row">
+                            <span>Virtual Memory</span>
+                            <strong>{vitals?.server.mem.virtual || '...'}</strong>
+                        </div>
+                        <div className="metric-row">
+                            <span>Kernel Version</span>
+                            <strong style={{ fontSize: '0.75rem', opacity: 0.6 }}>{vitals?.server.version || '...'}</strong>
+                        </div>
+                    </VitalsCard>
+
+                    <div className="vitals-card maintenance-card">
+                        <div className="vitals-header">
+                            <RefreshCw size={18} className={syncing ? 'spin' : ''} />
+                            <h3>Data Integrity</h3>
+                        </div>
+                        <p>Re-evaluate all agent XP/Levels and rebuild team standings from individual member dossiers.</p>
+                        <button 
+                            className={`sync-btn ${syncing ? 'syncing' : ''}`} 
+                            onClick={handleRecalculateScores}
+                            disabled={syncing}
+                        >
+                            {syncing ? 'Synchronizing Dossiers...' : 'Initiate Global Score Sync'}
+                        </button>
+                        {syncing && <div className="sync-progress-bar"></div>}
+                    </div>
+                </div>
+
+                <div className="audit-section">
+                    <div className="section-header">
+                        <h4>Internal Audit (Last 10 Entries)</h4>
+                        <button className="text-btn" onClick={() => fetchLogs()}>Refresh Logs</button>
+                    </div>
+                    <div className="vitals-log-list">
+                        {logs.slice(0, 10).map(log => (
+                            <div key={log._id} className="vitals-log-entry">
+                                <span className="log-badge">{log.action}</span>
+                                <span className="log-msg">{log.details}</span>
+                                <span className="log-ts">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <div className="admin-dashboard-page">
+            <aside className="admin-sidebar">
+                <div className="sidebar-brand">
+                    <Shield size={24} className="text-primary" />
+                    <span>HQ ADMIN</span>
+                </div>
+
+                <nav className="sidebar-nav">
+                    <button className={`nav-item ${activeTab === 'moderation' ? 'active' : ''}`} onClick={() => setActiveTab('moderation')}>
+                        <Clock size={18} /> Moderation Queue
+                    </button>
+                    <button className={`nav-item ${activeTab === 'evidence' ? 'active' : ''}`} onClick={() => setActiveTab('evidence')}>
+                        <Eye size={18} /> Evidence Locker
+                    </button>
+                    <button className={`nav-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
+                        <Shield size={18} /> User Directory
+                    </button>
+                    <button className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>
+                        <BarChart2 size={18} /> Analytics
+                    </button>
+                    <button className={`nav-item ${activeTab === 'operations' ? 'active' : ''}`} onClick={() => setActiveTab('operations')}>
+                        <Zap size={18} /> Global Operations
+                    </button>
+                    <button className={`nav-item ${activeTab === 'vitals' ? 'active' : ''}`} onClick={() => setActiveTab('vitals')}>
+                        <Activity size={18} /> System Health
+                    </button>
+                </nav>
+
+                <div className="sidebar-footer">
+                    <div className="user-info">
+                        <div className="user-avatar">{user.username[0]}</div>
+                        <div className="user-details">
+                            <span className="username">{user.username}</span>
+                            <span className="role">Administrator</span>
+                        </div>
+                    </div>
+                    <button className="logout-btn" onClick={logout}>
+                        <LogOut size={16} /> Logout
+                    </button>
+                </div>
+            </aside>
+
+            <main className="admin-main">
+                {renderHeader()}
+                <div className="admin-content">
+                    {loading ? (
+                        <div className="loading-state">
+                            <div className="spinner"></div>
+                            <p>Loading intel...</p>
+                        </div>
+                    ) : (
+                        <>
+                            {activeTab === 'moderation' && renderModeration()}
+                            {activeTab === 'evidence' && renderEvidenceLocker()}
+                            {activeTab === 'users' && renderUsers()}
+                             {activeTab === 'analytics' && renderAnalytics()}
+                            {activeTab === 'operations' && renderOperations()}
+                            {activeTab === 'vitals' && renderVitals()}
+                        </>
+                    )}
+                </div>
+            </main>
+
+            {activeScenario && (
+                <div className="review-overlay" onClick={() => setActiveScenario(null)}>
+                    <div className="review-modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>Review: {activeScenario.title}</h2>
+                            <button className="close-btn" onClick={() => setActiveScenario(null)}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="review-section author-info-section">
+                                <h3>Author Details</h3>
+                                <div className="author-card">
+                                    <div className="author-avatar">
+                                        {activeScenario.authorId?.profilePhoto ? (
+                                            <img src={activeScenario.authorId.profilePhoto} alt="" />
+                                        ) : (
+                                            <span>{activeScenario.authorId?.username?.[0] || '?'}</span>
+                                        )}
+                                    </div>
+                                    <div className="author-text">
+                                        <strong>{activeScenario.authorId?.username || 'Unknown User'}</strong>
+                                        <span className="author-email">{activeScenario.authorId?.email || 'No email provided'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="review-section">
+                                <h3>Visual Content</h3>
+                                <pre className="content-preview">
+                                    {JSON.stringify(activeScenario.content?.visualData, null, 2)}
+                                </pre>
+                            </div>
+                            <div className="review-section">
+                                <h3>Decision Path</h3>
+                                <div className="options-preview">
+                                    {activeScenario.content?.options.map((opt, i) => (
+                                        <div key={i} className={`opt-preview ${opt.isCorrect ? 'correct' : 'mistake'}`}>
+                                            <strong>{opt.isCorrect ? 'Correct:' : 'Trap:'}</strong> {opt.text}
+                                            <p className="feedback">{opt.feedback}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="review-section">
+                                <h3>Educational Summary</h3>
+                                <p className="explanation">{activeScenario.content?.educationalExplanation}</p>
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn-reject" onClick={() => handleModerate(activeScenario._id, 'rejected')}>Reject Scenario</button>
+                            <button className="btn-approve" onClick={() => handleModerate(activeScenario._id, 'approved')}>Approve Scenario</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {banModal.isOpen && (
+                <div className="review-overlay" onClick={() => setBanModal({ ...banModal, isOpen: false })}>
+                    <div className="review-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '450px' }}>
+                        <div className="modal-header">
+                            <h2>Restrict Agent Access</h2>
+                            <button className="close-btn" onClick={() => setBanModal({ ...banModal, isOpen: false })}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            <p style={{ color: '#8b949e', marginBottom: '1.5rem' }}>
+                                You are about to permanently suspend <strong>{banModal.username}</strong> from the platform. This action will block all future login attempts.
+                            </p>
+                            <div className="form-group">
+                                <label style={{ color: '#e06c75', fontWeight: '600' }}>Reason for Suspension</label>
+                                <textarea
+                                    placeholder="e.g., Conduct unbecoming of an agent; Data tampering detected."
+                                    value={banModal.reason}
+                                    onChange={e => setBanModal({ ...banModal, reason: e.target.value })}
+                                    style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #e06c75', height: '100px' }}
+                                />
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn-view" onClick={() => setBanModal({ ...banModal, isOpen: false })}>Cancel</button>
+                            <button className="btn-reject" onClick={handleBan}>Apply Suspension</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
 
 const VitalsCard = ({ title, icon: Icon, children, pulse }) => (
@@ -1496,96 +1736,3 @@ const VitalsCard = ({ title, icon: Icon, children, pulse }) => (
         </div>
     </div>
 );
-
-function renderVitals() {
-    return (
-        <div className="admin-vitals animate-fade-in">
-            <div className="vitals-grid">
-                <VitalsCard title="Database Core" icon={Database} pulse={true}>
-                    <div className="metric-row">
-                        <span>Data Footprint</span>
-                        <strong>{vitals?.database.dataSize || '...'}</strong>
-                    </div>
-                    <div className="metric-row">
-                        <span>Physical Storage</span>
-                        <strong>{vitals?.database.storageSize || '...'}</strong>
-                    </div>
-                    <div className="metric-row">
-                        <span>Index Volume</span>
-                        <strong>{vitals?.database.indexSize || '...'}</strong>
-                    </div>
-                    <div className="metric-row">
-                        <span>Live Collections</span>
-                        <strong>{vitals?.database.collections || '0'}</strong>
-                    </div>
-                </VitalsCard>
-
-                <VitalsCard title="Connection Cluster" icon={Server}>
-                    <div className="metric-row">
-                        <span>Active Links</span>
-                        <div className="connection-counter">
-                            <div className="pulse-indicator"></div>
-                            <strong>{vitals?.server.connections.current || '0'}</strong>
-                        </div>
-                    </div>
-                    <div className="metric-row">
-                        <span>Available Capacity</span>
-                        <strong>{vitals?.server.connections.available || '0'}</strong>
-                    </div>
-                    <progress className="connection-bar" value={vitals?.server.connections.current} max={vitals?.server.connections.current + vitals?.server.connections.available}></progress>
-                </VitalsCard>
-
-                <VitalsCard title="System Performance" icon={Activity}>
-                    <div className="metric-row">
-                        <span>HQ Node Uptime</span>
-                        <strong>{vitals?.server.uptime || '...'}</strong>
-                    </div>
-                    <div className="metric-row">
-                        <span>Resident Memory</span>
-                        <strong>{vitals?.server.mem.resident || '...'}</strong>
-                    </div>
-                    <div className="metric-row">
-                        <span>Virtual Memory</span>
-                        <strong>{vitals?.server.mem.virtual || '...'}</strong>
-                    </div>
-                    <div className="metric-row">
-                        <span>Kernel Version</span>
-                        <strong style={{ fontSize: '0.75rem', opacity: 0.6 }}>{vitals?.server.version || '...'}</strong>
-                    </div>
-                </VitalsCard>
-
-                <div className="vitals-card maintenance-card">
-                    <div className="vitals-header">
-                        <RefreshCw size={18} className={syncing ? 'spin' : ''} />
-                        <h3>Data Integrity</h3>
-                    </div>
-                    <p>Re-evaluate all agent XP/Levels and rebuild team standings from individual member dossiers.</p>
-                    <button 
-                        className={`sync-btn ${syncing ? 'syncing' : ''}`} 
-                        onClick={handleRecalculateScores}
-                        disabled={syncing}
-                    >
-                        {syncing ? 'Synchronizing Dossiers...' : 'Initiate Global Score Sync'}
-                    </button>
-                    {syncing && <div className="sync-progress-bar"></div>}
-                </div>
-            </div>
-
-            <div className="audit-section">
-                <div className="section-header">
-                    <h4>Internal Audit (Last 10 Entries)</h4>
-                    <button className="text-btn" onClick={() => fetchLogs()}>Refresh Logs</button>
-                </div>
-                <div className="vitals-log-list">
-                    {logs.slice(0, 10).map(log => (
-                        <div key={log._id} className="vitals-log-entry">
-                            <span className="log-badge">{log.action}</span>
-                            <span className="log-msg">{log.details}</span>
-                            <span className="log-ts">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-}
