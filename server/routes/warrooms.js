@@ -44,7 +44,10 @@ router.post('/', authenticateToken, async (req, res) => {
             }
         }
 
-        res.status(201).json(warRoom);
+        const populatedWarRoom = await WarRoom.findById(warRoom._id)
+            .populate('activeParticipants', 'username profilePhoto');
+
+        res.status(201).json(populatedWarRoom);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -54,6 +57,7 @@ router.post('/', authenticateToken, async (req, res) => {
 router.get('/:id', authenticateToken, async (req, res) => {
     try {
         const warRoom = await WarRoom.findById(req.params.id)
+            .populate('teamId')
             .populate('activeParticipants', 'username profilePhoto');
         
         if (!warRoom) return res.status(404).json({ message: 'War room not found' });
@@ -100,6 +104,40 @@ router.patch('/:id/advance', authenticateToken, async (req, res) => {
             { new: true }
         );
         res.json(warRoom);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Close war room (Owner/PI only)
+router.patch('/:id/close', authenticateToken, async (req, res) => {
+    try {
+        const warRoom = await WarRoom.findById(req.params.id);
+        if (!warRoom) return res.status(404).json({ message: 'War room not found' });
+
+        const team = await Team.findById(warRoom.teamId);
+        if (!team) return res.status(404).json({ message: 'Team not found' });
+
+        const isOwner = team.ownerId.toString() === req.user.id.toString();
+        const userRole = team.memberRoles.find(r => r.userId.toString() === req.user.id.toString())?.role;
+        const isPI = userRole === 'Principal Investigator';
+
+        if (!isOwner && !isPI) {
+            return res.status(403).json({ message: 'Only Team Owner or Principal Investigators can terminate operations.' });
+        }
+
+        warRoom.status = 'completed';
+        warRoom.completedAt = new Date();
+        warRoom.activeParticipants = [];
+        await warRoom.save();
+
+        // Get IO instance to broadcast termination
+        const io = req.app.get('io');
+        if (io) {
+            io.to(warRoom._id.toString()).emit('session_terminated');
+        }
+
+        res.json({ message: 'Operations terminated successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

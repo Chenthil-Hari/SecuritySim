@@ -142,12 +142,12 @@ io.on('connection', (socket) => {
 
     socket.on('update_evidence', (data) => {
         // data: { roomId, evidence }
-        socket.to(data.roomId).emit('evidence_updated', data.evidence);
+        io.to(data.roomId).emit('evidence_updated', data.evidence);
     });
 
     socket.on('advance_scenario', (data) => {
         // data: { roomId, nextNodeId, historyItem }
-        socket.to(data.roomId).emit('scenario_advanced', data);
+        io.to(data.roomId).emit('scenario_advanced', data);
     });
 
     socket.on('identify', (userId) => {

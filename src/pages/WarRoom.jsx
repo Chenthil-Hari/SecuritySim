@@ -87,6 +87,10 @@ export default function WarRoom() {
             }
         });
 
+        newSocket.on('session_terminated', () => {
+            navigate('/teams');
+        });
+
         return () => {
             newSocket.emit('leave_warroom', { roomId, userId: user.id });
             newSocket.close();
@@ -140,16 +144,16 @@ export default function WarRoom() {
                 })
             });
 
-            if (res.ok) {
-                socket.emit('identify', user.id);
-                socket.emit('advance_scenario', {
-                    roomId,
-                    nextNodeId: option.nextNodeId,
-                    historyItem
-                });
-                setCurrentNodeId(option.nextNodeId);
-                setHistory(prev => [...prev, historyItem]);
-            }
+                if (res.ok) {
+                    socket.emit('identify', user.id);
+                    socket.emit('advance_scenario', {
+                        roomId,
+                        nextNodeId: option.nextNodeId,
+                        historyItem
+                    });
+                    setCurrentNodeId(option.nextNodeId);
+                    setHistory(prev => [...prev, historyItem]);
+                }
         } catch (err) {
             console.error("Failed to advance scenario:", err);
         }
@@ -203,10 +207,42 @@ export default function WarRoom() {
         socket.emit('update_evidence', { roomId, evidence: updatedEvidence });
     };
 
+    const handleEndMission = async () => {
+        if (!window.confirm("Terminate all active operations? This will disconnect the entire team.")) return;
+        
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/warrooms/${roomId}/close`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (res.ok) {
+                navigate('/teams');
+            } else {
+                const data = await res.json();
+                alert(data.message || "Failed to terminate operations.");
+            }
+        } catch (err) {
+            console.error("Error terminating mission:", err);
+        }
+    };
+
     if (!warRoomData || !scenario) return <div className="loading-screen">Decrypting War Room Access...</div>;
 
     const currentNode = scenario.nodes[currentNodeId];
     const isFinished = currentNode?.options?.length === 0;
+
+    // Standardize IDs for access checks
+    const currentUserId = user?.id || user?._id;
+    const teamOwnerId = warRoomData?.teamId?.ownerId || warRoomData?.teamId?.owner;
+    
+    const isTeamOwner = currentUserId && teamOwnerId && currentUserId.toString() === teamOwnerId.toString();
+    const isPI = warRoomData?.teamId?.memberRoles?.some(r => 
+        r.userId.toString() === currentUserId.toString() && r.role === 'Principal Investigator'
+    );
 
     return (
         <div className="warroom-layout">
@@ -229,6 +265,12 @@ export default function WarRoom() {
                             ))
                         )}
                     </div>
+                    {/* Only show End Mission to Launcher/PI */}
+                    {(isTeamOwner || isPI) && (
+                        <button className="btn-exit end-mission-btn" onClick={handleEndMission}>
+                            <Zap size={14} /> End Mission
+                        </button>
+                    )}
                     <button className="btn-exit" onClick={() => navigate('/teams')}>Exit Session</button>
                 </div>
             </header>
@@ -332,7 +374,7 @@ export default function WarRoom() {
                         <div className="section-header"><MessageSquare size={16} /> Team Comms</div>
                         <div className="chat-log">
                             {messages.map((msg, i) => (
-                                <div key={i} className={`chat-line ${user && msg.senderId === user.id ? 'own' : ''}`}>
+                                <div key={i} className={`chat-line ${user && (msg.senderId === user.id || msg.senderId === user._id) ? 'own' : ''}`}>
                                     <span className="sender">{msg.senderName || 'Unknown'}</span>
                                     <p className="text">{msg.text}</p>
                                 </div>

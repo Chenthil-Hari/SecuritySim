@@ -41,6 +41,7 @@
     font-family: 'Orbitron', sans-serif;
     background: linear-gradient(90deg, #fff, var(--primary));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -176,7 +177,10 @@
 }
 
 .console-entry {
-    line-height: 1.4;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    display: block;
+    word-break: break-all;
     animation: scanline 0.1s steps(10) infinite;
 }
 
