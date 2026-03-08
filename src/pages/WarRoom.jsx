@@ -66,7 +66,7 @@ export default function WarRoom() {
         };
 
         fetchState();
-        newSocket.emit('join_warroom', roomId);
+        newSocket.emit('join_warroom', { roomId, userId: user.id });
 
         newSocket.on('receive_message', (msg) => {
             setMessages(prev => [...prev, msg]);
@@ -87,8 +87,11 @@ export default function WarRoom() {
             }
         });
 
-        return () => newSocket.close();
-    }, [roomId]);
+        return () => {
+            newSocket.emit('leave_warroom', { roomId, userId: user.id });
+            newSocket.close();
+        };
+    }, [roomId, user?.id]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -104,10 +107,9 @@ export default function WarRoom() {
 
         const msgData = {
             roomId,
-            senderId: user._id,
+            senderId: user.id,
             senderName: user.username,
-            text: input.trim(),
-            timestamp: new Date()
+            text: input.trim()
         };
 
         socket.emit('send_message', msgData);
@@ -219,9 +221,13 @@ export default function WarRoom() {
                 <div className="header-right">
                     <div className="participants-list">
                         <Users size={16} />
-                        {warRoomData.activeParticipants?.map(p => (
-                            p && <span key={p._id || Math.random()} className="user-tag">{p.username || 'Agent'}</span>
-                        ))}
+                        {participants.length > 0 ? participants.map(p => (
+                            <span key={p._id} className="user-tag">{p.username}</span>
+                        )) : (
+                            warRoomData.activeParticipants?.map(p => (
+                                p && <span key={p._id || Math.random()} className="user-tag">{p.username || 'Agent'}</span>
+                            ))
+                        )}
                     </div>
                     <button className="btn-exit" onClick={() => navigate('/teams')}>Exit Session</button>
                 </div>

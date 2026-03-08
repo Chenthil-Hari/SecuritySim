@@ -127,7 +127,14 @@ router.get('/my-team', authMiddleware, async (req, res) => {
 
         if (roleUpdated) await team.save();
 
-        res.json(team);
+        // Check for an active war room for this team
+        const WarRoom = (await import('../models/WarRoom.js')).default;
+        const activeWarRoom = await WarRoom.findOne({ teamId: team._id, status: 'active' });
+
+        const teamData = team.toObject();
+        teamData.activeWarRoomId = activeWarRoom ? activeWarRoom._id : null;
+
+        res.json(teamData);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching team data', error: error.message });
     }

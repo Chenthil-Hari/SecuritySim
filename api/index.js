@@ -92,14 +92,52 @@ io.on('connection', (socket) => {
     
     // Check maintenance for sockets if needed, but primarily we'll handle at the route level
 
-    socket.on('join_warroom', (roomId) => {
+    socket.on('join_warroom', async ({ roomId, userId }) => {
         socket.join(roomId);
-        console.log(`User ${socket.id} joined room ${roomId}`);
+        console.log(`User ${userId} joined room ${roomId}`);
+        
+        // Add user to active participants in DB if not already there
+        const WarRoom = (await import('../server/models/WarRoom.js')).default;
+        const warRoom = await WarRoom.findById(roomId).populate('activeParticipants', 'username profilePhoto');
+        if (warRoom && !warRoom.activeParticipants.some(p => p._id.toString() === userId)) {
+            warRoom.activeParticipants.push(userId);
+            await warRoom.save();
+            const updatedWarRoom = await WarRoom.findById(roomId).populate('activeParticipants', 'username profilePhoto');
+            io.to(roomId).emit('participants_updated', updatedWarRoom.activeParticipants);
+        } else if (warRoom) {
+            io.to(roomId).emit('participants_updated', warRoom.activeParticipants);
+        }
     });
 
-    socket.on('send_message', (data) => {
+    socket.on('send_message', async (data) => {
         // data: { roomId, senderId, senderName, text }
-        io.to(data.roomId).emit('receive_message', data);
+        try {
+            const ChatMessage = (await import('../server/models/ChatMessage.js')).default;
+            const newMessage = new ChatMessage({
+                warRoomId: data.roomId,
+                senderId: data.senderId,
+                senderName: data.senderName,
+                text: data.text
+            });
+            await newMessage.save();
+            io.to(data.roomId).emit('receive_message', newMessage);
+        } catch (err) {
+            console.error("Error saving chat message:", err);
+            // Fallback: emit without saving if DB fails
+            io.to(data.roomId).emit('receive_message', { ...data, timestamp: new Date() });
+        }
+    });
+
+    socket.on('leave_warroom', async ({ roomId, userId }) => {
+        socket.leave(roomId);
+        const WarRoom = (await import('../server/models/WarRoom.js')).default;
+        const warRoom = await WarRoom.findById(roomId);
+        if (warRoom) {
+            warRoom.activeParticipants = warRoom.activeParticipants.filter(p => p.toString() !== userId);
+            await warRoom.save();
+            const updatedWarRoom = await WarRoom.findById(roomId).populate('activeParticipants', 'username profilePhoto');
+            io.to(roomId).emit('participants_updated', updatedWarRoom.activeParticipants);
+        }
     });
 
     socket.on('update_evidence', (data) => {

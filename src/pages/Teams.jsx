@@ -293,7 +293,14 @@ export default function Teams() {
                             <h3><Shield size={24} /> Active Operations</h3>
                             <p>Collaborative War Rooms allow your team to analyze threats together in real-time.</p>
                         </div>
-                        {canLaunchWarRoom ? (
+                        {team.activeWarRoomId ? (
+                            <button 
+                                className="btn-primary join-active-btn" 
+                                onClick={() => navigate(`/warroom/${team.activeWarRoomId}`)}
+                            >
+                                <Play size={18} /> Join Active Operations
+                            </button>
+                        ) : canLaunchWarRoom ? (
                             <button 
                                 className="btn-primary" 
                                 onClick={async () => {
@@ -313,8 +320,10 @@ export default function Teams() {
                                             })
                                         });
                                         const data = await res.json();
-                                        if (res.ok) navigate(`/warroom/${data._id}`);
-                                        else alert(data.message || 'Error launching War Room');
+                                        if (res.ok) {
+                                            await fetchMyTeam(); // Refresh to get the new ID
+                                            navigate(`/warroom/${data._id}`);
+                                        } else alert(data.message || 'Error launching War Room');
                                     } catch (err) {
                                         alert('Error launching War Room');
                                     }
