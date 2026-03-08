@@ -41,7 +41,8 @@ router.post('/create', authMiddleware, async (req, res) => {
             name,
             inviteCode: generateInviteCode(),
             ownerId: user._id,
-            members: [user._id]
+            members: [user._id],
+            memberRoles: [{ userId: user._id, role: 'Principal Investigator' }] // Owner starts as Principal Investigator
         });
 
         await newTeam.save();
@@ -76,6 +77,10 @@ router.post('/join', authMiddleware, async (req, res) => {
         }
 
         team.members.push(user._id);
+        
+        // Assign default role for new member
+        team.memberRoles.push({ userId: user._id, role: 'Technical Operative' });
+        
         await team.save();
 
         user.teamId = team._id;
@@ -106,6 +111,21 @@ router.get('/my-team', authMiddleware, async (req, res) => {
             team.totalScore = totalScore;
             await team.save();
         }
+
+        // Standardize roles: Ensure all members have a role entry
+        let roleUpdated = false;
+        team.members.forEach(member => {
+            const hasRole = team.memberRoles.find(r => r.userId.toString() === member._id.toString());
+            if (!hasRole) {
+                team.memberRoles.push({ 
+                    userId: member._id, 
+                    role: member._id.toString() === team.ownerId.toString() ? 'Principal Investigator' : 'Technical Operative' 
+                });
+                roleUpdated = true;
+            }
+        });
+
+        if (roleUpdated) await team.save();
 
         res.json(team);
     } catch (error) {
@@ -148,6 +168,36 @@ router.post('/leave', authMiddleware, async (req, res) => {
         res.json({ message: 'Left team successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error leaving team', error: error.message });
+    }
+});
+
+// POST /api/teams/promote
+router.post('/promote', authMiddleware, async (req, res) => {
+    try {
+        const { targetUserId, newRole } = req.body;
+        const validRoles = ['Principal Investigator', 'Security Researcher', 'Threat Analyst', 'Technical Operative'];
+
+        if (!validRoles.includes(newRole)) {
+            return res.status(400).json({ message: 'Invalid role selection.' });
+        }
+
+        const team = await Team.findOne({ ownerId: req.userId });
+        if (!team) {
+            return res.status(403).json({ message: 'Only the team owner can promote members.' });
+        }
+
+        // Find the member's role entry
+        const roleEntry = team.memberRoles.find(r => r.userId.toString() === targetUserId.toString());
+        if (roleEntry) {
+            roleEntry.role = newRole;
+        } else {
+            team.memberRoles.push({ userId: targetUserId, role: newRole });
+        }
+
+        await team.save();
+        res.json({ message: `Successfully promoted member to ${newRole}`, team });
+    } catch (error) {
+        res.status(500).json({ message: 'Error promoting member', error: error.message });
     }
 });
 

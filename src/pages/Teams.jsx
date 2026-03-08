@@ -293,11 +293,58 @@ export default function Teams() {
                                         )}
                                     </div>
                                     <div className="member-details">
-                                        <h4>{member.username} {member._id === team.ownerId && <span className="owner-badge">Owner</span>}</h4>
+                                        <div className="member-name-row">
+                                            <h4>{member.username}</h4>
+                                            {team.memberRoles?.find(r => r.userId.toString() === member._id.toString())?.role && (
+                                                <span className={`role-badge ${(team.memberRoles.find(r => r.userId.toString() === member._id.toString()).role).toLowerCase().replace(/\s+/g, '-')}`}>
+                                                    {team.memberRoles.find(r => r.userId.toString() === member._id.toString()).role}
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="member-stats">
                                             <span>Level {member.level}</span>
                                             <span>Score: {member.score.toLocaleString()}</span>
                                         </div>
+                                        
+                                        {/* Promotion Controls for Owner */}
+                                        {user.id === team.ownerId && member._id !== user.id && (
+                                            <div className="promotion-controls">
+                                                <select 
+                                                    onChange={async (e) => {
+                                                        const newRole = e.target.value;
+                                                        if (!newRole) return;
+                                                        try {
+                                                            const token = localStorage.getItem('token');
+                                                            const res = await fetch(buildApiUrl('/api/teams/promote'), {
+                                                                method: 'POST',
+                                                                headers: {
+                                                                    'Content-Type': 'application/json',
+                                                                    'Authorization': `Bearer ${token}`
+                                                                },
+                                                                body: JSON.stringify({ 
+                                                                    targetUserId: member._id, 
+                                                                    newRole 
+                                                                })
+                                                            });
+                                                            if (res.ok) await fetchMyTeam();
+                                                            else {
+                                                                const data = await res.json();
+                                                                alert(data.message || "Promotion failed");
+                                                            }
+                                                        } catch (err) {
+                                                            alert("Error promoting member");
+                                                        }
+                                                    }}
+                                                    value={team.memberRoles?.find(r => r.userId.toString() === member._id.toString())?.role || "Technical Operative"}
+                                                    className="promote-select"
+                                                >
+                                                    <option value="Principal Investigator">Principal Investigator</option>
+                                                    <option value="Security Researcher">Security Researcher</option>
+                                                    <option value="Threat Analyst">Threat Analyst</option>
+                                                    <option value="Technical Operative">Technical Operative</option>
+                                                </select>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}

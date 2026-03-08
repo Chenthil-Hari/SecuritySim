@@ -24,6 +24,14 @@ const teamSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }],
+    memberRoles: [{
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        role: { 
+            type: String, 
+            enum: ['Principal Investigator', 'Security Researcher', 'Threat Analyst', 'Technical Operative'],
+            default: 'Technical Operative'
+        }
+    }],
     totalScore: {
         type: Number,
         default: 0
