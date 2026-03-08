@@ -1,5 +1,6 @@
 import express from 'express';
 import WarRoom from '../models/WarRoom.js';
+import Team from '../models/Team.js';
 import ChatMessage from '../models/ChatMessage.js';
 import { authenticateToken } from '../middleware/auth.js';
 
@@ -14,6 +15,18 @@ router.post('/', authenticateToken, async (req, res) => {
         let warRoom = await WarRoom.findOne({ teamId, scenarioId, status: 'active' });
 
         if (!warRoom) {
+            // AUTH CHECK: Only Owner or Principal Investigator can launch (create) a new war room
+            const team = await Team.findById(teamId);
+            if (!team) return res.status(404).json({ message: 'Team not found' });
+
+            const isOwner = team.ownerId.toString() === req.user.id.toString();
+            const userRole = team.memberRoles.find(r => r.userId.toString() === req.user.id.toString())?.role;
+            const isPI = userRole === 'Principal Investigator';
+
+            if (!isOwner && !isPI) {
+                return res.status(403).json({ message: 'Only Team Owner or Principal Investigators can launch new operations.' });
+            }
+
             warRoom = new WarRoom({
                 name,
                 teamId,

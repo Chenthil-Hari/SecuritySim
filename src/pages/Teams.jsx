@@ -132,6 +132,11 @@ export default function Teams() {
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const canLaunchWarRoom = user && team && (
+        user.id === team.ownerId || 
+        team.memberRoles?.some(r => r.userId.toString() === user.id.toString() && r.role === 'Principal Investigator')
+    );
+
     const handleRoleChange = async (targetUserId, newRole) => {
         try {
             const token = localStorage.getItem('token');
@@ -286,35 +291,42 @@ export default function Teams() {
                     <div className="team-warroom-prompt">
                         <div className="prompt-content">
                             <h3><Shield size={24} /> Active Operations</h3>
-                            <p>Launch a collaborative War Room to analyze threats with your teammates in real-time.</p>
+                            <p>Collaborative War Rooms allow your team to analyze threats together in real-time.</p>
                         </div>
-                        <button 
-                            className="btn-primary" 
-                            onClick={async () => {
-                                try {
-                                    const token = localStorage.getItem('token');
-                                    const res = await fetch('/api/warrooms', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'Authorization': `Bearer ${token}`
-                                        },
-                                        body: JSON.stringify({
-                                            name: `${team.name} Ops`,
-                                            teamId: team._id,
-                                            scenarioId: 'scen-01', // Example default
-                                            scenarioType: 'core'
-                                        })
-                                    });
-                                    const data = await res.json();
-                                    if (res.ok) navigate(`/warroom/${data._id}`);
-                                } catch (err) {
-                                    alert('Error launching War Room');
-                                }
-                            }}
-                        >
-                            <Play size={18} /> Launch War Room
-                        </button>
+                        {canLaunchWarRoom ? (
+                            <button 
+                                className="btn-primary" 
+                                onClick={async () => {
+                                    try {
+                                        const token = localStorage.getItem('token');
+                                        const res = await fetch('/api/warrooms', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': `Bearer ${token}`
+                                            },
+                                            body: JSON.stringify({
+                                                name: `${team.name} Ops`,
+                                                teamId: team._id,
+                                                scenarioId: 'scen-01', // Example default
+                                                scenarioType: 'core'
+                                            })
+                                        });
+                                        const data = await res.json();
+                                        if (res.ok) navigate(`/warroom/${data._id}`);
+                                        else alert(data.message || 'Error launching War Room');
+                                    } catch (err) {
+                                        alert('Error launching War Room');
+                                    }
+                                }}
+                            >
+                                <Play size={18} /> Launch War Room
+                            </button>
+                        ) : (
+                            <div className="restricted-message">
+                                <span>Waiting for Owner or Principal Investigator to initiate operations.</span>
+                            </div>
+                        )}
                     </div>
 
                     <div className="team-invite-code-card">
