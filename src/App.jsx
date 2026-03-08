@@ -116,8 +116,15 @@ function AppContent() {
   // Handle Maintenance Redirect
   const isAdmin = user?.role === 'admin';
   const isAdminRoute = location.pathname.startsWith('/admin');
+  
   if (maintenance.enabled && !isAdmin && !isAdminRoute) {
     return <Maintenance expectedReturn={maintenance.expectedReturn} />;
+  }
+
+  // Handle Verification Redirect
+  const isAuthRoute = ['/login', '/signup', '/forgot-password', '/reset-password', '/verify-email'].some(path => location.pathname.startsWith(path));
+  if (isLoggedIn && !user?.isVerified && !isAdmin && !isAuthRoute) {
+    return <VerifyEmail />;
   }
 
   return (
