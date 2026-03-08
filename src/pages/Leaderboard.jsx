@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Trophy, Shield, Zap, Medal, Crown, Star, Globe, MapPin, Lock, ArrowLeft } from 'lucide-react';
+import { Trophy, Shield, Zap, Medal, Crown, Star, Globe, MapPin, Lock, ArrowLeft, Users } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { buildApiUrl } from '../utils/api';
 import { getRank } from '../utils/ranks';
