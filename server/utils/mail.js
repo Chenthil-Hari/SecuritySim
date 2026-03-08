@@ -15,7 +15,12 @@ const transporter = nodemailer.createTransport({
     // For Vercel/Serverless, we typically want to disable pooling to ensure
     // connections are cleared after the function execution
     pool: false,
-    timeout: 10000 // 10s timeout
+    timeout: 30000, // 30s timeout for stability
+    tls: {
+        rejectUnauthorized: false // Helps with serverless cert issues
+    },
+    debug: true,
+    logger: true
 });
 
 console.log(`📡 Mail System Initialized: ${process.env.EMAIL_HOST || 'smtp.titan.email'}:${process.env.EMAIL_PORT || 465} (User: ${process.env.EMAIL_USER || 'info@hari07.tech'})`);

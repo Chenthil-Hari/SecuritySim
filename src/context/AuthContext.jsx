@@ -16,8 +16,8 @@ export const AuthProvider = ({ children }) => {
                 const parsedUser = JSON.parse(storedUser);
                 // Standardize ID field for backwards compatibility without logout
                 if (parsedUser._id && !parsedUser.id) parsedUser.id = parsedUser._id;
-                // Legacy users (pre-OTP) should be considered verified by default
-                if (parsedUser.isVerified === undefined) parsedUser.isVerified = true;
+                // Legacy users (pre-OTP) should be considered UNVERIFIED by default to enforce the new policy
+                if (parsedUser.isVerified === undefined) parsedUser.isVerified = false;
                 setUser(parsedUser);
             }
         } catch (error) {

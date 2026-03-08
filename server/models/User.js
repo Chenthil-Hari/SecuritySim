@@ -143,7 +143,7 @@ const userSchema = new mongoose.Schema({
     resetPasswordExpires: Date,
     isVerified: {
         type: Boolean,
-        default: true
+        default: false
     },
     verificationOTP: String,
     verificationOTPExpires: Date

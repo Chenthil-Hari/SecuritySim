@@ -172,7 +172,7 @@ router.post('/login', async (req, res) => {
                 country: user.country,
                 role: user.role || 'user',
                 isFrozen: user.isFrozen || false,
-                isVerified: user.isVerified ?? true
+                isVerified: user.isVerified ?? false
             }
         });
     } catch (error) {
