@@ -123,7 +123,7 @@ function AppContent() {
 
   // Handle Verification Redirect
   const isAuthRoute = ['/login', '/signup', '/forgot-password', '/reset-password', '/verify-email'].some(path => location.pathname.startsWith(path));
-  if (isLoggedIn && !user?.isVerified && !isAdmin && !isAuthRoute) {
+  if (isLoggedIn && user?.isVerified === false && !isAdmin && !isAuthRoute) {
     return <VerifyEmail />;
   }
 
