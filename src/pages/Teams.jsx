@@ -26,7 +26,7 @@ export default function Teams() {
     }, [user?.teamId]);
 
     const fetchMyTeam = async () => {
-        if (!user || (!user.teamId && !team)) {
+        if (!user) {
             setLoading(false);
             return;
         }
