@@ -1,10 +1,12 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import User from '../models/User.js';
 import { getMaintenanceStatus } from '../middleware/auth.js';
 import NewsItem from '../models/NewsItem.js';
 import SystemSetting from '../models/SystemSetting.js';
+import { sendEmail, emailTemplates } from '../utils/mail.js';
 
 const router = express.Router();
 
@@ -63,13 +65,23 @@ router.post('/signup', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
         const newUser = new User({
             username,
             email,
             password: hashedPassword,
-            country: country || 'Global'
+            country: country || 'Global',
+            verificationOTP: otp,
+            verificationOTPExpires: otpExpiry,
+            isVerified: false
         });
         await newUser.save();
+
+        // Send OTP Email
+        await sendEmail(email, 'SecuritySim Verification Sequence', emailTemplates.otp(otp));
 
         const token = jwt.sign(
             { userId: newUser._id, username: newUser.username, role: newUser.role || 'user' },
@@ -78,7 +90,7 @@ router.post('/signup', async (req, res) => {
         );
 
         res.status(201).json({
-            message: 'User created successfully',
+            message: 'User created successfully. Verification required.',
             token,
             user: {
                 id: newUser._id,
@@ -86,7 +98,8 @@ router.post('/signup', async (req, res) => {
                 email: newUser.email,
                 country: newUser.country,
                 role: newUser.role || 'user',
-                isFrozen: newUser.isFrozen || false
+                isFrozen: newUser.isFrozen || false,
+                isVerified: false
             }
         });
     } catch (error) {
@@ -151,7 +164,8 @@ router.post('/login', async (req, res) => {
                 email: user.email,
                 country: user.country,
                 role: user.role || 'user',
-                isFrozen: user.isFrozen || false
+                isFrozen: user.isFrozen || false,
+                isVerified: user.isVerified
             }
         });
     } catch (error) {
@@ -201,16 +215,96 @@ router.post('/admin-login', async (req, res) => {
     }
 });
 
-// Temporary Admin Promotion (Delete in production)
-router.post('/make-admin', async (req, res) => {
+// --- Email Verification Endpoints ---
+
+// POST /api/auth/verify-email
+router.post('/verify-email', async (req, res) => {
     try {
-        const { email, secret } = req.body;
-        if (secret !== 'admin_secret_123') return res.status(403).json({ message: 'Invalid secret' });
+        const { email, otp } = req.body;
+        const user = await User.findOne({ email });
 
-        const user = await User.findOneAndUpdate({ email }, { role: 'admin' }, { new: true });
         if (!user) return res.status(404).json({ message: 'User not found' });
+        if (user.isVerified) return res.status(400).json({ message: 'Email already verified' });
 
-        res.json({ message: 'User promoted to admin successfully', user: { username: user.username, role: user.role } });
+        if (user.verificationOTP !== otp || user.verificationOTPExpires < Date.now()) {
+            return res.status(400).json({ message: 'Invalid or expired OTP code' });
+        }
+
+        user.isVerified = true;
+        user.verificationOTP = undefined;
+        user.verificationOTPExpires = undefined;
+        await user.save();
+
+        res.json({ message: 'Identity verified. Access granted.', isVerified: true });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// POST /api/auth/resend-otp
+router.post('/resend-otp', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        if (user.isVerified) return res.status(400).json({ message: 'Email already verified' });
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        user.verificationOTP = otp;
+        user.verificationOTPExpires = new Date(Date.now() + 15 * 60 * 1000);
+        await user.save();
+
+        await sendEmail(email, 'SecuritySim Verification Sequence (New Code)', emailTemplates.otp(otp));
+        res.json({ message: 'New verification code deployed to your inbox' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// --- Password Reset Endpoints ---
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            // For security, don't reveal if user exists
+            return res.json({ message: 'If an account exists, a recovery link has been sent.' });
+        }
+
+        const token = crypto.randomBytes(32).toString('hex');
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+        await user.save();
+
+        await sendEmail(email, 'SecuritySim Password Recovery Protocol', emailTemplates.passwordReset(token));
+        res.json({ message: 'Recovery link deployed to your inbox' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// POST /api/auth/reset-password
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { token, password } = req.body;
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) return res.status(400).json({ message: 'Recovery link invalid or expired' });
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        res.json({ message: 'Credentials updated. Security protocol restored.' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

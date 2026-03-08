@@ -60,7 +60,7 @@ const Signup = () => {
         setIsLoading(true);
         const result = await signup(username, email, password, country);
         if (result.success) {
-            navigate('/dashboard');
+            navigate('/verify-email');
         } else {
             setError(result.error || 'Failed to create account');
             setIsLoading(false);

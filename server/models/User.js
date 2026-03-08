@@ -137,7 +137,16 @@ const userSchema = new mongoose.Schema({
     lastSeen: {
         type: Date,
         default: Date.now
-    }
+    },
+    // Password Reset & Email Verification
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+    verificationOTP: String,
+    verificationOTPExpires: Date
 });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);

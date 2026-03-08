@@ -63,6 +63,9 @@ const Login = () => {
                             <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
                         </div>
                     </div>
+                    <div className="forgot-password-link">
+                        <Link to="/forgot-password">Forgot Access Credentials?</Link>
+                    </div>
                     <button type="submit" className="auth-submit" disabled={isLoading}>
                         {isLoading ? <div className="spinner"></div> : 'Initialize Login Sequence'}
                     </button>

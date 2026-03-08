@@ -187,6 +187,26 @@
     animation: rotate 0.8s linear infinite;
 }
 
+.forgot-password-link {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -10px;
+    margin-bottom: 20px;
+}
+
+.forgot-password-link a {
+    font-size: 0.8rem;
+    color: #8b949e;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.forgot-password-link a:hover {
+    color: var(--primary);
+}
+
+/* Sidebar */
+
 .auth-footer {
     margin-top: 2rem;
     text-align: center;

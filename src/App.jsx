@@ -28,6 +28,9 @@ import InteractiveScenarios from './pages/InteractiveScenarios';
 import PvPLobby from './pages/PvPLobby';
 import DuelRoom from './pages/DuelRoom';
 import Maintenance from './pages/Maintenance';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import VerifyEmail from './pages/VerifyEmail';
 import './App.css';
 import { buildApiUrl } from './utils/api';
 
@@ -139,6 +142,10 @@ function AppContent() {
           <Route path="/multiplayer/pvp" element={<PvPLobby />} />
           <Route path="/duel/:matchId" element={<DuelRoom />} />
           <Route path="/warroom/:id" element={<WarRoom />} />
+          {/* Authentication & Security */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
