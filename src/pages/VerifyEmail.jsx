@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Shield, Key, ArrowLeft, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { buildApiUrl } from '../utils/api';
 import './Login.css';
 
 const VerifyEmail = () => {
-    const { user, login } = useAuth();
+    const { user, updateUser } = useAuth();
     const [otp, setOtp] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [resending, setResending] = useState(false);
@@ -44,11 +44,9 @@ const VerifyEmail = () => {
             
             if (res.ok) {
                 setMessage(data.message);
-                // Update local user state if possible or just refresh
+                updateUser({ isVerified: true });
                 setTimeout(() => {
-                    // Force a re-login or state update here
-                    // For now we just go to dashboard, the interceptors should handle it
-                    window.location.href = '/dashboard';
+                    navigate('/dashboard');
                 }, 2000);
             } else {
                 setError(data.message || 'Verification failed');
