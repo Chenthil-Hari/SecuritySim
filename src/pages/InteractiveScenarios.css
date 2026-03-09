@@ -399,13 +399,13 @@
   gap: 1.5rem;
 }
 
-.form-group {
+.scenario-form .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.form-group label {
+.scenario-form .form-group label {
   color: #00ff88;
   font-size: 0.9rem;
   font-weight: 600;
@@ -413,9 +413,9 @@
   letter-spacing: 1px;
 }
 
-.form-group input, 
-.form-group select, 
-.form-group textarea {
+.scenario-form .form-group input, 
+.scenario-form .form-group select, 
+.scenario-form .form-group textarea {
   background: rgba(0,0,0,0.3);
   border: 1px solid rgba(255,255,255,0.1);
   padding: 0.8rem;
@@ -425,9 +425,9 @@
   transition: border-color 0.3s ease;
 }
 
-.form-group input:focus, 
-.form-group select:focus, 
-.form-group textarea:focus {
+.scenario-form .form-group input:focus, 
+.scenario-form .form-group select:focus, 
+.scenario-form .form-group textarea:focus {
   border-color: #00ff88;
   outline: none;
 }
