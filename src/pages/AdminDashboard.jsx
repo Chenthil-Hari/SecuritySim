@@ -1195,7 +1195,28 @@ export default function AdminDashboard() {
                         <div className="modal-header"><h2>Review: {activeScenario.title}</h2><button className="close-btn" onClick={() => setActiveScenario(null)}>&times;</button></div>
                         <div className="modal-body">
                             <div className="author-card"><div className="author-avatar">{activeScenario.authorId?.username?.[0] || '?'}</div><strong>{activeScenario.authorId?.username || 'Unknown'}</strong></div>
-                            <div className="review-section"><h3>Educational Summary</h3><p className="explanation">{activeScenario.content?.educationalExplanation}</p></div>
+                            <div className="review-section">
+                                <h3>Incident Overview</h3>
+                                <p className="description">{activeScenario.description}</p>
+                            </div>
+                            <div className="review-section">
+                                <h3>Threat Content</h3>
+                                <div className="threat-body" style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '4px', borderLeft: '3px solid #00f0ff', marginBottom: '1rem' }}>
+                                    {activeScenario.content?.visualData?.body}
+                                </div>
+                            </div>
+                            <div className="review-section">
+                                <h3>User Options</h3>
+                                <div className="options-review" style={{ display: 'grid', gap: '0.5rem' }}>
+                                    {activeScenario.content?.options?.map((opt, i) => (
+                                        <div key={i} className={`opt-item ${opt.isCorrect ? 'correct' : 'incorrect'}`} style={{ padding: '0.5rem', background: opt.isCorrect ? 'rgba(0, 255, 136, 0.1)' : 'rgba(255, 71, 87, 0.1)', borderRadius: '4px', border: `1px solid ${opt.isCorrect ? '#00ff88' : '#ff4757'}` }}>
+                                            <strong>{opt.isCorrect ? 'CORRECT: ' : 'TRAP: '}</strong> {opt.text}
+                                            <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '4px' }}>Feedback: {opt.feedback}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="review-section"><h3>Educational Guidance</h3><p className="explanation">{activeScenario.content?.educationalExplanation}</p></div>
                         </div>
                         <div className="modal-footer">
                             <button className="btn-reject" onClick={() => handleModerate(activeScenario._id, 'rejected')}>Reject</button>

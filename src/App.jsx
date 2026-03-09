@@ -33,6 +33,7 @@ import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
 import './App.css';
 import { buildApiUrl } from './utils/api';
+import UgcScenarioPlayer from './pages/UgcScenarioPlayer';
 
 import { useAuth } from './context/AuthContext';
 import { useGame } from './context/GameContext';
@@ -146,6 +147,7 @@ function AppContent() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/forensics" element={<ForensicsGame />} />
           <Route path="/interactive-scenarios" element={<InteractiveScenarios />} />
+          <Route path="/scenario/:id" element={<UgcScenarioPlayer />} />
           <Route path="/multiplayer/pvp" element={<PvPLobby />} />
           <Route path="/duel/:matchId" element={<DuelRoom />} />
           <Route path="/warroom/:id" element={<WarRoom />} />

@@ -1150,5 +1150,189 @@ export const interactiveScenarios = [
         explanation: "Obfuscating or encrypting parameters does not fix authorization logic flaws. It just slows attackers down temporarily. You must fix the underlying authorization check."
       }
     }
+  },
+  {
+    id: "beginner_phishing_01",
+    title: "The Suspicious Link",
+    description: "You receive an email that looks like it's from your bank. What do you do?",
+    difficulty: "Beginner",
+    type: "Phishing",
+    maxScore: 50,
+    nodes: {
+      "start": {
+        text: "You get an email saying 'Urgent: Your account is locked! Click here to verify your identity: http://secure-bank-login.xyz'. What is your first reaction?",
+        options: [
+          { text: "Click the link immediately to unlock my account.", nextNodeId: "click_link", points: 0 },
+          { text: "Check the sender's email address and hover over the link to see where it really goes.", nextNodeId: "check_details", points: 25 },
+          { text: "Delete the email and call my bank's official number from their website.", nextNodeId: "delete_email", points: 25 }
+        ]
+      },
+      "click_link": {
+        text: "You clicked the link. It takes you to a page that looks exactly like your bank, asking for your username and password. Do you enter them?",
+        options: [
+          { text: "Yes, I need to unlock my account.", nextNodeId: "enter_creds", points: 0 },
+          { text: "Wait, the web address looks strange (secure-bank-login.xyz). I'll close the tab.", nextNodeId: "close_tab", points: 25 }
+        ]
+      },
+      "check_details": {
+        text: "You notice the sender is 'support@random-mail.com' and the link points to a strange website. What do you do now?",
+        options: [
+          { text: "Report the email as phishing and delete it.", nextNodeId: "end_success", points: 25 }
+        ]
+      },
+      "delete_email": {
+        text: "Great choice! Your bank confirms your account is fine and thanks you for being cautious.",
+        options: [
+          { text: "Finish Scenario", nextNodeId: "end_success", points: 25 }
+        ]
+      },
+      "enter_creds": {
+        text: "Oh no! You just gave your bank login to a hacker. They can now access your money.",
+        options: [
+          { text: "Finish Scenario", nextNodeId: "end_fail", points: 0 }
+        ]
+      },
+      "close_tab": {
+        text: "Smart move. You avoided a trap. Always check the website address (URL) before typing passwords.",
+        options: [
+          { text: "Finish Scenario", nextNodeId: "end_success", points: 25 }
+        ]
+      },
+      "end_success": {
+        text: "Congratulations! You successfully identified and avoided a phishing attack.",
+        options: [],
+        score: 50,
+        isSuccess: true,
+        explanation: "Phishing emails often use 'urgent' language to make you panic and click without thinking. Always check the sender's address and the actual destination of links."
+      },
+      "end_fail": {
+        text: "Scenario Over. You fell for the phishing trap.",
+        options: [],
+        score: 0,
+        isSuccess: false,
+        explanation: "Never enter your passwords on a site you reached via an email link. Navigate to the official website yourself or use their app."
+      }
+    }
+  },
+  {
+    id: "beginner_vishing_01",
+    title: "The Unknown Caller",
+    description: "Someone calls you claiming to be from 'Tech Support'.",
+    difficulty: "Beginner",
+    type: "Vishing",
+    maxScore: 50,
+    nodes: {
+      "start": {
+        text: "Your phone rings. A person says, 'Hello, I'm from Microsoft Support. We've detected a virus on your computer. I need to remote in to fix it.' What do you do?",
+        options: [
+          { text: "Follow their instructions to get the virus removed.", nextNodeId: "follow_caller", points: 0 },
+          { text: "Ask them for their employee ID and why they are calling me personally.", nextNodeId: "ask_questions", points: 10 },
+          { text: "Hang up immediately. Microsoft doesn't call people like this.", nextNodeId: "hang_up", points: 25 }
+        ]
+      },
+      "follow_caller": {
+        text: "They ask you to download a program called 'AnyDesk'. Do you do it?",
+        options: [
+          { text: "Yes, I want my computer fixed.", nextNodeId: "download_tool", points: 0 },
+          { text: "No, this feels wrong. I'll hang up.", nextNodeId: "hang_up", points: 25 }
+        ]
+      },
+      "ask_questions": {
+        text: "They get aggressive and say your computer will crash in 5 minutes if you don't help. What now?",
+        options: [
+          { text: "Panic and do what they say.", nextNodeId: "follow_caller", points: 0 },
+          { text: "Realize this is a classic scam tactic. Hang up.", nextNodeId: "hang_up", points: 40 }
+        ]
+      },
+      "download_tool": {
+        text: "Once they have access, they lock your computer and demand $500 to unlock it.",
+        options: [
+          { text: "Finish Scenario", nextNodeId: "end_fail", points: 0 }
+        ]
+      },
+      "hang_up": {
+        text: "You hung up and stayed safe. Good job!",
+        options: [
+          { text: "Finish Scenario", nextNodeId: "end_success", points: 25 }
+        ]
+      },
+      "end_success": {
+        text: "Success! You avoided a 'Tech Support' scam.",
+        options: [],
+        score: 50,
+        isSuccess: true,
+        explanation: "Scammers use 'Vishing' (voice phishing) to trick you. Legitimate tech companies will never call you out of the blue to tell you about a virus."
+      },
+      "end_fail": {
+        text: "Scenario Over. You gave a stranger control of your computer.",
+        options: [],
+        score: 0,
+        isSuccess: false,
+        explanation: "Never give remote access to your computer to someone who calls you. They can steal your files and lock your system."
+      }
+    }
+  },
+  {
+    id: "beginner_wifi_01",
+    title: "The Public Wi-Fi Trap",
+    description: "You're at a coffee shop and see 'Free_Public_WiFi'.",
+    difficulty: "Beginner",
+    type: "Network Security",
+    maxScore: 50,
+    nodes: {
+      "start": {
+        text: "You need to check your bank balance quickly. You see an open Wi-Fi network called 'Free_Public_WiFi'. Should you join it?",
+        options: [
+          { text: "Yes, it's free and fast!", nextNodeId: "join_wifi", points: 0 },
+          { text: "No, I'll use my phone's cellular data instead.", nextNodeId: "use_data", points: 25 },
+          { text: "I'll join but only use it for reading news, not banking.", nextNodeId: "join_news", points: 15 }
+        ]
+      },
+      "join_wifi": {
+        text: "You are connected! Now you go to your bank's website. A warning pops up saying 'This connection is not private'. Do you proceed?",
+        options: [
+          { text: "Yes, the coffee shop Wi-Fi is probably just a bit old.", nextNodeId: "proceed_anyway", points: 0 },
+          { text: "No way! I'm disconnecting right now.", nextNodeId: "disconnect", points: 25 }
+        ]
+      },
+      "use_data": {
+        text: "Smart choice. Cellular data is much harder for hackers nearby to intercept than open Wi-Fi.",
+        options: [
+          { text: "Finish Scenario", nextNodeId: "end_success", points: 25 }
+        ]
+      },
+      "join_news": {
+        text: "Using public Wi-Fi for non-sensitive things is okay, but it's still better to be cautious. You finish reading and disconnect.",
+        options: [
+          { text: "Finish Scenario", nextNodeId: "end_success", points: 35 }
+        ]
+      },
+      "proceed_anyway": {
+        text: "A hacker sitting in the corner just intercepted your bank login. This is called a 'Man-in-the-Middle' attack.",
+        options: [
+          { text: "Finish Scenario", nextNodeId: "end_fail", points: 0 }
+        ]
+      },
+      "disconnect": {
+        text: "Safe move. That warning meant someone might be trying to watch your traffic.",
+        options: [
+          { text: "Finish Scenario", nextNodeId: "end_success", points: 25 }
+        ]
+      },
+      "end_success": {
+        text: "Well done! You stayed safe on public Wi-Fi.",
+        options: [],
+        score: 50,
+        isSuccess: true,
+        explanation: "Unsecured public Wi-Fi can be easily monitored by hackers. Avoid doing sensitive things like banking or shopping on networks you don't trust."
+      },
+      "end_fail": {
+        text: "Scenario Over. Your data was intercepted.",
+        options: [],
+        score: 0,
+        isSuccess: false,
+        explanation: "Never ignore certificate warnings on your browser, especially on public Wi-Fi. It often means your connection is being tampered with."
+      }
+    }
   }
 ];

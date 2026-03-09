@@ -81,5 +81,26 @@ export const emailTemplates = {
                 <p style="font-size: 12px; color: #8b949e; text-align: center;">Sent from HQ Command Center | SecuritySim 2026</p>
             </div>
         `;
+    },
+    scenarioStatusUpdate: (username, scenarioTitle, status) => {
+        const isApproved = status === 'approved';
+        const color = isApproved ? '#00f0ff' : '#ff4757';
+        const statusText = isApproved ? 'MISSION APPROVED' : 'MISSION REJECTED';
+        const message = isApproved 
+            ? `Your investigative case **"${scenarioTitle}"** has been reviewed and cleared for deployment. It is now live in the Interactive Scenarios catalog.`
+            : `Your submitted case **"${scenarioTitle}"** was reviewed by HQ and unfortunately did not meet our current field requirements.`;
+        
+        return `
+            <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3;">
+                <h2 style="color: ${color}; text-align: center;">${statusText}</h2>
+                <p>Agent ${username},</p>
+                <div style="background: rgba(48, 54, 61, 0.3); border-left: 4px solid ${color}; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0;">${message}</p>
+                </div>
+                ${isApproved ? '<p>Congratulations on contributing to the collective defense of the platform. Your scenario is already helping other agents level up.</p>' : '<p>We encourage you to refine your scenario based on our beginner-friendly guidelines and submit again.</p>'}
+                <hr style="border: 0; border-top: 1px solid #30363d; margin: 20px 0;">
+                <p style="font-size: 12px; color: #8b949e; text-align: center;">Sent from HQ Command Center | SecuritySim 2026</p>
+            </div>
+        `;
     }
 };

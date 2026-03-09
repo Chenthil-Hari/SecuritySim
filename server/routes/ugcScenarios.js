@@ -1,6 +1,7 @@
 import express from 'express';
 import UgcScenario from '../models/UgcScenario.js';
 import { authenticateToken, isAdmin } from '../middleware/auth.js';
+import { sendEmail, emailTemplates } from '../utils/mail.js';
 
 const router = express.Router();
 
@@ -102,6 +103,26 @@ router.patch('/:id/moderate', authenticateToken, isAdmin, async (req, res) => {
         scenario.status = status;
         scenario.published = (status === 'approved');
         await scenario.save();
+
+        // Send email notification to author
+        try {
+            const populatedScenario = await UgcScenario.findById(req.params.id).populate('authorId', 'username email');
+            if (populatedScenario && populatedScenario.authorId && populatedScenario.authorId.email) {
+                const emailHtml = emailTemplates.scenarioStatusUpdate(
+                    populatedScenario.authorId.username,
+                    populatedScenario.title,
+                    status
+                );
+                await sendEmail(
+                    populatedScenario.authorId.email,
+                    `[SecuritySim HQ] Scenario Status: ${status.toUpperCase()}`,
+                    emailHtml
+                );
+            }
+        } catch (emailError) {
+            console.error('Failed to send moderation email:', emailError);
+            // Don't fail the moderation if email fails
+        }
 
         res.json({ message: `Scenario ${status} successfully`, scenario });
     } catch (error) {
