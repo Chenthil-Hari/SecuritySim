@@ -199,3 +199,33 @@
         align-self: flex-start;
     }
 }
+
+/* PWA Install Styles */
+.settings-section.install-section {
+    border-left: 4px solid var(--primary);
+    background: rgba(0, 255, 136, 0.02);
+}
+
+.primary-btn {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #0a0a1a;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.primary-btn:active {
+    transform: translateY(0);
+}

@@ -2,12 +2,15 @@ import { Accessibility, Volume2, Eye, AlertTriangle, Info, RotateCcw, ArrowLeft 
 import { useNavigate } from 'react-router-dom';
 import { useGame, useGameDispatch } from '../context/GameContext';
 import accessibilityIcon from '../assets/accessibility-icon.png';
+import { usePWA } from '../context/PWAContext';
+import { Download } from 'lucide-react';
 import './Settings.css';
 
 export default function Settings() {
     const navigate = useNavigate();
     const { settings } = useGame();
     const dispatch = useGameDispatch();
+    const { isInstallable, installApp } = usePWA();
 
     const updateSetting = (key, value) => {
         dispatch({ type: 'UPDATE_SETTINGS', payload: { [key]: value } });
@@ -67,6 +70,22 @@ export default function Settings() {
                     </label>
                 </div>
             </div>
+
+            {isInstallable && (
+                <div className="settings-section install-section">
+                    <h2><Download size={20} /> App Installation</h2>
+                    <div className="setting-item">
+                        <div className="setting-info">
+                            <div className="setting-label">Install SecuritySim</div>
+                            <div className="setting-desc">Install as a standalone app for better performance and quick access on Desktop or Mobile.</div>
+                        </div>
+                        <button className="primary-btn" onClick={installApp}>
+                            <Download size={14} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />
+                            Install Now
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <div className="settings-section danger-section">
                 <h2><AlertTriangle size={20} /> Danger Zone</h2>

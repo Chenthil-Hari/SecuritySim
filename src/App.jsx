@@ -34,6 +34,7 @@ import VerifyEmail from './pages/VerifyEmail';
 import './App.css';
 import { buildApiUrl } from './utils/api';
 import UgcScenarioPlayer from './pages/UgcScenarioPlayer';
+import { PWAProvider } from './context/PWAContext';
 
 import { useAuth } from './context/AuthContext';
 import { useGame } from './context/GameContext';
@@ -170,9 +171,11 @@ function App() {
     <AuthProvider>
       <SystemStatusProvider>
         <GameProvider>
-          <Router>
-            <AppContent />
-          </Router>
+          <PWAProvider>
+            <Router>
+              <AppContent />
+            </Router>
+          </PWAProvider>
         </GameProvider>
       </SystemStatusProvider>
     </AuthProvider>
