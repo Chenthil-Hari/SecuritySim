@@ -221,7 +221,16 @@
     font-size: 0.9rem;
 }
 
-.primary-btn:hover {
+.primary-btn.disabled {
+    background: var(--border-color);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+    opacity: 0.6;
+}
+
+.primary-btn:hover:not(.disabled) {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px var(--primary-glow);
 }

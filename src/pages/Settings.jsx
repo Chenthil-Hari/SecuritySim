@@ -71,21 +71,27 @@ export default function Settings() {
                 </div>
             </div>
 
-            {isInstallable && (
-                <div className="settings-section install-section">
-                    <h2><Download size={20} /> App Installation</h2>
-                    <div className="setting-item">
-                        <div className="setting-info">
-                            <div className="setting-label">Install SecuritySim</div>
-                            <div className="setting-desc">Install as a standalone app for better performance and quick access on Desktop or Mobile.</div>
+            <div className="settings-section install-section">
+                <h2><Download size={20} /> App Installation</h2>
+                <div className="setting-item">
+                    <div className="setting-info">
+                        <div className="setting-label">Install SecuritySim</div>
+                        <div className="setting-desc">
+                            {isInstallable 
+                                ? "Install as a standalone app for better performance and quick access." 
+                                : "The app is currently not in an 'installable' state. Make sure you are using a PWA-supported browser (Chrome, Edge, Safari) and have interacted with the page."}
                         </div>
-                        <button className="primary-btn" onClick={installApp}>
-                            <Download size={14} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />
-                            Install Now
-                        </button>
                     </div>
+                    <button 
+                        className={`primary-btn ${!isInstallable ? 'disabled' : ''}`} 
+                        onClick={installApp}
+                        disabled={!isInstallable}
+                    >
+                        <Download size={14} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />
+                        {isInstallable ? "Install Now" : "Waiting for Browser..."}
+                    </button>
                 </div>
-            )}
+            </div>
 
             <div className="settings-section danger-section">
                 <h2><AlertTriangle size={20} /> Danger Zone</h2>

@@ -10,6 +10,7 @@ export const PWAProvider = ({ children }) => {
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
+      console.log('beforeinstallprompt event fired');
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
       // Stash the event so it can be triggered later.
@@ -18,9 +19,11 @@ export const PWAProvider = ({ children }) => {
       setIsInstallable(true);
     };
 
+    console.log('Registering beforeinstallprompt listener');
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     return () => {
+      console.log('Unregistering beforeinstallprompt listener');
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
