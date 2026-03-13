@@ -74,6 +74,15 @@
     background: var(--primary-bg);
 }
 
+.nav-case-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    box-shadow: 0 0 5px rgba(0, 255, 136, 0.2);
+}
+
 /* Dropdown Styles */
 .nav-dropdown {
     position: relative;

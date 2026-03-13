@@ -1,5 +1,6 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Zap, Calendar, Users, Swords, Globe, ChevronDown, Gamepad2, Search, Crown } from 'lucide-react';
+import caseImg from '../assets/case.png';
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
 import { useSystemStatus } from '../context/SystemStatusContext';
@@ -70,7 +71,7 @@ export default function Navbar() {
                     <>
                         <li>
                             <NavLink to="/interactive-scenarios" onClick={handleNavClick}>
-                                <Shield size={16} /> Cases
+                                <img src={caseImg} alt="" className="nav-case-icon" /> Cases
                             </NavLink>
                         </li>
                         <li
