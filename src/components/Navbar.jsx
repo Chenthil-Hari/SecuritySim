@@ -7,6 +7,7 @@ import leaderboardImg from '../assets/leaderboard.png';
 import multiplayerImg from '../assets/multiplayer.png';
 import profileImg from '../assets/profile.png';
 import settingsImg from '../assets/settings.png';
+import websiteIcon from '../assets/website-icon.png';
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
 import { useSystemStatus } from '../context/SystemStatusContext';
@@ -52,7 +53,7 @@ export default function Navbar() {
     return (
         <nav className="navbar" role="navigation" aria-label="Main navigation">
             <Link to="/" className="navbar-brand" onClick={playNavSound}>
-                <Shield size={28} />
+                <img src={websiteIcon} alt="" className="navbar-logo-img" />
                 <span>SecuritySim:Cyber Survival</span>
             </Link>
 

@@ -32,9 +32,11 @@
     text-decoration: none;
 }
 
-.navbar-brand svg {
-    color: var(--primary);
-    filter: drop-shadow(0 0 6px var(--primary-glow));
+.navbar-logo-img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px var(--primary-glow));
 }
 
 .navbar-brand span {
