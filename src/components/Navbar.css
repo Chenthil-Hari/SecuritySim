@@ -74,7 +74,7 @@
     background: var(--primary-bg);
 }
 
-.nav-case-icon {
+.nav-icon-img {
     width: 20px;
     height: 20px;
     object-fit: cover;

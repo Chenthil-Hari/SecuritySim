@@ -1,6 +1,12 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { Shield, LayoutDashboard, Crosshair, Award, Settings, Menu, X, LogOut, LogIn, UserPlus, User, Trophy, Zap, Calendar, Users, Swords, Globe, ChevronDown, Gamepad2, Search, Crown } from 'lucide-react';
 import caseImg from '../assets/case.png';
+import dashboardImg from '../assets/dashboard.png';
+import gamesImg from '../assets/games.png';
+import leaderboardImg from '../assets/leaderboard.png';
+import multiplayerImg from '../assets/multiplayer.png';
+import profileImg from '../assets/profile.png';
+import settingsImg from '../assets/settings.png';
 import { useGame } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
 import { useSystemStatus } from '../context/SystemStatusContext';
@@ -64,14 +70,14 @@ export default function Navbar() {
             <ul className={`navbar-links ${menuOpen ? 'open' : ''}`}>
                 <li>
                     <NavLink to="/dashboard" onClick={handleNavClick}>
-                        <LayoutDashboard size={16} /> Dashboard
+                        <img src={dashboardImg} alt="" className="nav-icon-img" /> Dashboard
                     </NavLink>
                 </li>
                 {user && (
                     <>
                         <li>
                             <NavLink to="/interactive-scenarios" onClick={handleNavClick}>
-                                <img src={caseImg} alt="" className="nav-case-icon" /> Cases
+                                <img src={caseImg} alt="" className="nav-icon-img" /> Cases
                             </NavLink>
                         </li>
                         <li
@@ -81,7 +87,7 @@ export default function Navbar() {
                             onClick={(e) => toggleDropdown(e, 'games')}
                         >
                             <button className="dropdown-trigger" type="button">
-                                <Gamepad2 size={16} /> Games <ChevronDown size={14} className={activeDropdown === 'games' ? 'rotate' : ''} />
+                                <img src={gamesImg} alt="" className="nav-icon-img" /> Games <ChevronDown size={14} className={activeDropdown === 'games' ? 'rotate' : ''} />
                             </button>
                             <ul className="dropdown-menu">
                                 <li>
@@ -99,7 +105,7 @@ export default function Navbar() {
                                 onClick={(e) => toggleDropdown(e, 'multiplayer')}
                             >
                                 <button className="dropdown-trigger" type="button">
-                                    <Globe size={16} /> Multiplayer <ChevronDown size={14} className={activeDropdown === 'multiplayer' ? 'rotate' : ''} />
+                                    <img src={multiplayerImg} alt="" className="nav-icon-img" /> Multiplayer <ChevronDown size={14} className={activeDropdown === 'multiplayer' ? 'rotate' : ''} />
                                 </button>
                                 <ul className="dropdown-menu">
                                     {features.teams !== false && (
@@ -128,12 +134,12 @@ export default function Navbar() {
                         )}
                         <li>
                             <NavLink to="/leaderboard" onClick={handleNavClick}>
-                                <Trophy size={16} /> Leaderboard
+                                <img src={leaderboardImg} alt="" className="nav-icon-img" /> Leaderboard
                             </NavLink>
                         </li>
                         <li>
                             <NavLink to="/profile" onClick={handleNavClick}>
-                                <User size={16} /> Profile
+                                <img src={profileImg} alt="" className="nav-icon-img" /> Profile
                             </NavLink>
                         </li>
                         {user.role === 'admin' && (
@@ -147,7 +153,7 @@ export default function Navbar() {
                 )}
                 <li>
                     <NavLink to="/settings" onClick={handleNavClick}>
-                        <Settings size={16} /> Settings
+                        <img src={settingsImg} alt="" className="nav-icon-img" /> Settings
                     </NavLink>
                 </li>
 
