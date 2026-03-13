@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Shield, ChevronRight, PlayCircle, AlertTriangle, CheckCircle2, PlusCircle, Send, Info } from 'lucide-react';
+import caseImg from '../assets/case.png';
 import { interactiveScenarios } from '../data/interactiveScenarios';
 import ScenarioSimulator from '../components/ScenarioSimulator';
 import { useAuth } from '../context/AuthContext';
@@ -101,6 +102,9 @@ export default function InteractiveScenarios() {
   return (
     <div className="scenarios-list-container fade-in">
       <div className="scenarios-header">
+        <div className="case-image-container">
+          <img src={caseImg} alt="Case Illustration" className="case-header-img" />
+        </div>
         <h1><Shield className="header-icon" /> Interactive Cyber Cases</h1>
         <p>Step into the shoes of an Incident Responder. Your choices will determine the outcome of these critical security events.</p>
       </div>
