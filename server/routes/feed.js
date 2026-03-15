@@ -41,14 +41,15 @@ router.get('/', auth, async (req, res) => {
 // Create a new post
 router.post('/post', auth, async (req, res) => {
     try {
-        const { content } = req.body;
+        const { content, media } = req.body;
         if (!content || content.trim().length === 0) {
             return res.status(400).json({ error: 'Post content cannot be empty' });
         }
 
         const newPost = new Post({
             userId: req.user.id,
-            content: content.trim()
+            content: content.trim(),
+            media: media || undefined
         });
 
         await newPost.save();

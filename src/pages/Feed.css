@@ -62,10 +62,63 @@
     border-color: rgba(255,255,255,0.3);
 }
 
-.create-post-footer {
+.create-post-actions-row {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     margin-top: 0.5rem;
+    padding-top: 0.5rem;
+}
+
+.upload-media-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+    transition: background 0.2s;
+}
+
+.upload-media-btn:hover {
+    background: rgba(0, 240, 255, 0.1);
+}
+
+.media-preview-container {
+    position: relative;
+    margin: 10px 0 0 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 400px;
+}
+
+.media-preview-img {
+    width: 100%;
+    display: block;
+    height: auto;
+    max-height: 300px;
+    object-fit: cover;
+}
+
+.remove-media-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }
 
 .post-btn {
@@ -80,8 +133,8 @@
 }
 
 .post-btn:disabled {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.05); /* Very faint background */
+    color: rgba(255, 255, 255, 0.2); /* Very faint text to match screenshot */
     cursor: not-allowed;
 }
 
@@ -174,6 +227,19 @@
     line-height: 1.5;
     word-break: break-word;
     white-space: pre-wrap;
+}
+
+.post-media-container {
+    width: 100%;
+    background: #000;
+    margin-bottom: 12px;
+}
+
+.post-media {
+    width: 100%;
+    display: block;
+    max-height: 400px;
+    object-fit: contain;
 }
 
 .post-stats-summary {

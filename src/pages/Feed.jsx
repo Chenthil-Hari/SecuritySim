@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Shield, MessageCircle, ThumbsUp, Heart, Flag, Send, Trash2, Clock, CheckCircle, XCircle, Globe, Share2, MoreHorizontal } from 'lucide-react';
+import { Shield, MessageCircle, ThumbsUp, Heart, Flag, Send, Trash2, Clock, CheckCircle, XCircle, Globe, Share2, MoreHorizontal, Image as ImageIcon } from 'lucide-react';
+import { useRef } from 'react';
 import { buildApiUrl } from '../utils/api';
 import './Feed.css';
 
@@ -8,8 +9,10 @@ export default function Feed() {
     const { user, token } = useAuth();
     const [posts, setPosts] = useState([]);
     const [newPostContent, setNewPostContent] = useState('');
+    const [mediaPreview, setMediaPreview] = useState(null); // base64 string
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const fileInputRef = useRef(null);
     
     // Reporting state
     const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -40,7 +43,7 @@ export default function Feed() {
 
     const handleCreatePost = async (e) => {
         e.preventDefault();
-        if (!newPostContent.trim()) return;
+        if (!newPostContent.trim() && !mediaPreview) return;
 
         try {
             const res = await fetch(buildApiUrl('/api/feed/post'), {
@@ -49,18 +52,35 @@ export default function Feed() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ content: newPostContent })
+                body: JSON.stringify({ content: newPostContent || ' ', media: mediaPreview })
             });
             const data = await res.json();
             if (res.ok) {
                 setPosts([data, ...posts]);
                 setNewPostContent('');
+                setMediaPreview(null);
             } else {
                 alert(data.error);
             }
         } catch (err) {
             alert('Failed to create post');
         }
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+            alert('File size must be less than 2MB');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setMediaPreview(reader.result);
+        };
+        reader.readAsDataURL(file);
     };
 
     const handleToggleLike = async (postId) => {
@@ -194,8 +214,26 @@ export default function Feed() {
                                 onChange={(e) => setNewPostContent(e.target.value)}
                             />
                         </div>
-                        <div className="create-post-footer">
-                            <button type="submit" disabled={!newPostContent.trim()} className="post-btn">
+                        {mediaPreview && (
+                            <div className="media-preview-container">
+                                <button type="button" className="remove-media-btn" onClick={() => setMediaPreview(null)}>
+                                    <XCircle size={16} />
+                                </button>
+                                <img src={mediaPreview} alt="Preview" className="media-preview-img" />
+                            </div>
+                        )}
+                        <div className="create-post-actions-row">
+                            <input 
+                                type="file" 
+                                accept="image/*" 
+                                ref={fileInputRef} 
+                                style={{ display: 'none' }} 
+                                onChange={handleImageChange}
+                            />
+                            <button type="button" className="upload-media-btn" onClick={() => fileInputRef.current?.click()}>
+                                <ImageIcon size={20} /> Media/Certificate
+                            </button>
+                            <button type="submit" disabled={!newPostContent.trim() && !mediaPreview} className="post-btn">
                                 Broadcast
                             </button>
                         </div>
@@ -304,8 +342,16 @@ function PostCard({ post, user, onLike, onDelete, onComment, onDeleteComment, on
             </div>
             
             <div className="post-content">
-                {post.content}
+                {post.content.trim() !== '' && post.content.trim() !== ' ' && (
+                    <div style={{ marginBottom: post.media ? '12px' : '0' }}>{post.content}</div>
+                )}
             </div>
+
+            {post.media && (
+                <div className="post-media-container">
+                    <img src={post.media} alt="Post attachment" className="post-media" />
+                </div>
+            )}
             
             <div className="post-stats-summary">
                 <div className="stats-left">
