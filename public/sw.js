@@ -1,11 +1,11 @@
 // Minimal Service Worker for PWA installation
-const CACHE_NAME = 'securitysim-v1';
+const CACHE_NAME = 'securitysim-v2';
 const ASSETS = [
   '/',
   '/index.html',
-  '/favicon.png',
-  '/icon-192.png',
-  '/icon-512.png',
+  '/favicon-v2.png',
+  '/icon-192-v2.png',
+  '/icon-512-v2.png',
   '/manifest.json'
 ];
 

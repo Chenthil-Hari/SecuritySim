@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Shield, Mail, Lock, ArrowLeft } from 'lucide-react';
@@ -12,6 +12,13 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
+    const videoRef = useRef(null);
+
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.playbackRate = 0.75;
+        }
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,7 +36,7 @@ const Login = () => {
 
     return (
         <div className="auth-container">
-            <video autoPlay loop muted playsInline className="auth-video-bg">
+            <video ref={videoRef} autoPlay loop muted playsInline className="auth-video-bg">
                 <source src="/background.mp4" type="video/mp4" />
             </video>
             <button className="back-btn auth-back-btn" onClick={() => navigate('/')}>

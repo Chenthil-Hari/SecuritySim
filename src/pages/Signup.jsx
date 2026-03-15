@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Shield, Mail, Lock, User, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
@@ -18,6 +18,13 @@ const Signup = () => {
 
     const { signup } = useAuth();
     const navigate = useNavigate();
+    const videoRef = useRef(null);
+
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.playbackRate = 0.75;
+        }
+    }, []);
 
     const checkUsernameAvailability = useCallback(async (name) => {
         if (name.length < 3) {
@@ -69,7 +76,7 @@ const Signup = () => {
 
     return (
         <div className="auth-container">
-            <video autoPlay loop muted playsInline className="auth-video-bg">
+            <video ref={videoRef} autoPlay loop muted playsInline className="auth-video-bg">
                 <source src="/background.mp4" type="video/mp4" />
             </video>
             <button className="back-btn auth-back-btn" onClick={() => navigate('/')}>
