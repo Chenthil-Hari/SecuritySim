@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Shield, MessageCircle, Heart, Flag, Send, Trash2, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Shield, MessageCircle, ThumbsUp, Heart, Flag, Send, Trash2, Clock, CheckCircle, XCircle, Globe, Share2, MoreHorizontal } from 'lucide-react';
 import { buildApiUrl } from '../utils/api';
 import './Feed.css';
 
@@ -178,25 +178,25 @@ export default function Feed() {
 
     return (
         <div className="feed-page">
-            <div className="feed-header">
-                <Shield className="feed-icon" size={32} />
-                <h1>Intelligence Feed</h1>
-                <p>Global agent dispatches and achievement broadcast</p>
+            <div className="feed-header" style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <Globe size={24} style={{ color: 'var(--primary)', marginRight: '10px' }} />
+                <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Intelligence Feed</h2>
             </div>
 
             <div className="feed-container">
                 <div className="create-post-card">
                     <form onSubmit={handleCreatePost}>
-                        <textarea 
-                            placeholder="Share an achievement or intelligence briefing..."
-                            value={newPostContent}
-                            onChange={(e) => setNewPostContent(e.target.value)}
-                            maxLength={500}
-                        />
+                        <div className="create-post-input-wrapper">
+                            <div className="author-avatar-small">{user?.username?.charAt(0) || 'A'}</div>
+                            <textarea 
+                                placeholder="Start a post or share an achievement..."
+                                value={newPostContent}
+                                onChange={(e) => setNewPostContent(e.target.value)}
+                            />
+                        </div>
                         <div className="create-post-footer">
-                            <span className="char-count">{newPostContent.length}/500</span>
                             <button type="submit" disabled={!newPostContent.trim()} className="post-btn">
-                                <Send size={16} /> Broadcast
+                                Broadcast
                             </button>
                         </div>
                     </form>
@@ -286,18 +286,19 @@ function PostCard({ post, user, onLike, onDelete, onComment, onDeleteComment, on
             <div className="post-header">
                 <div className="post-author">
                     <div className="author-avatar">{post.userId?.username?.charAt(0) || 'A'}</div>
-                    <div>
+                    <div className="author-info-block">
                         <span className="author-name">{post.userId?.username || 'Unknown Agent'}</span>
+                        <span className="author-title">Cyber Security Agent</span>
                         <div className="post-meta">
-                            <Clock size={12} /> {formatDate(post.createdAt)}
+                            {formatDate(post.createdAt)} • <Globe size={10} style={{ marginLeft: '4px' }}/>
                         </div>
                     </div>
                 </div>
                 <div className="post-actions-menu">
                     {isAuthor ? (
-                        <button onClick={onDelete} className="action-btn delete" title="Delete Post"><Trash2 size={16}/></button>
+                        <button onClick={onDelete} className="action-btn delete" title="Delete Post"><Trash2 size={18}/></button>
                     ) : (
-                        <button onClick={() => onReport(post._id, 'Post')} className="action-btn report" title="Report Post"><Flag size={16}/></button>
+                        <button className="action-btn more-options" title="More"><MoreHorizontal size={18}/></button>
                     )}
                 </div>
             </div>
@@ -306,27 +307,49 @@ function PostCard({ post, user, onLike, onDelete, onComment, onDeleteComment, on
                 {post.content}
             </div>
             
-            <div className="post-stats">
-                <button className={`stat-btn ${isLiked ? 'liked' : ''}`} onClick={onLike}>
-                    <Heart size={18} fill={isLiked ? "currentColor" : "none"} /> 
-                    <span>{likes.length}</span>
+            <div className="post-stats-summary">
+                <div className="stats-left">
+                    {likes.length > 0 && (
+                        <span className="likes-summary"><ThumbsUp size={12} fill="var(--primary)" color="var(--primary)" /> {likes.length}</span>
+                    )}
+                </div>
+                <div className="stats-right">
+                    {post.comments?.length > 0 && (
+                        <span>{post.comments.length} comments</span>
+                    )}
+                </div>
+            </div>
+
+            <div className="post-actions-row">
+                <button className={`linkedin-action-btn ${isLiked ? 'liked' : ''}`} onClick={onLike}>
+                    <ThumbsUp size={20} fill={isLiked ? "currentColor" : "none"} /> 
+                    <span>Like</span>
                 </button>
-                <button className="stat-btn" onClick={() => setShowComments(!showComments)}>
-                    <MessageCircle size={18} />
-                    <span>{post.comments?.length || 0}</span>
+                <button className="linkedin-action-btn" onClick={() => setShowComments(!showComments)}>
+                    <MessageCircle size={20} />
+                    <span>Comment</span>
+                </button>
+                <button className="linkedin-action-btn" onClick={() => onReport(post._id, 'Post')}>
+                    <Flag size={20} />
+                    <span>Report</span>
+                </button>
+                <button className="linkedin-action-btn share-btn">
+                    <Share2 size={20} />
+                    <span>Share</span>
                 </button>
             </div>
 
             {showComments && (
                 <div className="comments-section">
                     <form className="add-comment" onSubmit={submitComment}>
+                        <div className="author-avatar-small outline">{user?.username?.charAt(0) || 'A'}</div>
                         <input 
                             type="text" 
-                            placeholder="Add a transmission..." 
+                            placeholder="Add a comment..." 
                             value={commentText}
                             onChange={(e) => setCommentText(e.target.value)}
                         />
-                        <button type="submit" disabled={!commentText.trim()}><Send size={16}/></button>
+                        {commentText.trim() && <button type="submit" className="linkedin-post-comment-btn">Post</button>}
                     </form>
 
                     <div className="comments-list">
@@ -334,17 +357,21 @@ function PostCard({ post, user, onLike, onDelete, onComment, onDeleteComment, on
                             const isCommentAuthor = user && comment.userId && comment.userId._id === user.id;
                             
                             return (
-                                <div key={comment._id} className="comment">
-                                    <div className="comment-content">
-                                        <span className="comment-author">{comment.userId?.username || 'Agent'}:</span>
+                                <div key={comment._id} className="comment-wrapper">
+                                    <div className="author-avatar-small">{comment.userId?.username?.charAt(0) || 'A'}</div>
+                                    <div className="comment-box">
+                                        <div className="comment-header-row">
+                                            <span className="comment-author">{comment.userId?.username || 'Agent'}</span>
+                                            <div className="comment-actions">
+                                                {isCommentAuthor ? (
+                                                    <button onClick={() => onDeleteComment(comment._id)} className="comment-del-btn"><Trash2 size={12}/></button>
+                                                ) : (
+                                                    <button onClick={() => onReport(comment._id, 'Comment')} className="comment-rep-btn" title="Report Comment"><Flag size={12}/></button>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="comment-title-sub">Cyber Security Agent</div>
                                         <span className="comment-text">{comment.content}</span>
-                                    </div>
-                                    <div className="comment-actions">
-                                        {isCommentAuthor ? (
-                                            <button onClick={() => onDeleteComment(comment._id)} className="comment-del-btn"><XCircle size={14}/></button>
-                                        ) : (
-                                            <button onClick={() => onReport(comment._id, 'Comment')} className="comment-rep-btn"><Flag size={14}/></button>
-                                        )}
                                     </div>
                                 </div>
                             );

@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import ScoreRing from '../components/ScoreRing';
 import StatCard from '../components/StatCard';
 import NewsFeed from '../components/NewsFeed';
+import Feed from './Feed';
 import { useSystemStatus } from '../context/SystemStatusContext';
 
 import { getRank } from '../utils/ranks';
@@ -153,6 +154,10 @@ export default function Dashboard() {
                     </div>
                 </div>
             )}
+
+            <div className="dashboard-feed-section" style={{ marginTop: '3rem' }}>
+                <Feed />
+            </div>
 
             {features.forensics !== false && (
                 <div className="forensics-preview">
