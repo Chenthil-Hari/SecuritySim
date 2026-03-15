@@ -32,7 +32,7 @@ export default function Feed() {
             if (res.ok) {
                 setPosts(data.posts);
             } else {
-                setError(data.error);
+                setError(data.error || data.message || 'Error loading feed');
             }
         } catch (err) {
             setError('Failed to load feed');
@@ -60,7 +60,7 @@ export default function Feed() {
                 setNewPostContent('');
                 setMediaPreview(null);
             } else {
-                alert(data.error || 'Failed to broadcast. The payload might be too large or there is a server error.');
+                alert(data.error || data.message || 'Failed to broadcast. The payload might be too large or there is a server error.');
             }
         } catch (err) {
             alert('Failed to create post');

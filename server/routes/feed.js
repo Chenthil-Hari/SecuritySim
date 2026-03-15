@@ -57,8 +57,8 @@ router.post('/post', auth, async (req, res) => {
 
         res.status(201).json(populatedPost);
     } catch (error) {
-        console.error('Error creating post:', error);
-        res.status(500).json({ error: 'Failed to create post' });
+        console.error('Error creating post:', error.message, error.stack);
+        res.status(500).json({ error: 'Failed to create post: ' + error.message });
     }
 });
 
