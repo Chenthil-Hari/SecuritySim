@@ -122,9 +122,9 @@
 }
 
 .post-btn {
-    background: var(--primary-color);
-    color: #000;
-    border: none;
+    background: #111; /* Dark background similar to the input area */
+    color: var(--text-muted); /* Grey out the text initially */
+    border: 1px solid var(--border-color); /* Add a subtle border */
     padding: 6px 16px;
     border-radius: 16px;
     font-weight: 600;
@@ -132,9 +132,18 @@
     transition: all 0.2s;
 }
 
+/* When the button is NOT disabled, color it blue (or primary) like the screenshot text color suggests */
+.post-btn:not(:disabled) {
+    background: transparent;
+    color: #4cd137; /* The bright green/blue color from the screenshot or primary */
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
 .post-btn:disabled {
-    background: rgba(255, 255, 255, 0.05); /* Very faint background */
-    color: rgba(255, 255, 255, 0.2); /* Very faint text to match screenshot */
+    background: transparent; /* Keep it transparent to match the UI */
+    color: rgba(255, 255, 255, 0.2);
+    border-color: transparent;
     cursor: not-allowed;
 }
 

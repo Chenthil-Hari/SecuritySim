@@ -71,14 +71,41 @@ export default function Feed() {
         const file = e.target.files[0];
         if (!file) return;
 
-        if (file.size > 2 * 1024 * 1024) {
-            alert('File size must be less than 2MB');
-            return;
-        }
-
+        // Create a canvas to downscale/compress the image
+        const img = new Image();
         const reader = new FileReader();
-        reader.onloadend = () => {
-            setMediaPreview(reader.result);
+
+        reader.onload = (e) => {
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                // Maximum dimensions
+                const MAX_WIDTH = 1200;
+                const MAX_HEIGHT = 1200;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Compress to WebP or JPEG at 70% quality (drastically reduces base64 size)
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                setMediaPreview(dataUrl);
+            };
         };
         reader.readAsDataURL(file);
     };
