@@ -60,7 +60,7 @@ export default function Feed() {
                 setNewPostContent('');
                 setMediaPreview(null);
             } else {
-                alert(data.error);
+                alert(data.error || 'Failed to broadcast. The payload might be too large or there is a server error.');
             }
         } catch (err) {
             alert('Failed to create post');
