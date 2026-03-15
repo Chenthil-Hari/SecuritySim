@@ -1,11 +1,11 @@
-const express = require('require');
+import express from 'express';
+import Report from '../models/Report.js';
+import Post from '../models/Post.js';
+import Comment from '../models/Comment.js';
+import User from '../models/User.js';
+import { authenticateToken as auth, isAdmin as adminAuth } from '../middleware/auth.js';
+
 const router = express.Router();
-const Report = require('../models/Report');
-const Post = require('../models/Post');
-const Comment = require('../models/Comment');
-const User = require('../models/User');
-const auth = require('../middleware/auth'); // Assuming auth
-const adminAuth = require('../middleware/adminAuth'); // Assuming admin Auth
 
 // User submits a report
 router.post('/report', auth, async (req, res) => {
@@ -116,4 +116,4 @@ router.get('/all-messages', [auth, adminAuth], async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

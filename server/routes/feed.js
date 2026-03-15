@@ -1,9 +1,10 @@
-const express = require('require');
+import express from 'express';
+import Post from '../models/Post.js';
+import Comment from '../models/Comment.js';
+import User from '../models/User.js';
+import { authenticateToken as auth } from '../middleware/auth.js';
+
 const router = express.Router();
-const Post = require('../models/Post');
-const Comment = require('../models/Comment');
-const User = require('../models/User');
-const auth = require('../middleware/auth'); // Assuming you have an auth middleware
 
 // Get all posts (with pagination)
 router.get('/', auth, async (req, res) => {
@@ -159,4 +160,4 @@ router.delete('/comment/:id', auth, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;
