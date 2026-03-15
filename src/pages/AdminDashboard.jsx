@@ -1162,6 +1162,7 @@ export default function AdminDashboard() {
                 <div className="sidebar-brand"><Shield size={24} className="text-primary" /><span>HQ ADMIN</span></div>
                 <nav className="sidebar-nav">
                     <button className={`nav-item ${activeTab === 'moderation' ? 'active' : ''}`} onClick={() => setActiveTab('moderation')}><Clock size={18} /> Moderation Queue</button>
+                    <button className="nav-item" onClick={() => navigate('/admin/feed-moderation')}><Shield size={18} /> Intel Feed Moderation</button>
                     <button className={`nav-item ${activeTab === 'evidence' ? 'active' : ''}`} onClick={() => setActiveTab('evidence')}><Eye size={18} /> Evidence Locker</button>
                     <button className={`nav-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}><Shield size={18} /> User Directory</button>
                     <button className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}><BarChart2 size={18} /> Analytics</button>

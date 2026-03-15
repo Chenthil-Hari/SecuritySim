@@ -77,6 +77,11 @@ export default function Navbar() {
                 {user && (
                     <>
                         <li>
+                            <NavLink to="/feed" onClick={handleNavClick}>
+                                <Globe size={18} className="nav-icon-img" style={{ marginRight: '8px' }}/> Intel Feed
+                            </NavLink>
+                        </li>
+                        <li>
                             <NavLink to="/interactive-scenarios" onClick={handleNavClick}>
                                 <img src={caseImg} alt="" className="nav-icon-img" /> Cases
                             </NavLink>
