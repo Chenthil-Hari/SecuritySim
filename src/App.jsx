@@ -23,7 +23,6 @@ import AdminLogin from './pages/AdminLogin';
 import { io } from 'socket.io-client';
 import GlobalAlert from './components/GlobalAlert';
 import AdminDashboard from './pages/AdminDashboard';
-import AdminModeration from './pages/AdminModeration';
 import TerminalLocked from './pages/TerminalLocked';
 import InteractiveScenarios from './pages/InteractiveScenarios';
 import PvPLobby from './pages/PvPLobby';
@@ -36,7 +35,6 @@ import './App.css';
 import { buildApiUrl } from './utils/api';
 import UgcScenarioPlayer from './pages/UgcScenarioPlayer';
 import { PWAProvider } from './context/PWAContext';
-import Feed from './pages/Feed';
 
 import { useAuth } from './context/AuthContext';
 import { useGame } from './context/GameContext';
@@ -141,7 +139,6 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/feed" element={<Feed />} />
           <Route path="/teams" element={<Teams />} />
           <Route path="/threat-map" element={<ThreatMap />} />
           <Route path="/achievements" element={<Achievements />} />
@@ -162,7 +159,6 @@ function AppContent() {
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/feed-moderation" element={<AdminModeration />} />
         </Routes>
       </main>
       {!isAdminRoute && <ChatWidget isLoggedIn={isLoggedIn} />}

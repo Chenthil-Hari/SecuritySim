@@ -18,8 +18,6 @@ import usersRoutes from '../server/routes/users.js';
 import adminRoutes from '../server/routes/admin.js';
 import pvpRoutes from '../server/routes/pvp.js';
 import eventsRoutes from '../server/routes/events.js';
-import feedRoutes from '../server/routes/feed.js';
-import moderationRoutes from '../server/routes/moderation.js';
 import { maintenanceMiddleware } from '../server/middleware/maintenance.js';
 import SystemSetting from '../server/models/SystemSetting.js';
 import { authenticateToken } from '../server/middleware/auth.js';
@@ -227,8 +225,6 @@ app.use('/api/ugc-scenarios', ugcScenariosRoutes);
 app.use('/api/warrooms', warroomsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/feed', feedRoutes);
-app.use('/api/moderation', moderationRoutes);
 
 // Maintenance Status (Public)
 app.get('/api/maintenance/status', async (req, res) => {
@@ -258,7 +254,6 @@ app.use('/api/warrooms', authenticateToken, maintenanceMiddleware);
 app.use('/api/users', maintenanceMiddleware);
 app.use('/api/pvp', authenticateToken, maintenanceMiddleware);
 app.use('/api/events', maintenanceMiddleware);
-app.use('/api/feed', authenticateToken, maintenanceMiddleware);
 
 // Debug endpoint for sockets
 app.get('/api/debug/sockets', (req, res) => {
