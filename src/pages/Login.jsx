@@ -29,6 +29,9 @@ const Login = () => {
 
     return (
         <div className="auth-container">
+            <video autoPlay loop muted playsInline className="auth-video-bg">
+                <source src="/background.mp4" type="video/mp4" />
+            </video>
             <button className="back-btn auth-back-btn" onClick={() => navigate('/')}>
                 <ArrowLeft size={18} /> Back to Home
             </button>
