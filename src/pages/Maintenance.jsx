@@ -20,9 +20,6 @@ export default function Maintenance({ expectedReturn }) {
 
     return (
         <div className="maintenance-page">
-            <video autoPlay loop muted playsInline className="maintenance-video-bg">
-                <source src="/Maintainance.mp4" type="video/mp4" />
-            </video>
             <div className="maintenance-container">
                 <div className="maintenance-icon">
                     <Shield size={64} className="shield-glow" />
