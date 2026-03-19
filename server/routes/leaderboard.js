@@ -8,7 +8,10 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     try {
         const { country } = req.query;
-        const query = {};
+        const query = { 
+            showInLeaderboard: { $ne: false }, 
+            isBanned: { $ne: true } 
+        };
 
         // If a country is provided, filter the results for that specific country
         if (country) {

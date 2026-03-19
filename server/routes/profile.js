@@ -25,7 +25,11 @@ router.get('/me', authMiddleware, async (req, res) => {
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         // Calculate global rank
-        const rank = await User.countDocuments({ score: { $gt: user.score } }) + 1;
+        const rank = await User.countDocuments({ 
+            score: { $gt: user.score },
+            showInLeaderboard: { $ne: false },
+            isBanned: { $ne: true }
+        }) + 1;
 
         const userData = user.toObject();
         userData.rank = rank;

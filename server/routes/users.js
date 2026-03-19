@@ -80,4 +80,36 @@ router.post('/admin/:id/reset-password', authenticateToken, isAdmin, async (req,
     }
 });
 
+// Toggle showInLeaderboard status (Admin only)
+router.patch('/admin/:id/leaderboard-toggle', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        user.showInLeaderboard = !user.showInLeaderboard;
+        await user.save();
+
+        // Log action if AuditLog is available (optional but good)
+        try {
+            const AuditLog = (await import('../models/AuditLog.js')).default;
+            await AuditLog.create({
+                adminId: req.user.id,
+                adminName: req.user.username,
+                action: 'leaderboard_toggle',
+                details: `${user.showInLeaderboard ? 'Restored' : 'Removed'} ${user.username} ${user.showInLeaderboard ? 'to' : 'from'} leaderboard`,
+                targetId: user._id
+            });
+        } catch (logErr) {
+            console.error("Audit Log Failure:", logErr);
+        }
+
+        res.json({ 
+            message: `User ${user.showInLeaderboard ? 'restored to' : 'removed from'} leaderboard successfully`, 
+            showInLeaderboard: user.showInLeaderboard 
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 export default router;

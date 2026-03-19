@@ -146,7 +146,11 @@ const userSchema = new mongoose.Schema({
         default: false
     },
     verificationOTP: String,
-    verificationOTPExpires: Date
+    verificationOTPExpires: Date,
+    showInLeaderboard: {
+        type: Boolean,
+        default: true
+    }
 });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);

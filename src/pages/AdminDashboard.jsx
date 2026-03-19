@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, CheckCircle, XCircle, Eye, AlertCircle, Clock, Search, LogOut, ExternalLink, Lock, BarChart2, Radio, Star, X, Zap, Download, FileText, Activity, Database, RefreshCw, Server } from 'lucide-react';
+import { Shield, CheckCircle, XCircle, Eye, AlertCircle, Clock, Search, LogOut, ExternalLink, Lock, BarChart2, Radio, Star, X, Zap, Download, FileText, Activity, Database, RefreshCw, Server, Award } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useAuth } from '../context/AuthContext';
@@ -528,6 +528,27 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleToggleLeaderboard = async (userId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl(`/api/users/admin/${userId}/leaderboard-toggle`), {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setUsers(users.map(u => u._id === userId ? { ...u, showInLeaderboard: data.showInLeaderboard } : u));
+                alert(data.message);
+                fetchLogs();
+            } else {
+                const data = await res.json();
+                alert("Operation failed: " + data.message);
+            }
+        } catch (err) {
+            alert("Error toggling leaderboard status: " + err.message);
+        }
+    };
+
     const handleDeleteLog = async (logId) => {
         try {
             const token = localStorage.getItem('token');
@@ -937,15 +958,25 @@ export default function AdminDashboard() {
                                 <td>{u.teamId?.name || <span className="text-muted">No Team</span>}</td>
                                 <td>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'Unknown'}</td>
                                 <td>
-                                    <span className={`status-badge ${u.isBanned ? 'banned' : u.isFrozen ? 'frozen' : 'active'}`}>
-                                        {u.isBanned ? 'BANNED' : u.isFrozen ? 'Terminal Locked' : 'Active'}
-                                    </span>
+                                    <div className="status-container">
+                                        <span className={`status-badge ${u.isBanned ? 'banned' : u.isFrozen ? 'frozen' : 'active'}`}>
+                                            {u.isBanned ? 'BANNED' : u.isFrozen ? 'Terminal Locked' : 'Active'}
+                                        </span>
+                                        {u.showInLeaderboard === false && (
+                                            <span className="status-badge" style={{ background: 'rgba(255, 171, 0, 0.1)', color: '#ffab00', border: '1px solid currentColor', marginLeft: '5px' }}>
+                                                HIDDEN FROM RANK
+                                            </span>
+                                        )}
+                                    </div>
                                 </td>
                                 <td className="actions-cell">
                                     {!u.isVerified && (
                                         <button className="action-btn verify" onClick={() => handleVerifyUser(u._id)} title="Force Verify Identity"><Shield size={16} /></button>
                                     )}
                                     <button className={`action-btn ${u.isFrozen ? 'unfreeze' : 'freeze'}`} onClick={() => handleFreeze(u._id)} title={u.isFrozen ? 'Unfreeze' : 'Freeze'}><AlertCircle size={16} /></button>
+                                    <button className={`action-btn ${u.showInLeaderboard === false ? 'unhide' : 'hide'}`} onClick={() => handleToggleLeaderboard(u._id)} title={u.showInLeaderboard === false ? 'Show in Leaderboard' : 'Hide from Leaderboard'} style={{ color: u.showInLeaderboard === false ? 'var(--text-secondary)' : 'var(--accent)' }}>
+                                        <Award size={16} />
+                                    </button>
                                     <button className={`action-btn ${u.isBanned ? 'unban' : 'ban'}`} onClick={() => u.isBanned ? handleUnban(u._id) : setBanModal({ isOpen: true, userId: u._id, username: u.username, reason: '' })} title={u.isBanned ? 'Lift Ban' : 'Ban User'}><XCircle size={16} /></button>
                                     <button className="action-btn reset" onClick={() => handleResetPassword(u._id)} title="Reset Password"><Lock size={16} /></button>
                                 </td>
