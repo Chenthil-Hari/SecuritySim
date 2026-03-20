@@ -85,14 +85,21 @@ export default function Dashboard() {
     return (
         <motion.div 
             className="dashboard"
-            variants={staggerContainer()}
+            variants={staggerContainer(0.2, 0.2)}
             initial="hidden"
             animate="show"
             data-version="2.1-tactical"
         >
             <motion.div className="dashboard-header" variants={fadeInDown}>
                 <h1>Risk Assessment Dashboard {activeEvents.length > 0 && <span className="live-tag">OPS LIVE</span>}</h1>
-                <p>Tactical Awareness Protocol v2.1 active</p>
+                <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <motion.span 
+                        animate={{ opacity: [0.4, 1, 0.4] }} 
+                        transition={{ repeat: Infinity, duration: 2 }}
+                        style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', display: 'inline-block' }}
+                    />
+                    Tactical Awareness Protocol v2.2 active
+                </p>
             </motion.div>
 
             <AnimatePresence>
