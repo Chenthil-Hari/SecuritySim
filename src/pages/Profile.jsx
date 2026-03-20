@@ -8,6 +8,7 @@ import { getRank } from '../utils/ranks';
 import badges from '../data/badges';
 import Loader from '../components/Loader';
 import customizations from '../data/customizations';
+import { Medal, Crown, Palette, Layout, Sparkles } from 'lucide-react';
 import AgentIDCard from '../components/AgentIDCard';
 import './Profile.css';
 
