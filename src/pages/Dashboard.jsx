@@ -88,10 +88,11 @@ export default function Dashboard() {
             variants={staggerContainer()}
             initial="hidden"
             animate="show"
+            data-version="2.1-tactical"
         >
             <motion.div className="dashboard-header" variants={fadeInDown}>
                 <h1>Risk Assessment Dashboard {activeEvents.length > 0 && <span className="live-tag">OPS LIVE</span>}</h1>
-                <p>Your cybersecurity awareness at a glance</p>
+                <p>Tactical Awareness Protocol v2.1 active</p>
             </motion.div>
 
             <AnimatePresence>

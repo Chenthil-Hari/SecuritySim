@@ -43,6 +43,10 @@ import { useGame } from './context/GameContext';
 function AppContent() {
   const { user, checkFreezeStatus, isLoggedIn } = useAuth();
   
+  useEffect(() => {
+    console.log("[System] SecuritySim Tactical OS V2.1 (Framer Motion) Active");
+  }, []);
+  
   // Heartbeat for persistence (works on Vercel where Sockets might fail)
   useEffect(() => {
     if (!isLoggedIn || !user?.id) return;
