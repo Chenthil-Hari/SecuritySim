@@ -8,7 +8,7 @@ import { getRank } from '../utils/ranks';
 import badges from '../data/badges';
 import Loader from '../components/Loader';
 import customizations from '../data/customizations';
-import { Medal, Crown, Palette, Layout, Sparkles } from 'lucide-react';
+import AgentIDCard from '../components/AgentIDCard';
 import './Profile.css';
 
 const avatarPresets = [
@@ -509,6 +509,17 @@ const Profile = () => {
 
             {activeTab === 'overview' ? (
                 <>
+                    {/* Interactive Agent ID Card */}
+                    <AgentIDCard user={{
+                        username: profileData?.username || user?.username,
+                        profilePhoto: profileData?.profilePhoto,
+                        score: score,
+                        xp: xp,
+                        level: profileData?.level || level,
+                        country: profileData?.country || user?.country,
+                        _id: profileData?._id || user?._id
+                    }} />
+
                     {/* Stats Grid */}
                     <div className="profile-stats-grid">
                         <div className="profile-stat-card stat-score">
