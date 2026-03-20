@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { Trophy, Shield, Zap, Medal, Crown, Star, Globe, MapPin, Lock, ArrowLeft, Users } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -8,6 +9,37 @@ import Loader from '../components/Loader';
 import { getTier } from '../utils/tiers';
 import '../styles/AvatarFrames.css';
 import './Leaderboard.css';
+import { tacticalHover, tacticalTap } from '../utils/animations';
+
+// Inline Variants for robustness on Vercel
+const localStagger = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1,
+            delayChildren: 0.1
+        }
+    }
+};
+
+const localFadeUp = {
+    hidden: { opacity: 0, y: 20 },
+    show: { 
+        opacity: 1, 
+        y: 0, 
+        transition: { type: 'spring', bounce: 0.3, duration: 0.6 } 
+    }
+};
+
+const localRowFade = {
+    hidden: { opacity: 0, x: -20 },
+    show: { 
+        opacity: 1, 
+        x: 0, 
+        transition: { type: 'spring', bounce: 0.2, duration: 0.5 } 
+    }
+};
 
 const Leaderboard = () => {
     const navigate = useNavigate();
@@ -88,13 +120,18 @@ const Leaderboard = () => {
     }
 
     return (
-        <div className="leaderboard-container">
-            <div className="page-top-nav">
+        <motion.div 
+            className="leaderboard-container"
+            initial="hidden"
+            animate="show"
+            variants={localStagger}
+        >
+            <motion.div className="page-top-nav" variants={localFadeUp}>
                 <button className="back-btn" onClick={() => navigate('/dashboard')}>
                     <ArrowLeft size={18} /> Back to Dashboard
                 </button>
-            </div>
-            <div className="leaderboard-header">
+            </motion.div>
+            <motion.div className="leaderboard-header" variants={localFadeUp}>
                 <Trophy size={32} className="leaderboard-icon" />
                 <h1>{tab === 'regional' ? 'Regional Leaderboard' : 'Global Leaderboard'}</h1>
                 <p>Top agents ranked by Cumulative Cyber Score</p>
@@ -125,7 +162,7 @@ const Leaderboard = () => {
                         You have not selected a specific country for Regional rankings. Showing Global results.
                     </div>
                 )}
-            </div>
+            </motion.div>
 
             {error && <div className="leaderboard-error">{error}</div>}
 
@@ -136,7 +173,7 @@ const Leaderboard = () => {
                     <p>Be the first to claim the top spot here!</p>
                 </div>
             ) : (
-                <div className="leaderboard-grid">
+                <motion.div className="leaderboard-grid" variants={localFadeUp}>
                     <div className="leaderboard-header-row">
                         <div className="col-rank">Rank</div>
                         <div className="col-agent">{tab === 'teams' ? 'Defense Team' : 'Agent'}</div>
@@ -151,10 +188,12 @@ const Leaderboard = () => {
                         )}
                     </div>
 
-                    <div className="leaderboard-body">
+                    <motion.div className="leaderboard-body" variants={localStagger}>
                         {leaderboard.map((entry) => (
-                            <div
+                            <motion.div
                                 key={entry.id}
+                                variants={localRowFade}
+                                whileHover={tacticalHover('rgba(0, 240, 255, 0.1)')}
                                 className={`leaderboard-row ${user && (user.id === entry.id || user.teamId === entry.id) ? 'current-user' : ''} ${entry.rank <= 3 ? 'top-3' : ''} ${entry.rank === 1 ? 'rank-1-row' : ''} ${!tab.includes('teams') && entry.customization?.auraEnabled && entry.rank <= 50 ? 'has-aura' : ''}`}
                                 style={!tab.includes('teams') && entry.customization?.auraEnabled && entry.rank <= 50 ? {
                                     '--aura-color': entry.rank === 1 ? '255, 215, 0' : entry.rank <= 10 ? '0, 240, 255' : '124, 77, 255',
@@ -239,12 +278,12 @@ const Leaderboard = () => {
                                         <div className="col-badges">{entry.badgeCount}</div>
                                     </>
                                 )}
-                            </div>
+                            </motion.div>
                         ))}
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             )}
-        </div>
+        </motion.div>
     );
 };
 

@@ -1,8 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Shield, Mail, Lock, ArrowLeft } from 'lucide-react';
+import { Shield, Mail, Mail as MailIcon, Lock, ArrowLeft, User, Globe, MessageSquare } from 'lucide-react';
 import './Login.css';
+
+const localFadeUp = {
+    hidden: { opacity: 0, y: 30 },
+    show: { 
+        opacity: 1, 
+        y: 0, 
+        transition: { type: 'spring', bounce: 0.4, duration: 0.8 } 
+    }
+};
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -42,7 +52,12 @@ const Login = () => {
             <button className="back-btn auth-back-btn" onClick={() => navigate('/')}>
                 <ArrowLeft size={18} /> Back to Home
             </button>
-            <div className="auth-card">
+            <motion.div 
+                className="auth-card"
+                initial="hidden"
+                animate="show"
+                variants={localFadeUp}
+            >
                 <div className="auth-header">
                     <Shield className="auth-logo" size={48} />
                     <h2>Welcome Back</h2>
@@ -83,7 +98,7 @@ const Login = () => {
                 <div className="auth-footer">
                     <p>Don't have clearance? <Link to="/signup">Request Access</Link></p>
                 </div>
-            </div>
+            </motion.div>
             <div className="auth-bg-decorators">
                 <div className="decorator-blob blob-1"></div>
                 <div className="decorator-blob blob-2"></div>

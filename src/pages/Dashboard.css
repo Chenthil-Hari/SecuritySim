@@ -497,29 +497,6 @@
     }
 }
 
-/* Diagnostic Animations */
-.debug-pulse-ring {
-    width: 10px;
-    height: 10px;
-    background: var(--primary);
-    border-radius: 50%;
-    position: relative;
-    box-shadow: 0 0 0 rgba(0, 240, 255, 0.4);
-    animation: debugPulse 2s infinite;
-}
-
-@keyframes debugPulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.7);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(0, 240, 255, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(0, 240, 255, 0);
-    }
-}
-
 @media (max-width: 480px) {
     .dashboard {
         padding: var(--space-md) var(--space-sm);

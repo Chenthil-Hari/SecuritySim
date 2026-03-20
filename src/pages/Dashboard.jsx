@@ -122,10 +122,7 @@ export default function Dashboard() {
         >
             <motion.div className="dashboard-header" variants={localFadeUp}>
                 <h1>Risk Assessment Dashboard {activeEvents.length > 0 && <span className="live-tag">OPS LIVE</span>}</h1>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-secondary)' }}>
-                    <div className="debug-pulse-ring" />
-                    <p>Tactical Awareness Protocol v2.3 active (Enhanced Stagger)</p>
-                </div>
+                <p>Your cybersecurity awareness at a glance</p>
             </motion.div>
 
             <AnimatePresence>
