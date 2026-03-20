@@ -174,3 +174,39 @@
         font-size: 1.2rem;
     }
 }
+
+@media (max-width: 480px) {
+    .contact-page {
+        padding: var(--space-md) var(--space-sm);
+    }
+
+    .contact-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .contact-header p {
+        font-size: 0.9rem;
+    }
+
+    .info-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .info-content p {
+        font-size: 0.95rem;
+    }
+
+    .direct-icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .direct-item {
+        padding: var(--space-lg);
+    }
+
+    .email-link {
+        font-size: 1rem;
+        word-break: break-all;
+    }
+}

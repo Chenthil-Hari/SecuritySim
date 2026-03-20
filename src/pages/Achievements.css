@@ -123,3 +123,43 @@
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     }
 }
+
+@media (max-width: 480px) {
+    .achievements-page {
+        padding: var(--space-md) var(--space-sm);
+    }
+
+    .achievements-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .achievements-summary {
+        padding: var(--space-md);
+        gap: var(--space-md);
+    }
+
+    .achievements-progress-info h2 {
+        font-size: 1rem;
+    }
+
+    .level-section h2 {
+        font-size: 1.1rem;
+    }
+
+    .level-bar-container {
+        padding: var(--space-md);
+    }
+
+    .level-bar-current {
+        font-size: 1.1rem;
+    }
+
+    .badges-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: var(--space-sm);
+    }
+
+    .badges-section h2 {
+        font-size: 1.1rem;
+    }
+}

@@ -986,3 +986,100 @@
         height: auto;
     }
 }
+
+@media (max-width: 480px) {
+    .forensics-page {
+        padding: var(--space-md) var(--space-sm);
+    }
+
+    .forensics-hero h1 {
+        font-size: 1.4rem;
+    }
+
+    .forensics-hero p {
+        font-size: 0.85rem;
+    }
+
+    .forensics-hero-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .mission-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mission-card {
+        padding: var(--space-lg);
+    }
+
+    .mission-meta {
+        flex-wrap: wrap;
+        gap: var(--space-sm);
+    }
+
+    .forensics-hud {
+        padding: var(--space-sm) var(--space-md);
+    }
+
+    .hud-timer {
+        font-size: 1rem;
+    }
+
+    .forensics-briefing {
+        padding: var(--space-sm) var(--space-md);
+        font-size: 0.72rem;
+    }
+
+    .forensics-result {
+        margin: 20px var(--space-sm);
+        padding: var(--space-lg);
+    }
+
+    .forensics-result h1 {
+        font-size: 1.4rem;
+    }
+
+    .result-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-sm);
+    }
+
+    .result-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .result-actions button,
+    .result-actions a {
+        width: 100%;
+    }
+
+    .file-row {
+        font-size: 0.72rem;
+        padding: 4px var(--space-md);
+    }
+
+    .terminal-body {
+        padding: 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .rules-grid {
+        gap: var(--space-sm);
+    }
+
+    .rule-item {
+        font-size: 0.75rem;
+        padding: var(--space-xs) var(--space-sm);
+    }
+
+    .scan-overlay {
+        font-size: 1rem;
+    }
+
+    .scan-hint {
+        font-size: 0.78rem;
+        max-width: 90%;
+    }
+}

@@ -1584,3 +1584,225 @@ input:checked + .slider:before {
 
 .log-msg { color: #e6edf3; }
 .log-ts { color: #8b949e; text-align: right; font-size: 0.75rem; }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .admin-dashboard-page {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-sidebar {
+        display: none;
+    }
+
+    .admin-main {
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .main-header {
+        flex-direction: column;
+        gap: var(--space-md);
+        align-items: flex-start;
+    }
+
+    .header-title h1 {
+        font-size: 1.4rem;
+    }
+
+    .admin-main .header-search {
+        max-width: 100%;
+        margin: 0;
+    }
+
+    /* Tables: horizontal scroll */
+    .admin-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 10px 8px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    .actions-cell {
+        flex-wrap: wrap;
+    }
+
+    /* Analytics */
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card.large {
+        grid-column: span 1;
+    }
+
+    .analytics-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    /* Operations */
+    .ops-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .audit-log-card {
+        grid-column: span 1;
+    }
+
+    .log-entry {
+        grid-template-columns: 80px 90px 1fr;
+        font-size: 0.75rem;
+    }
+
+    .log-entry .log-action,
+    .log-entry .btn-delete-log {
+        display: none;
+    }
+
+    /* Queue cards */
+    .queue-card {
+        flex-direction: column;
+        gap: var(--space-lg);
+    }
+
+    .queue-card-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .scenario-meta {
+        flex-wrap: wrap;
+        gap: var(--space-md);
+    }
+
+    /* Moderation tabs */
+    .moderation-tabs {
+        flex-wrap: wrap;
+    }
+
+    /* News Manager */
+    .news-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .news-form {
+        padding-right: 0;
+        border-right: none;
+        border-bottom: 1px solid #30363d;
+        padding-bottom: 2rem;
+    }
+
+    /* Vitals */
+    .vitals-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vitals-log-entry {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    /* Evidence Locker */
+    .asset-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Review Modal */
+    .review-overlay {
+        padding: var(--space-md);
+    }
+
+    .review-modal {
+        max-height: 95vh;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: var(--space-md);
+    }
+
+    .modal-footer {
+        flex-wrap: wrap;
+    }
+
+    /* Form rows */
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    /* Event items */
+    .event-item {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    /* Control items */
+    .control-item {
+        flex-direction: column;
+        gap: var(--space-md);
+        align-items: flex-start;
+    }
+
+    .toggle-btn {
+        width: 100%;
+        min-width: unset;
+    }
+
+    /* Feature grid */
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Ban modal */
+    .ban-modal {
+        width: 95%;
+        padding: var(--space-lg);
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-main {
+        padding: var(--space-md) var(--space-sm);
+    }
+
+    .header-title h1 {
+        font-size: 1.2rem;
+    }
+
+    .stat-card {
+        padding: var(--space-md);
+    }
+
+    .ops-card {
+        padding: var(--space-md);
+    }
+
+    .vitals-card {
+        padding: var(--space-md);
+    }
+
+    .queue-card {
+        padding: var(--space-md);
+    }
+
+    .chart-placeholder {
+        height: 150px;
+    }
+
+    .export-btn {
+        padding: 6px 10px;
+        font-size: 0.7rem;
+    }
+}

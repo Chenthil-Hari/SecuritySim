@@ -129,3 +129,28 @@
     0% { transform: translateX(-100%); }
     100% { transform: translateX(300%); }
 }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 480px) {
+    .maintenance-page {
+        padding: 1rem;
+    }
+
+    .maintenance-container {
+        padding: 1.5rem;
+    }
+
+    .maintenance-container h1 {
+        font-size: 1.6rem;
+    }
+
+    .maintenance-container p {
+        font-size: 0.9rem;
+    }
+
+    .detail-item {
+        font-size: 0.9rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}

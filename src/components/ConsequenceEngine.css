@@ -269,3 +269,97 @@
     color: #ffcccc;
     font-size: 0.9rem;
 }
+
+/* ====================================================
+   MOBILE RESPONSIVE
+   ==================================================== */
+
+@media (max-width: 768px) {
+    .glitch-text {
+        font-size: 3rem;
+    }
+
+    .leak-container {
+        width: 90%;
+        max-width: 400px;
+    }
+
+    .leak-list {
+        height: 200px;
+    }
+
+    .leak-line {
+        font-size: 0.78rem;
+    }
+
+    .ransom-card {
+        padding: var(--space-lg);
+    }
+
+    .ransom-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .ransom-body {
+        font-size: 0.95rem;
+    }
+
+    .timer-val {
+        font-size: 2rem;
+        padding: 8px 20px;
+    }
+
+    .ransom-warning {
+        font-size: 0.8rem;
+        flex-wrap: wrap;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .glitch-text {
+        font-size: 2rem;
+    }
+
+    .leak-container {
+        width: 95%;
+        padding: var(--space-sm);
+    }
+
+    .leak-list {
+        height: 150px;
+    }
+
+    .leak-line {
+        font-size: 0.7rem;
+    }
+
+    .leak-footer {
+        flex-direction: column;
+        gap: 4px;
+        text-align: center;
+    }
+
+    .ransom-card {
+        padding: var(--space-md);
+        border-width: 3px;
+    }
+
+    .ransom-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .ransom-body {
+        font-size: 0.85rem;
+    }
+
+    .timer-val {
+        font-size: 1.6rem;
+        padding: 6px 16px;
+    }
+
+    .btc-address {
+        font-size: 0.75rem;
+        padding: var(--space-sm);
+    }
+}

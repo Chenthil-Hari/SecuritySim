@@ -497,3 +497,109 @@
         grid-template-columns: 200px 1fr 250px;
     }
 }
+
+@media (max-width: 768px) {
+    .warroom-main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        overflow-y: auto;
+    }
+
+    .warroom-tool-panel {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .tool-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .console-section {
+        max-height: 200px;
+    }
+
+    .warroom-center {
+        min-height: 50vh;
+    }
+
+    .narrative-box {
+        padding: 20px;
+    }
+
+    .narrative-box h2 {
+        font-size: 1.3rem;
+    }
+
+    .narrative-text {
+        font-size: 0.95rem;
+    }
+
+    .decision-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .decision-btn {
+        padding: 14px;
+    }
+
+    .warroom-side {
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .chat-container {
+        height: auto;
+        max-height: 300px;
+    }
+
+    .warroom-header {
+        padding: 0 var(--space-md);
+        height: 50px;
+    }
+
+    .header-left h1 {
+        font-size: 0.85rem;
+    }
+
+    .header-right {
+        gap: 10px;
+    }
+
+    .participants-list {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .warroom-header {
+        height: 45px;
+    }
+
+    .header-left h1 {
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+    }
+
+    .scen-badge {
+        display: none;
+    }
+
+    .tool-grid {
+        grid-template-columns: repeat(3, 1fr);
+        padding: 10px;
+        gap: 6px;
+    }
+
+    .tool-grid button {
+        font-size: 0.6rem;
+        padding: 6px 3px;
+    }
+
+    .narrative-box {
+        padding: 15px;
+    }
+
+    .narrative-box h2 {
+        font-size: 1.1rem;
+    }
+}

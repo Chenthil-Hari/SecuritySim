@@ -297,3 +297,80 @@
     0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
     100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .duel-header {
+        padding: 0 1rem;
+        height: 50px;
+    }
+
+    .duel-info h1 {
+        font-size: 0.9rem;
+    }
+
+    .duel-main {
+        flex-direction: column;
+    }
+
+    .own-pane {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .player-pane {
+        padding: 0.75rem;
+        min-height: 0;
+    }
+
+    .duel-controls {
+        height: auto;
+    }
+
+    .duel-opt-btn {
+        padding: 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .opp-meta h3 {
+        font-size: 1.1rem;
+    }
+
+    .final-result-card {
+        width: 90%;
+        max-width: 300px;
+        padding: 1.5rem;
+    }
+
+    .exit-btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .duel-header {
+        height: 45px;
+        padding: 0 0.75rem;
+    }
+
+    .duel-info h1 {
+        font-size: 0.8rem;
+        letter-spacing: 0;
+    }
+
+    .status-pill {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.4rem;
+    }
+
+    .duel-terminal {
+        font-size: 0.75rem;
+        padding: 0.75rem;
+    }
+
+    .pane-header {
+        padding: 0.3rem;
+        font-size: 0.75rem;
+    }
+}

@@ -183,3 +183,45 @@
     color: #484f58;
     font-family: var(--font-mono);
 }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .admin-login-page {
+        padding: var(--space-md);
+    }
+
+    .admin-card {
+        padding: var(--space-xl);
+    }
+
+    .admin-logo h1 {
+        font-size: 1.4rem;
+    }
+
+    .admin-logo h1 span {
+        display: block;
+        margin-left: 0;
+        margin-top: 4px;
+    }
+
+    .admin-footer {
+        flex-direction: column;
+        gap: var(--space-sm);
+        align-items: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-card {
+        padding: var(--space-lg);
+    }
+
+    .card-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .shield-icon {
+        width: 60px;
+        height: 60px;
+    }
+}

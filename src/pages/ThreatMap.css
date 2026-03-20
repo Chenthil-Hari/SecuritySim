@@ -306,3 +306,53 @@
 .feed-desc strong {
     color: var(--text-primary);
 }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .threat-map-page {
+        padding: 1rem;
+        height: auto;
+        min-height: calc(100vh - 70px);
+    }
+
+    .map-title h1 {
+        font-size: 1.5rem;
+    }
+
+    .map-stats {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .stat-box {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.75rem;
+    }
+
+    .map-visual-container {
+        min-height: 250px;
+    }
+}
+
+@media (max-width: 480px) {
+    .threat-map-page {
+        padding: 0.75rem;
+    }
+
+    .map-title h1 {
+        font-size: 1.2rem;
+    }
+
+    .feed-item {
+        font-size: 0.7rem;
+    }
+
+    .feed-timestamp {
+        min-width: 50px;
+        font-size: 0.65rem;
+    }
+
+    .map-header {
+        margin-bottom: 1rem;
+    }
+}

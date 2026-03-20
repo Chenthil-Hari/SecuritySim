@@ -73,3 +73,27 @@
         transform: scale(1.08);
     }
 }
+
+/* ===== MOBILE RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+    .timer-container {
+        width: 56px;
+        height: 56px;
+    }
+
+    .timer-text {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .timer-container {
+        width: 48px;
+        height: 48px;
+    }
+
+    .timer-text {
+        font-size: 0.75rem;
+    }
+}

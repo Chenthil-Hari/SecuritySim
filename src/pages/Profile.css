@@ -1265,3 +1265,113 @@
         grid-template-columns: 1fr;
     }
 }
+
+@media (max-width: 768px) {
+    .profile-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        gap: 0;
+        padding-bottom: 0;
+    }
+
+    .profile-tabs .tab-btn {
+        white-space: nowrap;
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .profile-email {
+        flex-wrap: wrap;
+        font-size: 0.8rem;
+    }
+
+    .profile-meta {
+        flex-wrap: wrap;
+    }
+
+    .profile-title-row {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .medals-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .avatar-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+    }
+
+    .cust-section {
+        padding: 1rem;
+    }
+
+    .toggle-row {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+
+    .friend-requests-section,
+    .user-search-section {
+        padding: 1rem;
+        min-height: auto;
+    }
+
+    .friends-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+
+    .social-actions {
+        flex-wrap: wrap;
+    }
+
+    .edit-modal {
+        width: 95%;
+    }
+
+    .page-top-nav {
+        padding-left: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-info h1 {
+        font-size: 1.3rem;
+    }
+
+    .stat-value {
+        font-size: 1.3rem;
+    }
+
+    .profile-header {
+        padding: var(--space-lg) var(--space-sm);
+    }
+
+    .xp-section {
+        padding: 1rem;
+    }
+
+    .trophy-room-section {
+        padding: 1rem;
+    }
+
+    .avatar-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .edit-modal-header,
+    .edit-modal-body,
+    .edit-modal-footer {
+        padding: 1rem;
+    }
+
+    .friends-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .banners-grid {
+        grid-template-columns: 1fr;
+    }
+}

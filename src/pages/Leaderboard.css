@@ -366,3 +366,41 @@
         padding: 0.75rem 0.5rem;
     }
 }
+
+@media (max-width: 480px) {
+    .leaderboard-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .leaderboard-tabs {
+        gap: 0.5rem;
+    }
+
+    .tab-btn {
+        padding: 0.4rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .leaderboard-header-row,
+    .leaderboard-row {
+        grid-template-columns: 40px 1fr 70px;
+    }
+
+    .col-score {
+        display: none;
+    }
+
+    .agent-avatar-sm {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+    }
+
+    .agent-name-main {
+        font-size: 0.8rem;
+    }
+
+    .seasonal-medals {
+        display: none;
+    }
+}

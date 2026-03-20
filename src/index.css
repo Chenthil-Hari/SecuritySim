@@ -468,6 +468,30 @@ img {
   .hide-mobile {
     display: none !important;
   }
+
+  /* Tables should scroll on mobile */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Global form input sizing */
+  input, select, textarea {
+    font-size: 16px !important; /* Prevent iOS zoom */
+    max-width: 100%;
+  }
+
+  /* Scrollbar thinner on mobile */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  /* All modals/overlays should respect safe area */
+  .modal, .overlay {
+    padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0)
+             env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+  }
 }
 
 @media (max-width: 480px) {
@@ -477,5 +501,23 @@ img {
 
   .container {
     padding: 0 var(--space-sm);
+  }
+
+  /* Full-width buttons on smallest screens */
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Stack form elements */
+  .form-row, .form-group-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Reduce animation intensity on mobile for performance */
+  @media (prefers-reduced-motion: no-preference) {
+    * {
+      animation-duration: 0.3s !important;
+    }
   }
 }

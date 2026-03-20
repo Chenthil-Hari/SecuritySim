@@ -200,6 +200,42 @@
     }
 }
 
+@media (max-width: 480px) {
+    .settings-page {
+        padding: var(--space-md) var(--space-sm);
+    }
+
+    .settings-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .settings-section {
+        padding: var(--space-md) var(--space-sm);
+    }
+
+    .settings-section h2 {
+        font-size: 0.95rem;
+    }
+
+    .setting-label {
+        font-size: 0.85rem;
+    }
+
+    .setting-desc {
+        font-size: 0.75rem;
+    }
+
+    .reset-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .primary-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 /* PWA Install Styles */
 .settings-section.install-section {
     border-left: 4px solid var(--primary);

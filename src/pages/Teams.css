@@ -599,3 +599,67 @@
         grid-template-columns: 1fr;
     }
 }
+
+@media (max-width: 768px) {
+    .teams-title h1 {
+        font-size: 1.6rem;
+    }
+
+    .teams-header p {
+        font-size: 0.95rem;
+    }
+
+    .team-warroom-prompt {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-md);
+    }
+
+    .team-warroom-prompt .btn-primary {
+        width: 100%;
+    }
+
+    .roster-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .code-box {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .code-box .code {
+        font-size: 1.2rem;
+        letter-spacing: 3px;
+    }
+
+    .team-invite-code-card {
+        padding: 1.25rem;
+    }
+
+    .role-buttons {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .teams-page {
+        padding: var(--space-md) var(--space-sm);
+    }
+
+    .teams-title h1 {
+        font-size: 1.3rem;
+    }
+
+    .team-card {
+        padding: 1.5rem;
+    }
+
+    .team-dash-header {
+        padding: var(--space-lg) var(--space-sm);
+    }
+
+    .team-dash-info h2 {
+        font-size: 1.5rem;
+    }
+}
