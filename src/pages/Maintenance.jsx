@@ -28,6 +28,12 @@ export default function Maintenance({ expectedReturn }) {
             backgroundRepeat: 'no-repeat'
         }}>
             <div className="maintenance-container">
+                {/* Decorative Corners */}
+                <div className="decor-corner top-left"></div>
+                <div className="decor-corner top-right"></div>
+                <div className="decor-corner bottom-left"></div>
+                <div className="decor-corner bottom-right"></div>
+
                 <div className="maintenance-image-wrapper">
                     <img src={iconsImg} alt="System Maintenance" className="maintenance-image" />
                 </div>
