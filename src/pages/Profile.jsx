@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useGame, useGameDispatch } from '../context/GameContext';
-import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin, Upload, UserPlus, UserCheck, UserMinus, Search, MessageSquare, ArrowLeft } from 'lucide-react';
+import { Shield, Zap, Award, Target, Calendar, Star, User, Edit2, X, Check, MapPin, Upload, UserPlus, UserCheck, UserMinus, Search, MessageSquare, ArrowLeft, Fingerprint } from 'lucide-react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { buildApiUrl } from '../utils/api';
 import { getRank } from '../utils/ranks';
@@ -47,6 +47,7 @@ const Profile = () => {
     const [editCountry, setEditCountry] = useState('Global');
     const [editError, setEditError] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [showAgentCard, setShowAgentCard] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -510,16 +511,30 @@ const Profile = () => {
 
             {activeTab === 'overview' ? (
                 <>
-                    {/* Interactive Agent ID Card */}
-                    <AgentIDCard user={{
-                        username: profileData?.username || user?.username,
-                        profilePhoto: profileData?.profilePhoto,
-                        score: score,
-                        xp: xp,
-                        level: profileData?.level || level,
-                        country: profileData?.country || user?.country,
-                        _id: profileData?._id || user?._id
-                    }} />
+                    {/* Interactive Agent ID Card Toggle */}
+                    <div className="agent-card-toggle-section">
+                        <button 
+                            className={`btn-agent-card ${showAgentCard ? 'active' : ''}`}
+                            onClick={() => setShowAgentCard(!showAgentCard)}
+                        >
+                            <Fingerprint size={18} />
+                            {showAgentCard ? 'Hide Agent Profile Card' : 'View Agent Profile Card'}
+                        </button>
+                    </div>
+
+                    {showAgentCard && (
+                        <div className="agent-card-wrapper animate-fade-in">
+                            <AgentIDCard user={{
+                                username: profileData?.username || user?.username,
+                                profilePhoto: profileData?.profilePhoto,
+                                score: score,
+                                xp: xp,
+                                level: profileData?.level || level,
+                                country: profileData?.country || user?.country,
+                                _id: profileData?._id || user?._id
+                            }} />
+                        </div>
+                    )}
 
                     {/* Stats Grid */}
                     <div className="profile-stats-grid">
