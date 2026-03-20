@@ -14,6 +14,36 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeInUp, fadeInDown, springScale, tacticalHover, tacticalTap } from '../utils/animations';
 import './Dashboard.css';
 
+// Inline Variants for Debugging
+const localStagger = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.4,
+            delayChildren: 0.3
+        }
+    }
+};
+
+const localFadeUp = {
+    hidden: { opacity: 0, y: 30 },
+    show: { 
+        opacity: 1, 
+        y: 0, 
+        transition: { type: 'spring', bounce: 0.4, duration: 0.8 } 
+    }
+};
+
+const localScale = {
+    hidden: { opacity: 0, scale: 0.8 },
+    show: { 
+        opacity: 1, 
+        scale: 1, 
+        transition: { type: 'spring', bounce: 0.5, duration: 0.8 } 
+    }
+};
+
 export default function Dashboard() {
     const { score, xp, level, difficulty } = useGame();
     const { user } = useAuth();
@@ -85,21 +115,17 @@ export default function Dashboard() {
     return (
         <motion.div 
             className="dashboard"
-            variants={staggerContainer(0.2, 0.2)}
+            variants={localStagger}
             initial="hidden"
             animate="show"
-            data-version="2.1-tactical"
+            key="dashboard-main"
         >
-            <motion.div className="dashboard-header" variants={fadeInDown}>
+            <motion.div className="dashboard-header" variants={localFadeUp}>
                 <h1>Risk Assessment Dashboard {activeEvents.length > 0 && <span className="live-tag">OPS LIVE</span>}</h1>
-                <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <motion.span 
-                        animate={{ opacity: [0.4, 1, 0.4] }} 
-                        transition={{ repeat: Infinity, duration: 2 }}
-                        style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', display: 'inline-block' }}
-                    />
-                    Tactical Awareness Protocol v2.2 active
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-secondary)' }}>
+                    <div className="debug-pulse-ring" />
+                    <p>Tactical Awareness Protocol v2.3 active (Enhanced Stagger)</p>
+                </div>
             </motion.div>
 
             <AnimatePresence>
@@ -122,12 +148,12 @@ export default function Dashboard() {
                 ))}
             </AnimatePresence>
 
-            <motion.div variants={fadeInUp}>
+            <motion.div variants={localFadeUp}>
                 <NewsFeed />
             </motion.div>
 
             <div className="dashboard-grid">
-                <motion.div className="dashboard-score-panel" variants={springScale}>
+                <motion.div className="dashboard-score-panel" variants={localScale}>
                     <span className="score-panel-label">Cyber Safety Score</span>
                     <ScoreRing score={score} size={180} />
 
@@ -150,25 +176,25 @@ export default function Dashboard() {
                     </div>
                 </motion.div>
 
-                <motion.div className="stats-column" variants={staggerContainer(0.2)}>
-                    <motion.div variants={fadeInUp}>
+                <motion.div className="stats-column" variants={localStagger}>
+                    <motion.div variants={localFadeUp}>
                         <StatCard icon={TrendingUp} label="Level" value={level} sub={`${xp} total XP`} color="purple" />
                     </motion.div>
-                    <motion.div variants={fadeInUp}>
+                    <motion.div variants={localFadeUp}>
                         <StatCard icon={Zap} label="Total XP" value={xp} sub="Experience points" color="yellow" />
                     </motion.div>
                 </motion.div>
             </div>
 
             {features.ugc !== false && featuredScenarios.length > 0 && (
-                <motion.div className="featured-missions" variants={fadeInUp}>
+                <motion.div className="featured-missions" variants={localFadeUp}>
                     <div className="section-header">
                         <h2><Target size={20} /> Priority Missions</h2>
                         <Link to="/scenarios" className="text-link">View All</Link>
                     </div>
-                    <motion.div className="featured-grid" variants={staggerContainer(0.15)}>
+                    <motion.div className="featured-grid" variants={localStagger}>
                         {featuredScenarios.map(s => (
-                            <motion.div key={s._id} variants={springScale} whileHover={tacticalHover('#00f0ff')} whileTap={tacticalTap}>
+                            <motion.div key={s._id} variants={localScale} whileHover={tacticalHover('#00f0ff')} whileTap={tacticalTap}>
                                 <Link to={`/scenario/${s._id}`} className="featured-card">
                                     <div className="card-badge">FEATURED</div>
                                     <div className="featured-card-content">
@@ -185,7 +211,7 @@ export default function Dashboard() {
             )}
 
             {features.forensics !== false && (
-                <motion.div className="forensics-preview" variants={fadeInUp} whileHover={{ y: -5 }}>
+                <motion.div className="forensics-preview" variants={localFadeUp} whileHover={{ y: -5 }}>
                     <div className="preview-content">
                         <div className="preview-icon">
                             <Search size={32} />
@@ -204,7 +230,7 @@ export default function Dashboard() {
             )}
 
 
-            <motion.div className="dashboard-footer" variants={fadeInUp}>
+            <motion.div className="dashboard-footer" variants={localFadeUp}>
                 <Link to="/contact" className="dashboard-contact-link">
                     <Mail size={16} /> Contact Support
                 </Link>
