@@ -2,6 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, Loader, Shield, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import chatbotIcon from '../assets/chatbot-icon.png';
+import { useAuth } from '../context/AuthContext';
+import { useGame } from '../context/GameContext';
+import { getTier } from '../utils/tiers';
+import '../styles/AvatarFrames.css';
 import './ChatWidget.css';
 
 export default function ChatWidget({ isLoggedIn }) {
@@ -10,6 +14,8 @@ export default function ChatWidget({ isLoggedIn }) {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    const { user } = useAuth();
+    const { score } = useGame();
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
 
@@ -142,6 +148,18 @@ export default function ChatWidget({ isLoggedIn }) {
                             <div className="messages-list">
                                 {messages.map((msg, i) => (
                                     <div key={msg._id || i} className={`message-wrapper ${msg.role}`}>
+                                        {msg.role === 'user' && (
+                                            <div className="chat-avatar-sm">
+                                                <div className={`tier-frame ${getTier(score).class}`}></div>
+                                                {user?.profilePhoto ? (
+                                                    <img src={user.profilePhoto} alt="" />
+                                                ) : (
+                                                    <div className="avatar-placeholder-sm" style={{ background: '#00f0ff', color: '#0a0f14', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', width: '100%', height: '100%', fontSize: '10px', fontWeight: 'bold' }}>
+                                                        {user?.username?.charAt(0).toUpperCase() || 'U'}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                         <div className="message-bubble">
                                             {msg.role === 'model' || msg.role === 'system' ? (
                                                 <ReactMarkdown>{msg.text}</ReactMarkdown>

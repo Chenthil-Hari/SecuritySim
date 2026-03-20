@@ -1,0 +1,120 @@
+/* Avatar Frames & Tier Effects */
+.avatar-frame-container {
+    position: relative;
+    padding: 4px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+/* Base Frame Style */
+.tier-frame {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Bronze: Matte Gray */
+.tier-bronze {
+    border-color: #4b5563;
+    opacity: 0.6;
+}
+
+/* Silver: Subtle White Glow */
+.tier-silver {
+    border-color: #d1d5db;
+    box-shadow: 0 0 10px rgba(209, 213, 219, 0.2);
+}
+
+/* Gold: Golden Glow with Pulse */
+.tier-gold {
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    animation: gold-pulse 2s infinite ease-in-out;
+}
+
+@keyframes gold-pulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+    50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.5); }
+}
+
+/* Platinum: Cyber Cyan Glow */
+.tier-platinum {
+    border-color: #00f0ff;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+    animation: plat-glow 1.5s infinite alternate;
+}
+
+@keyframes plat-glow {
+    from { box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); opacity: 0.8; }
+    to { box-shadow: 0 0 30px rgba(0, 240, 255, 0.6); opacity: 1; }
+}
+
+/* Diamond: Deep Purple Neon */
+.tier-diamond {
+    border-color: #7c4dff;
+    box-shadow: 0 0 25px rgba(124, 77, 255, 0.5);
+    animation: diamond-pulse 3s infinite linear;
+}
+
+@keyframes diamond-pulse {
+    0%, 100% { border-color: #7c4dff; box-shadow: 0 0 20px rgba(124, 77, 255, 0.4); }
+    50% { border-color: #9d50bb; box-shadow: 0 0 40px rgba(157, 80, 187, 0.7); }
+}
+
+/* Ace: Aggressive Red Neon */
+.tier-ace {
+    border-color: #ff4757;
+    box-shadow: 0 0 30px rgba(255, 71, 87, 0.6);
+    animation: ace-breathe 2s infinite ease-in-out;
+}
+
+@keyframes ace-breathe {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 71, 87, 0.5); }
+    50% { transform: scale(1.05); box-shadow: 0 0 45px rgba(255, 71, 87, 0.8); }
+}
+
+/* Conqueror: Legendary Golden-Cyan Gradient with Particles */
+.tier-conqueror {
+    background: linear-gradient(var(--bg-dark, #0a0f14), var(--bg-dark, #0a0f14)) padding-box,
+                linear-gradient(45deg, #ffd700, #00f0ff, #ffd700) border-box;
+    border: 3px solid transparent;
+    box-shadow: 
+        0 0 35px rgba(0, 240, 255, 0.5),
+        0 0 60px rgba(255, 215, 0, 0.3);
+    animation: conqueror-spin 4s linear infinite;
+}
+
+@keyframes conqueror-spin {
+    from { filter: hue-rotate(0deg); }
+    to { filter: hue-rotate(360deg); }
+}
+
+/* Conqueror Inner Particle Glow */
+.tier-conqueror::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, transparent 70%, rgba(255, 215, 0, 0.2) 100%);
+    animation: conqueror-particle 2s infinite alternate;
+}
+
+@keyframes conqueror-particle {
+    from { transform: scale(0.9); opacity: 0.5; }
+    to { transform: scale(1.1); opacity: 1; }
+}
+
+/* UI Adjustments for small avatars */
+.avatar-frame-sm {
+    padding: 2px;
+}
+
+.avatar-frame-sm .tier-frame {
+    border-width: 1.5px;
+}

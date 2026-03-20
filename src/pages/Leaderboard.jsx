@@ -5,6 +5,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { buildApiUrl } from '../utils/api';
 import { getRank } from '../utils/ranks';
 import Loader from '../components/Loader';
+import { getTier } from '../utils/tiers';
+import '../styles/AvatarFrames.css';
 import './Leaderboard.css';
 
 const Leaderboard = () => {
@@ -177,10 +179,11 @@ const Leaderboard = () => {
                                     ) : (
                                         <div className="agent-cell">
                                             <div className="agent-avatar-sm">
+                                                <div className={`tier-frame ${getTier(entry.totalScore || entry.score).class}`} style={{ transform: 'scale(1.2)' }}></div>
                                                 {entry.profilePhoto ? (
-                                                    <img src={entry.profilePhoto} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                                                    <img src={entry.profilePhoto} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'relative', zIndex: 1 }} />
                                                 ) : (
-                                                    entry.username.charAt(0).toUpperCase()
+                                                    <span style={{ position: 'relative', zIndex: 1 }}>{entry.username.charAt(0).toUpperCase()}</span>
                                                 )}
                                             </div>
                                             <div className="agent-name">
