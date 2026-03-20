@@ -9,6 +9,8 @@ import badges from '../data/badges';
 import Loader from '../components/Loader';
 import customizations from '../data/customizations';
 import { Medal, Crown, Palette, Layout, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { staggerContainer, fadeInUp, fadeInDown, springScale, tacticalHover, tacticalTap } from '../utils/animations';
 import AgentIDCard from '../components/AgentIDCard';
 import { getTier } from '../utils/tiers';
 import '../styles/AvatarFrames.css';
@@ -315,19 +317,24 @@ const Profile = () => {
     ) : customizations.auras?.default || { color: 'transparent', blur: '0' };
 
     return (
-        <div className="profile-container">
-            <div className="page-top-nav">
+        <motion.div 
+            className="profile-container"
+            variants={staggerContainer(0.1, 0.1)}
+            initial="hidden"
+            animate="show"
+        >
+            <motion.div className="page-top-nav" variants={fadeInDown}>
                 <button className="back-btn" onClick={() => navigate(-1)}>
                     <ArrowLeft size={18} /> Back
                 </button>
-            </div>
+            </motion.div>
             {/* Banner Background */}
-            <div className="profile-banner-bg" style={activeBanner?.style}></div>
+            <motion.div className="profile-banner-bg" style={activeBanner?.style} variants={fadeInDown}></motion.div>
 
             {/* Profile Header */}
-            <div className="profile-header">
+            <motion.div className="profile-header" variants={fadeInUp}>
                 <div className="profile-avatar-outer">
-                    <div className="avatar-frame-container">
+                    <motion.div className="avatar-frame-container" variants={springScale}>
                         <div className={`tier-frame ${getTier(score).class}`}></div>
                         <div className={`profile-avatar ${auraEnabled ? 'has-aura' : ''}`}
                             style={{ '--aura-color': auraConfig.color, '--aura-blur': auraConfig.blur }}>
@@ -340,20 +347,20 @@ const Profile = () => {
                             )}
                             <div className="level-badge">Lv.{profileData?.level || level}</div>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
                 <div className="profile-info">
                     <div className="profile-title-row">
-                        <h1>{profileData?.username || user?.username}</h1>
+                        <motion.h1 variants={fadeInUp}>{profileData?.username || user?.username}</motion.h1>
                         {profileData?.unlockedTitles?.length > 0 && (
-                            <span className="agent-title-display">{profileData.unlockedTitles[profileData.unlockedTitles.length - 1]}</span>
+                            <motion.span className="agent-title-display" variants={fadeInUp}>{profileData.unlockedTitles[profileData.unlockedTitles.length - 1]}</motion.span>
                         )}
                         {isOwnProfile ? (
-                            <button className="edit-profile-btn" onClick={openEditModal}>
+                            <motion.button className="edit-profile-btn" onClick={openEditModal} whileHover={tacticalHover('#00f0ff')} whileTap={tacticalTap} variants={fadeInUp}>
                                 <Edit2 size={16} /> Edit Profile
-                            </button>
+                            </motion.button>
                         ) : (
-                            <div className="social-actions">
+                            <motion.div className="social-actions" variants={fadeInUp}>
                                 {friendStatus === 'friends' ? (
                                     <button className="btn-social friend"><UserCheck size={16} /> Friends</button>
                                 ) : friendStatus === 'pending' ? (
@@ -367,10 +374,10 @@ const Profile = () => {
                                     </button>
                                 )}
                                 <button className="btn-social msg"><MessageSquare size={16} /></button>
-                            </div>
+                            </motion.div>
                         )}
                     </div>
-                    <p className="profile-email">
+                    <motion.p className="profile-email" variants={fadeInUp}>
                         {isOwnProfile ? user?.email : 'Classified Agent'}
                         {isOwnProfile && (
                             profileData?.isVerified ? (
@@ -381,14 +388,14 @@ const Profile = () => {
                                 </button>
                             )
                         )}
-                    </p>
-                    <div className="profile-meta">
+                    </motion.p>
+                    <motion.div className="profile-meta" variants={fadeInUp}>
                         <span className="rank-badge" style={{ color: getRank(profileData?.level || level).color }}>{getRank(profileData?.level || level).icon} {getRank(profileData?.level || level).title}</span>
                         <span><MapPin size={14} /> {profileData?.country || 'Global'}</span>
                         <span><Calendar size={14} /> Joined {memberSince}</span>
-                    </div>
+                    </motion.div>
                 </div>
-            </div>
+            </motion.div>
 
             {/* Edit Profile Modal Overlay */}
             {isEditing && (
@@ -491,93 +498,109 @@ const Profile = () => {
             )}
 
             {/* Tabs */}
-            <div className="profile-tabs">
-                <button
+            <motion.div className="profile-tabs" variants={fadeInUp}>
+                <motion.button
                     className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
                     onClick={() => setActiveTab('overview')}
+                    whileHover={tacticalHover('#00f0ff')}
+                    whileTap={tacticalTap}
                 >
                     <Layout size={18} /> Overview
-                </button>
+                </motion.button>
                 {isOwnProfile && (
                     <>
-                        <button
+                        <motion.button
                             className={`tab-btn ${activeTab === 'customization' ? 'active' : ''}`}
                             onClick={() => setActiveTab('customization')}
+                            whileHover={tacticalHover('#00f0ff')}
+                            whileTap={tacticalTap}
                         >
                             <Palette size={18} /> Customization
-                        </button>
-                        <button
+                        </motion.button>
+                        <motion.button
                             className={`tab-btn ${activeTab === 'social' ? 'active' : ''}`}
                             onClick={() => setActiveTab('social')}
+                            whileHover={tacticalHover('#00f0ff')}
+                            whileTap={tacticalTap}
                         >
                             <Search size={18} /> Social & Friends
-                        </button>
+                        </motion.button>
                     </>
                 )}
-            </div>
+            </motion.div>
 
             {activeTab === 'overview' ? (
                 <>
                     {/* Interactive Agent ID Card Toggle */}
-                    <div className="agent-card-toggle-section">
-                        <button 
+                    <motion.div className="agent-card-toggle-section" variants={fadeInUp}>
+                        <motion.button 
                             className={`btn-agent-card ${showAgentCard ? 'active' : ''}`}
                             onClick={() => setShowAgentCard(!showAgentCard)}
+                            whileHover={tacticalHover('#00f0ff')}
+                            whileTap={tacticalTap}
                         >
                             <Fingerprint size={18} />
                             {showAgentCard ? 'Hide Agent Profile Card' : 'View Agent Profile Card'}
-                        </button>
-                    </div>
+                        </motion.button>
+                    </motion.div>
 
-                    {showAgentCard && (
-                        <div className="agent-card-wrapper animate-fade-in">
-                            <AgentIDCard user={{
-                                username: profileData?.username || user?.username,
-                                profilePhoto: profileData?.profilePhoto,
-                                score: score,
-                                xp: xp,
-                                level: profileData?.level || level,
-                                country: profileData?.country || user?.country,
-                                _id: profileData?._id || user?._id
-                            }} />
-                        </div>
-                    )}
+                    <AnimatePresence>
+                        {showAgentCard && (
+                            <motion.div 
+                                className="agent-card-wrapper"
+                                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                                transition={{ type: 'spring', duration: 0.6 }}
+                            >
+                                <AgentIDCard user={{
+                                    username: profileData?.username || user?.username,
+                                    profilePhoto: profileData?.profilePhoto,
+                                    score: score,
+                                    xp: xp,
+                                    level: profileData?.level || level,
+                                    country: profileData?.country || user?.country,
+                                    _id: profileData?._id || user?._id
+                                }} />
+                        </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     {/* Stats Grid */}
-                    <div className="profile-stats-grid">
-                        <div className="profile-stat-card stat-score">
+                    <motion.div className="profile-stats-grid" variants={staggerContainer(0.1)}>
+                        <motion.div className="profile-stat-card stat-score" variants={springScale} whileHover={tacticalHover('#00f0ff')}>
                             <Shield size={24} />
                             <div className="stat-value">{score}</div>
                             <div className="stat-label">Cyber Score</div>
-                        </div>
-                        <div className="profile-stat-card stat-xp">
+                        </motion.div>
+                        <motion.div className="profile-stat-card stat-xp" variants={springScale} whileHover={tacticalHover('#ffd700')}>
                             <Zap size={24} />
                             <div className="stat-value">{xp}</div>
                             <div className="stat-label">Total XP</div>
-                        </div>
-                        <div className="profile-stat-card stat-badges">
+                        </motion.div>
+                        <motion.div className="profile-stat-card stat-badges" variants={springScale} whileHover={tacticalHover('#ff4081')}>
                             <Award size={24} />
                             <div className="stat-value">{earnedBadges.length}</div>
                             <div className="stat-label">Badges Earned</div>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
 
                     {/* Trophy Room & Medals */}
                     {((profileData?.seasonalMedals || (isOwnProfile ? gameState.seasonalMedals : []))?.length > 0) && (
-                        <div className="trophy-room-section">
+                        <motion.div className="trophy-room-section" variants={fadeInUp}>
                             <h2><Medal size={20} /> Trophy Room</h2>
-                            <div className="medals-grid">
+                            <motion.div className="medals-grid" variants={staggerContainer(0.15)}>
                                 {(profileData?.seasonalMedals || (isOwnProfile ? gameState.seasonalMedals : [])).map((medal, idx) => (
-                                    <div key={idx} className={`medal-item ${medal.type}`}>
+                                    <motion.div key={idx} className={`medal-item ${medal.type}`} variants={springScale} whileHover={{ y: -5 }}>
                                         <Crown size={32} />
                                         <div className="medal-info">
                                             <div className="medal-name">Season Winner: {medal.season}</div>
                                             <div className="medal-type">{medal.type.toUpperCase()} MEDAL</div>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 ))}
-                            </div>
-                        </div>
+                            </motion.div>
+                        </motion.div>
                     )}
 
                     {/* XP Progress */}
@@ -749,7 +772,7 @@ const Profile = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </motion.div>
     );
 };
 

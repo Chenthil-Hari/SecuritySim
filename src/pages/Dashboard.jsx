@@ -9,8 +9,10 @@ import { useSystemStatus } from '../context/SystemStatusContext';
 
 import { getRank } from '../utils/ranks';
 import { buildApiUrl } from '../utils/api';
-import './Dashboard.css';
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { staggerContainer, fadeInUp, fadeInDown, springScale, tacticalHover, tacticalTap } from '../utils/animations';
+import './Dashboard.css';
 
 export default function Dashboard() {
     const { score, xp, level, difficulty } = useGame();
@@ -81,29 +83,43 @@ export default function Dashboard() {
 
 
     return (
-        <div className="dashboard">
-            <div className="dashboard-header">
+        <motion.div 
+            className="dashboard"
+            variants={staggerContainer()}
+            initial="hidden"
+            animate="show"
+        >
+            <motion.div className="dashboard-header" variants={fadeInDown}>
                 <h1>Risk Assessment Dashboard {activeEvents.length > 0 && <span className="live-tag">OPS LIVE</span>}</h1>
                 <p>Your cybersecurity awareness at a glance</p>
-            </div>
+            </motion.div>
 
-            {activeEvents.map(event => (
-                <div key={event._id} className={`event-banner ${event.type.toLowerCase()}`}>
-                    <Zap size={20} />
-                    <div className="event-banner-content">
-                        <h3>{event.title}</h3>
-                        <p>{event.description} — <strong>{event.multiplier}x Multiplier Active</strong></p>
-                    </div>
-                    <div className="event-timer">
-                        ENDS {new Date(event.expiresAt).toLocaleDateString()}
-                    </div>
-                </div>
-            ))}
+            <AnimatePresence>
+                {activeEvents.map(event => (
+                    <motion.div 
+                        key={event._id} 
+                        className={`event-banner ${event.type.toLowerCase()}`}
+                        variants={fadeInUp}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                    >
+                        <Zap size={20} />
+                        <div className="event-banner-content">
+                            <h3>{event.title}</h3>
+                            <p>{event.description} — <strong>{event.multiplier}x Multiplier Active</strong></p>
+                        </div>
+                        <div className="event-timer">
+                            ENDS {new Date(event.expiresAt).toLocaleDateString()}
+                        </div>
+                    </motion.div>
+                ))}
+            </AnimatePresence>
 
-            <NewsFeed />
+            <motion.div variants={fadeInUp}>
+                <NewsFeed />
+            </motion.div>
 
             <div className="dashboard-grid">
-                <div className="dashboard-score-panel">
+                <motion.div className="dashboard-score-panel" variants={springScale}>
                     <span className="score-panel-label">Cyber Safety Score</span>
                     <ScoreRing score={score} size={180} />
 
@@ -124,38 +140,44 @@ export default function Dashboard() {
                             <div className="xp-bar-fill" style={{ width: `${xpInLevel}%` }} />
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
-                <div className="stats-column">
-                    <StatCard icon={TrendingUp} label="Level" value={level} sub={`${xp} total XP`} color="purple" />
-                    <StatCard icon={Zap} label="Total XP" value={xp} sub="Experience points" color="yellow" />
-                </div>
+                <motion.div className="stats-column" variants={staggerContainer(0.2)}>
+                    <motion.div variants={fadeInUp}>
+                        <StatCard icon={TrendingUp} label="Level" value={level} sub={`${xp} total XP`} color="purple" />
+                    </motion.div>
+                    <motion.div variants={fadeInUp}>
+                        <StatCard icon={Zap} label="Total XP" value={xp} sub="Experience points" color="yellow" />
+                    </motion.div>
+                </motion.div>
             </div>
 
             {features.ugc !== false && featuredScenarios.length > 0 && (
-                <div className="featured-missions">
+                <motion.div className="featured-missions" variants={fadeInUp}>
                     <div className="section-header">
                         <h2><Target size={20} /> Priority Missions</h2>
                         <Link to="/scenarios" className="text-link">View All</Link>
                     </div>
-                    <div className="featured-grid">
+                    <motion.div className="featured-grid" variants={staggerContainer(0.15)}>
                         {featuredScenarios.map(s => (
-                            <Link to={`/scenario/${s._id}`} key={s._id} className="featured-card">
-                                <div className="card-badge">FEATURED</div>
-                                <div className="featured-card-content">
-                                    <span className="scen-cat">{s.category}</span>
-                                    <h3>{s.title}</h3>
-                                    <div className="scen-author">by {s.authorId?.username || 'System'}</div>
-                                </div>
-                                <PlayCircle size={32} className="play-icon" />
-                            </Link>
+                            <motion.div key={s._id} variants={springScale} whileHover={tacticalHover('#00f0ff')} whileTap={tacticalTap}>
+                                <Link to={`/scenario/${s._id}`} className="featured-card">
+                                    <div className="card-badge">FEATURED</div>
+                                    <div className="featured-card-content">
+                                        <span className="scen-cat">{s.category}</span>
+                                        <h3>{s.title}</h3>
+                                        <div className="scen-author">by {s.authorId?.username || 'System'}</div>
+                                    </div>
+                                    <PlayCircle size={32} className="play-icon" />
+                                </Link>
+                            </motion.div>
                         ))}
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             )}
 
             {features.forensics !== false && (
-                <div className="forensics-preview">
+                <motion.div className="forensics-preview" variants={fadeInUp} whileHover={{ y: -5 }}>
                     <div className="preview-content">
                         <div className="preview-icon">
                             <Search size={32} />
@@ -164,19 +186,21 @@ export default function Dashboard() {
                             <h3>New: File Forensics Mini-Game</h3>
                             <p>Put on your investigator hat. Scour the file system for malware and secure the site.</p>
                         </div>
-                        <Link to="/forensics" className="btn-primary">
-                            Play Now
-                        </Link>
+                        <motion.div whileHover={tacticalHover('#a855f7')} whileTap={tacticalTap}>
+                            <Link to="/forensics" className="btn-primary">
+                                Play Now
+                            </Link>
+                        </motion.div>
                     </div>
-                </div>
+                </motion.div>
             )}
 
 
-            <div className="dashboard-footer">
+            <motion.div className="dashboard-footer" variants={fadeInUp}>
                 <Link to="/contact" className="dashboard-contact-link">
                     <Mail size={16} /> Contact Support
                 </Link>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 }

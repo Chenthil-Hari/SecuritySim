@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GameProvider } from './context/GameContext';
 import { AuthProvider } from './context/AuthContext';
 import { SystemStatusProvider, useSystemStatus } from './context/SystemStatusContext';
@@ -134,32 +135,34 @@ function AppContent() {
       {!isAdminRoute && <Navbar />}
       <GlobalAlert />
       <main className={`app-main ${isAdminRoute ? 'admin-isolated' : ''}`}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/teams" element={<Teams />} />
-          <Route path="/threat-map" element={<ThreatMap />} />
-          <Route path="/achievements" element={<Achievements />} />
-          <Route path="/profile/:userId?" element={<Profile />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/forensics" element={<ForensicsGame />} />
-          <Route path="/interactive-scenarios" element={<InteractiveScenarios />} />
-          <Route path="/scenario/:id" element={<UgcScenarioPlayer />} />
-          <Route path="/multiplayer/pvp" element={<PvPLobby />} />
-          <Route path="/duel/:matchId" element={<DuelRoom />} />
-          <Route path="/warroom/:id" element={<WarRoom />} />
-          {/* Authentication & Security */}
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        </Routes>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/teams" element={<Teams />} />
+            <Route path="/threat-map" element={<ThreatMap />} />
+            <Route path="/achievements" element={<Achievements />} />
+            <Route path="/profile/:userId?" element={<Profile />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/forensics" element={<ForensicsGame />} />
+            <Route path="/interactive-scenarios" element={<InteractiveScenarios />} />
+            <Route path="/scenario/:id" element={<UgcScenarioPlayer />} />
+            <Route path="/multiplayer/pvp" element={<PvPLobby />} />
+            <Route path="/duel/:matchId" element={<DuelRoom />} />
+            <Route path="/warroom/:id" element={<WarRoom />} />
+            {/* Authentication & Security */}
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          </Routes>
+        </AnimatePresence>
       </main>
       {!isAdminRoute && <ChatWidget isLoggedIn={isLoggedIn} />}
     </div>
