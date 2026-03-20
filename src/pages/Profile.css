@@ -43,22 +43,35 @@
     }
 }
 
+.profile-avatar-outer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-width: 120px;
+}
+
 .profile-avatar {
     position: relative;
-    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
 }
 
 .profile-avatar img {
-    width: 100px;
-    height: 100px;
+    width: 90%;
+    height: 90%;
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--primary);
 }
 
 .avatar-placeholder {
-    width: 100px;
-    height: 100px;
+    width: 90%;
+    height: 90%;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     display: flex;

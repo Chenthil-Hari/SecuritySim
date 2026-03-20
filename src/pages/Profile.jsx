@@ -326,9 +326,21 @@ const Profile = () => {
 
             {/* Profile Header */}
             <div className="profile-header">
-                <div className={`profile-avatar-outer ${auraEnabled ? 'has-aura' : ''}`}
-                    style={{ '--aura-color': auraConfig.color, '--aura-blur': auraConfig.blur }}>
-                    <div className="level-badge">Lv.{profileData?.level || level}</div>
+                <div className="profile-avatar-outer">
+                    <div className="avatar-frame-container">
+                        <div className={`tier-frame ${getTier(score).class}`}></div>
+                        <div className={`profile-avatar ${auraEnabled ? 'has-aura' : ''}`}
+                            style={{ '--aura-color': auraConfig.color, '--aura-blur': auraConfig.blur }}>
+                            {profileData?.profilePhoto ? (
+                                <img src={profileData.profilePhoto} alt="Profile" />
+                            ) : (
+                                <div className="avatar-placeholder">
+                                    <User size={40} />
+                                </div>
+                            )}
+                            <div className="level-badge">Lv.{profileData?.level || level}</div>
+                        </div>
+                    </div>
                 </div>
                 <div className="profile-info">
                     <div className="profile-title-row">
