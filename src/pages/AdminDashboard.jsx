@@ -307,31 +307,37 @@ export default function AdminDashboard() {
         });
     };
 
-    const handleToggleNews = async (id) => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl(`/api/admin/news/${id}/toggle`), {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) fetchNews();
-        } catch (err) {
-            console.error("Error toggling news:", err);
-        }
+    const handleToggleNews = (id) => {
+        requireAdminName('Toggle News Status', async (adminName) => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl(`/api/admin/news/${id}/toggle`), {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminDisplayName: adminName })
+                });
+                if (res.ok) fetchNews();
+            } catch (err) {
+                console.error("Error toggling news:", err);
+            }
+        });
     };
 
-    const handleDeleteNews = async (id) => {
-        if (!confirm("Delete this news item permanently?")) return;
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl(`/api/admin/news/${id}`), {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) fetchNews();
-        } catch (err) {
-            console.error("Error deleting news:", err);
-        }
+    const handleDeleteNews = (id) => {
+        requireAdminName('Delete News Item', async (adminName) => {
+            if (!confirm("Delete this news item permanently?")) return;
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl(`/api/admin/news/${id}`), {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminDisplayName: adminName })
+                });
+                if (res.ok) fetchNews();
+            } catch (err) {
+                console.error("Error deleting news:", err);
+            }
+        });
     };
 
     const fetchPending = async () => {
@@ -586,19 +592,23 @@ export default function AdminDashboard() {
         });
     };
 
-    const handleDeleteLog = async (logId) => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl(`/api/admin/logs/${logId}`), {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                setLogs(logs.filter(l => l._id !== logId));
+    const handleDeleteLog = (logId) => {
+        requireAdminName('Delete Audit Log', async (adminName) => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl(`/api/admin/logs/${logId}`), {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    setLogs(logs.filter(l => l._id !== logId));
+                    fetchLogs(); // Refresh to see the deletion log itself
+                }
+            } catch (err) {
+                console.error("Error deleting log:", err);
             }
-        } catch (err) {
-            console.error("Error deleting log:", err);
-        }
+        });
     };
 
     const handleClearLogs = () => {

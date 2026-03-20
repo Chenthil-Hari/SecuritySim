@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import Team from '../models/Team.js';
 import { authenticateToken, isAdmin } from '../middleware/auth.js';
 import bcrypt from 'bcryptjs';
+import { logAction } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -41,6 +42,7 @@ router.get('/admin/all', authenticateToken, isAdmin, async (req, res) => {
 // Toggle user frozen status (Admin only)
 router.patch('/admin/:id/freeze', authenticateToken, isAdmin, async (req, res) => {
     try {
+        const { adminDisplayName } = req.body;
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -52,6 +54,14 @@ router.patch('/admin/:id/freeze', authenticateToken, isAdmin, async (req, res) =
         user.isFrozen = !user.isFrozen;
         await user.save();
 
+        await logAction(
+            req.user, 
+            user.isFrozen ? 'freeze_user' : 'unfreeze_user', 
+            `${user.isFrozen ? 'Frozen' : 'Unfrozen'} access for agent: ${user.username}`, 
+            user._id, 
+            adminDisplayName
+        );
+
         res.json({ message: `User ${user.isFrozen ? 'frozen' : 'unfrozen'} successfully`, isFrozen: user.isFrozen });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -61,6 +71,7 @@ router.patch('/admin/:id/freeze', authenticateToken, isAdmin, async (req, res) =
 // Reset user password (Admin only)
 router.post('/admin/:id/reset-password', authenticateToken, isAdmin, async (req, res) => {
     try {
+        const { adminDisplayName } = req.body;
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -70,6 +81,14 @@ router.post('/admin/:id/reset-password', authenticateToken, isAdmin, async (req,
         user.password = await bcrypt.hash(tempPassword, salt);
 
         await user.save();
+
+        await logAction(
+            req.user, 
+            'reset_password', 
+            `Issued emergency password reset for agent: ${user.username}`, 
+            user._id, 
+            adminDisplayName
+        );
 
         res.json({
             message: 'Password reset successful',
@@ -83,25 +102,20 @@ router.post('/admin/:id/reset-password', authenticateToken, isAdmin, async (req,
 // Toggle showInLeaderboard status (Admin only)
 router.patch('/admin/:id/leaderboard-toggle', authenticateToken, isAdmin, async (req, res) => {
     try {
+        const { adminDisplayName } = req.body;
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         user.showInLeaderboard = !user.showInLeaderboard;
         await user.save();
 
-        // Log action if AuditLog is available (optional but good)
-        try {
-            const AuditLog = (await import('../models/AuditLog.js')).default;
-            await AuditLog.create({
-                adminId: req.user.id,
-                adminName: req.user.username,
-                action: 'leaderboard_toggle',
-                details: `${user.showInLeaderboard ? 'Restored' : 'Removed'} ${user.username} ${user.showInLeaderboard ? 'to' : 'from'} leaderboard`,
-                targetId: user._id
-            });
-        } catch (logErr) {
-            console.error("Audit Log Failure:", logErr);
-        }
+        await logAction(
+            req.user, 
+            'leaderboard_toggle', 
+            `${user.showInLeaderboard ? 'Restored' : 'Removed'} ${user.username} ${user.showInLeaderboard ? 'to' : 'from'} leaderboard`, 
+            user._id, 
+            adminDisplayName
+        );
 
         res.json({ 
             message: `User ${user.showInLeaderboard ? 'restored to' : 'removed from'} leaderboard successfully`, 

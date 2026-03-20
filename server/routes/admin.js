@@ -7,23 +7,11 @@ import SystemSetting from '../models/SystemSetting.js';
 import Event from '../models/Event.js';
 import NewsItem from '../models/NewsItem.js';
 import { authenticateToken, isAdmin } from '../middleware/auth.js';
+import { logAction } from '../utils/logger.js';
 
 const router = express.Router();
 
 // Helper to log admin actions
-const logAction = async (admin, action, details, targetId = null, adminDisplayName = null) => {
-    try {
-        await AuditLog.create({
-            adminId: admin.id,
-            adminName: adminDisplayName || admin.username,
-            action,
-            details,
-            targetId
-        });
-    } catch (err) {
-        console.error("Audit Log Failure:", err);
-    }
-};
 
 // GET /api/admin/stats — System Analytics
 router.get('/stats', authenticateToken, isAdmin, async (req, res) => {
@@ -152,7 +140,12 @@ router.get('/maintenance/status', authenticateToken, isAdmin, async (req, res) =
 // DELETE /api/admin/logs/:id — Remove specific log
 router.delete('/logs/:id', authenticateToken, isAdmin, async (req, res) => {
     try {
-        await AuditLog.findByIdAndDelete(req.params.id);
+        const { adminDisplayName } = req.body;
+        const log = await AuditLog.findById(req.params.id);
+        if (log) {
+            await logAction(req.user, 'delete_log', `Removed specific log entry: ${log.action} by ${log.adminName}`, req.params.id, adminDisplayName);
+            await AuditLog.findByIdAndDelete(req.params.id);
+        }
         res.json({ message: "Log entry removed" });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -254,11 +247,11 @@ router.get('/events', authenticateToken, isAdmin, async (req, res) => {
 // POST /api/admin/events — Create new global event
 router.post('/events', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const { title, description, type, multiplier, expiresAt } = req.body;
+        const { title, description, type, multiplier, expiresAt, adminDisplayName } = req.body;
         const event = new Event({ title, description, type, multiplier, expiresAt });
         await event.save();
         
-        await logAction(req.user, 'create_event', `Created ${type} event: ${title}`, null, adminDisplayName);
+        await logAction(req.user, 'create_event', `Created ${type} event: ${title}`, event._id, adminDisplayName);
         
         // Notify via socket
         const io = req.app.get('io');
@@ -273,6 +266,7 @@ router.post('/events', authenticateToken, isAdmin, async (req, res) => {
 // DELETE /api/admin/events/:id — Cancel an event
 router.delete('/events/:id', authenticateToken, isAdmin, async (req, res) => {
     try {
+        const { adminDisplayName } = req.body;
         const event = await Event.findByIdAndDelete(req.params.id);
         if (!event) return res.status(404).json({ message: 'Event not found' });
         
@@ -286,6 +280,7 @@ router.delete('/events/:id', authenticateToken, isAdmin, async (req, res) => {
 // PATCH /api/admin/scenarios/:id/feature — Pin/Unpin scenario
 router.patch('/scenarios/:id/feature', authenticateToken, isAdmin, async (req, res) => {
     try {
+        const { adminDisplayName } = req.body;
         const scenario = await UgcScenario.findById(req.params.id);
         if (!scenario) return res.status(404).json({ message: 'Scenario not found' });
 
@@ -428,10 +423,13 @@ router.post('/news', authenticateToken, isAdmin, async (req, res) => {
 
 router.patch('/news/:id/toggle', authenticateToken, isAdmin, async (req, res) => {
     try {
+        const { adminDisplayName } = req.body;
         const news = await NewsItem.findById(req.params.id);
         if (!news) return res.status(404).json({ message: 'News item not found' });
         news.isActive = !news.isActive;
         await news.save();
+        
+        await logAction(req.user, 'toggle_news', `${news.isActive ? 'Activated' : 'Deactivated'} news item: ${news.title}`, news._id, adminDisplayName);
         res.json(news);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -440,7 +438,12 @@ router.patch('/news/:id/toggle', authenticateToken, isAdmin, async (req, res) =>
 
 router.delete('/news/:id', authenticateToken, isAdmin, async (req, res) => {
     try {
-        await NewsItem.findByIdAndDelete(req.params.id);
+        const { adminDisplayName } = req.body;
+        const news = await NewsItem.findById(req.params.id);
+        if (news) {
+            await logAction(req.user, 'delete_news', `Deleted news item: ${news.title}`, req.params.id, adminDisplayName);
+            await NewsItem.findByIdAndDelete(req.params.id);
+        }
         res.json({ message: 'News item deleted' });
     } catch (error) {
         res.status(500).json({ message: error.message });

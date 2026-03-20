@@ -2,6 +2,7 @@ import express from 'express';
 import UgcScenario from '../models/UgcScenario.js';
 import { authenticateToken, isAdmin } from '../middleware/auth.js';
 import { sendEmail, emailTemplates } from '../utils/mail.js';
+import { logAction } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -92,7 +93,7 @@ router.get('/admin/live', authenticateToken, isAdmin, async (req, res) => {
 // Moderate a scenario (approve/reject)
 router.patch('/:id/moderate', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const { status } = req.body;
+        const { status, adminDisplayName } = req.body;
         if (!['approved', 'rejected'].includes(status)) {
             return res.status(400).json({ message: 'Invalid status' });
         }
@@ -103,6 +104,14 @@ router.patch('/:id/moderate', authenticateToken, isAdmin, async (req, res) => {
         scenario.status = status;
         scenario.published = (status === 'approved');
         await scenario.save();
+
+        await logAction(
+            req.user, 
+            status === 'approved' ? 'approve_scenario' : 'reject_scenario', 
+            `${status === 'approved' ? 'Approved' : 'Rejected'} scenario: ${scenario.title}`, 
+            scenario._id, 
+            adminDisplayName
+        );
 
         // Send email notification to author
         try {
@@ -133,13 +142,21 @@ router.patch('/:id/moderate', authenticateToken, isAdmin, async (req, res) => {
 // Admin toggle scenario bounty
 router.patch('/admin/:id/bounty', authenticateToken, isAdmin, async (req, res) => {
     try {
+        const { adminDisplayName } = req.body;
         const scenario = await UgcScenario.findById(req.params.id);
         if (!scenario) return res.status(404).json({ message: 'Scenario not found' });
         
         scenario.isBountied = !scenario.isBountied;
         await scenario.save();
         
-        // Log the bounty action if logAction is available (optional but good practice)
+        await logAction(
+            req.user, 
+            'toggle_bounty', 
+            `${scenario.isBountied ? 'Placed' : 'Removed'} bounty on scenario: ${scenario.title}`, 
+            scenario._id, 
+            adminDisplayName
+        );
+
         res.json({ message: `Bounty ${scenario.isBountied ? 'placed on' : 'removed from'} scenario`, isBountied: scenario.isBountied });
     } catch (error) {
         res.status(500).json({ message: error.message });

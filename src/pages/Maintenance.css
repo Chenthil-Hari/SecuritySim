@@ -149,10 +149,21 @@
 
     .maintenance-container {
         padding: 1.5rem;
+        margin: 1rem;
+    }
+
+    .maintenance-image-wrapper {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 1.5rem;
+    }
+
+    .maintenance-image {
+        max-width: 60px;
     }
 
     .maintenance-container h1 {
-        font-size: 1.6rem;
+        font-size: 1.5rem;
     }
 
     .maintenance-container p {
