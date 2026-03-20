@@ -11,11 +11,11 @@ import { authenticateToken, isAdmin } from '../middleware/auth.js';
 const router = express.Router();
 
 // Helper to log admin actions
-const logAction = async (admin, action, details, targetId = null) => {
+const logAction = async (admin, action, details, targetId = null, adminDisplayName = null) => {
     try {
         await AuditLog.create({
             adminId: admin.id,
-            adminName: admin.username,
+            adminName: adminDisplayName || admin.username,
             action,
             details,
             targetId
@@ -86,10 +86,10 @@ router.get('/stats', authenticateToken, isAdmin, async (req, res) => {
 // POST /api/admin/broadcast — Global System Alert
 router.post('/broadcast', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const { message, type = 'info' } = req.body;
+        const { message, type = 'info', adminDisplayName } = req.body;
         if (!message) return res.status(400).json({ message: "Message is required" });
 
-        // Emission is handled by the main app instance via req.app.get('io')
+        // Emission is handled by the main main app instance via req.app.get('io')
         const io = req.app.get('io');
         if (io) {
             console.log(`📣 Broadcasting message: "${message.substring(0, 30)}..." [Type: ${type}]`);
@@ -100,7 +100,7 @@ router.post('/broadcast', authenticateToken, isAdmin, async (req, res) => {
                 timestamp: new Date()
             });
 
-            await logAction(req.user, 'broadcast', `Sent global alert: "${message.substring(0, 30)}..."`);
+            await logAction(req.user, 'broadcast', `Sent global alert: "${message.substring(0, 30)}..."`, null, adminDisplayName);
             res.json({ message: "Broadcast deployed successfully" });
         } else {
             console.error("❌ Socket.io instance NOT found on req.app");
@@ -114,7 +114,7 @@ router.post('/broadcast', authenticateToken, isAdmin, async (req, res) => {
 // POST /api/admin/maintenance — Toggle Maintenance Mode
 router.post('/maintenance', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const { enabled } = req.body;
+        const { enabled, adminDisplayName } = req.body;
 
         await SystemSetting.findOneAndUpdate(
             { key: 'maintenance_mode' },
@@ -126,7 +126,7 @@ router.post('/maintenance', authenticateToken, isAdmin, async (req, res) => {
             { upsert: true, new: true }
         );
 
-        await logAction(req.user, 'toggle_maintenance', `Set Maintenance Mode to ${enabled}`);
+        await logAction(req.user, 'toggle_maintenance', `Set Maintenance Mode to ${enabled}`, null, adminDisplayName);
 
         const io = req.app.get('io');
         if (io) {
@@ -162,9 +162,10 @@ router.delete('/logs/:id', authenticateToken, isAdmin, async (req, res) => {
 // DELETE /api/admin/logs — Clear all logs
 router.delete('/logs', authenticateToken, isAdmin, async (req, res) => {
     try {
+        const { adminDisplayName } = req.body;
         await AuditLog.deleteMany({});
         // Log this destructive action!
-        await logAction(req.user, 'clear_logs', 'All audit logs were cleared from the system.');
+        await logAction(req.user, 'clear_logs', 'All audit logs were cleared from the system.', null, adminDisplayName);
         res.json({ message: "All logs cleared" });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -213,7 +214,7 @@ router.get('/assets', authenticateToken, isAdmin, async (req, res) => {
 // DELETE /api/admin/assets — Takedown an image
 router.delete('/assets', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const { id, type } = req.body; // type is 'user_profile' or 'scenario_image'
+        const { id, type, adminDisplayName } = req.body; // type is 'user_profile' or 'scenario_image'
         if (!id || !type) return res.status(400).json({ message: "Asset ID and Type are required" });
 
         if (type === 'user_profile') {
@@ -222,14 +223,14 @@ router.delete('/assets', authenticateToken, isAdmin, async (req, res) => {
             const oldUrl = user.profilePhoto;
             user.profilePhoto = ''; // Clear it
             await user.save();
-            await logAction(req.user, 'asset_takedown', `Removed profile picture for ${user.username} (${oldUrl})`);
+            await logAction(req.user, 'asset_takedown', `Removed profile picture for ${user.username} (${oldUrl})`, id, adminDisplayName);
         } else if (type === 'scenario_image') {
             const scenario = await UgcScenario.findById(id);
             if (!scenario) return res.status(404).json({ message: "Scenario not found" });
             const oldUrl = scenario.visualData.imageUrl;
             scenario.visualData.imageUrl = ''; // Clear it
             await scenario.save();
-            await logAction(req.user, 'asset_takedown', `Removed image from scenario "${scenario.title}" (${oldUrl})`);
+            await logAction(req.user, 'asset_takedown', `Removed image from scenario "${scenario.title}" (${oldUrl})`, id, adminDisplayName);
         } else {
             return res.status(400).json({ message: "Invalid asset type" });
         }
@@ -257,7 +258,7 @@ router.post('/events', authenticateToken, isAdmin, async (req, res) => {
         const event = new Event({ title, description, type, multiplier, expiresAt });
         await event.save();
         
-        await logAction(req.user, 'create_event', `Created ${type} event: ${title}`);
+        await logAction(req.user, 'create_event', `Created ${type} event: ${title}`, null, adminDisplayName);
         
         // Notify via socket
         const io = req.app.get('io');
@@ -275,7 +276,7 @@ router.delete('/events/:id', authenticateToken, isAdmin, async (req, res) => {
         const event = await Event.findByIdAndDelete(req.params.id);
         if (!event) return res.status(404).json({ message: 'Event not found' });
         
-        await logAction(req.user, 'cancel_event', `Canceled event: ${event.title}`);
+        await logAction(req.user, 'cancel_event', `Canceled event: ${event.title}`, req.params.id, adminDisplayName);
         res.json({ message: 'Event canceled' });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -291,7 +292,7 @@ router.patch('/scenarios/:id/feature', authenticateToken, isAdmin, async (req, r
         scenario.isFeatured = !scenario.isFeatured;
         await scenario.save();
 
-        await logAction(req.user, 'feature_scenario', `${scenario.isFeatured ? 'Featured' : 'Unfeatured'} scenario: ${scenario.title}`);
+        await logAction(req.user, 'feature_scenario', `${scenario.isFeatured ? 'Featured' : 'Unfeatured'} scenario: ${scenario.title}`, scenario._id, adminDisplayName);
         res.json({ isFeatured: scenario.isFeatured });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -322,7 +323,7 @@ router.get('/settings/maintenance', authenticateToken, isAdmin, async (req, res)
 
 router.patch('/settings/maintenance', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const { isActive, expectedReturn } = req.body;
+        const { isActive, expectedReturn, adminDisplayName } = req.body;
         
         if (isActive === undefined) {
             return res.status(400).json({ message: "Payload error: isActive is required." });
@@ -343,7 +344,9 @@ router.patch('/settings/maintenance', authenticateToken, isAdmin, async (req, re
         await logAction(
             req.user, 
             isActive ? 'maintenance_on' : 'maintenance_off', 
-            `Global Maintenance Mode toggled to ${isActive ? 'ACTIVE' : 'INACTIVE'}${expectedReturn ? ` (Expected Return: ${expectedReturn})` : ''}`
+            `Global Maintenance Mode toggled to ${isActive ? 'ACTIVE' : 'INACTIVE'}${expectedReturn ? ` (Expected Return: ${expectedReturn})` : ''}`,
+            null,
+            adminDisplayName
         );
 
         res.json({ 
@@ -381,13 +384,13 @@ router.get('/settings/features', authenticateToken, isAdmin, async (req, res) =>
 
 router.patch('/settings/features', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const { toggles } = req.body;
+        const { toggles, adminDisplayName } = req.body;
         const setting = await SystemSetting.findOneAndUpdate(
             { key: 'feature_toggles' },
             { $set: { value: toggles, updatedAt: new Date(), updatedBy: req.user.id } },
             { upsert: true, new: true }
         );
-        await logAction(req.user, 'update_features', `Updated feature toggles: ${Object.keys(toggles).filter(k => toggles[k]).join(', ')}`);
+        await logAction(req.user, 'update_features', `Updated feature toggles: ${Object.keys(toggles).filter(k => toggles[k]).join(', ')}`, null, adminDisplayName);
         res.json(setting.value);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -406,7 +409,7 @@ router.get('/news/admin', authenticateToken, isAdmin, async (req, res) => {
 
 router.post('/news', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const { title, message, type, priority, expiresAt } = req.body;
+        const { title, message, type, priority, expiresAt, adminDisplayName } = req.body;
         const news = new NewsItem({
             title,
             message,
@@ -416,7 +419,7 @@ router.post('/news', authenticateToken, isAdmin, async (req, res) => {
             createdBy: req.user.id
         });
         await news.save();
-        await logAction(req.user, 'create_news', `Created news: ${title}`);
+        await logAction(req.user, 'create_news', `Created news: ${title}`, null, adminDisplayName);
         res.status(201).json(news);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -447,7 +450,7 @@ router.delete('/news/:id', authenticateToken, isAdmin, async (req, res) => {
 // --- User Enforcement (Banning) ---
 router.patch('/users/:id/ban', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const { reason } = req.body;
+        const { reason, adminDisplayName } = req.body;
         if (!reason) return res.status(400).json({ message: "Ban reason is required" });
 
         const user = await User.findById(req.params.id);
@@ -462,12 +465,12 @@ router.patch('/users/:id/ban', authenticateToken, isAdmin, async (req, res) => {
         user.enforcementHistory.push({
             action: 'ban',
             reason,
-            adminName: req.user.username,
+            adminName: adminDisplayName || req.user.username,
             timestamp: new Date()
         });
 
         await user.save();
-        await logAction(req.user, 'ban_user', `Banned user ${user.username}. Reason: ${reason}`, user._id);
+        await logAction(req.user, 'ban_user', `Banned user ${user.username}. Reason: ${reason}`, user._id, adminDisplayName);
 
         res.json({ message: `User ${user.username} has been permanently banned`, isBanned: true });
     } catch (error) {
@@ -477,6 +480,7 @@ router.patch('/users/:id/ban', authenticateToken, isAdmin, async (req, res) => {
 
 router.patch('/users/:id/unban', authenticateToken, isAdmin, async (req, res) => {
     try {
+        const { adminDisplayName } = req.body;
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -484,12 +488,12 @@ router.patch('/users/:id/unban', authenticateToken, isAdmin, async (req, res) =>
         user.enforcementHistory.push({
             action: 'unban',
             reason: 'Enforcement action lifted by administrator',
-            adminName: req.user.username,
+            adminName: adminDisplayName || req.user.username,
             timestamp: new Date()
         });
 
         await user.save();
-        await logAction(req.user, 'unban_user', `Lifted ban for user ${user.username}`, user._id);
+        await logAction(req.user, 'unban_user', `Lifted ban for user ${user.username}`, user._id, adminDisplayName);
 
         res.json({ message: `Ban lifted for user ${user.username}`, isBanned: false });
     } catch (error) {
@@ -500,6 +504,7 @@ router.patch('/users/:id/unban', authenticateToken, isAdmin, async (req, res) =>
 // PATCH /api/admin/users/:id/verify — Force verify an agent
 router.patch('/users/:id/verify', authenticateToken, isAdmin, async (req, res) => {
     try {
+        const { adminDisplayName } = req.body;
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -510,12 +515,12 @@ router.patch('/users/:id/verify', authenticateToken, isAdmin, async (req, res) =
         user.enforcementHistory.push({
             action: 'force_verify',
             reason: 'Manual identity verification override by administrator',
-            adminName: req.user.username,
+            adminName: adminDisplayName || req.user.username,
             timestamp: new Date()
         });
 
         await user.save();
-        await logAction(req.user, 'force_verify', `Manually verified identity for user ${user.username}`, user._id);
+        await logAction(req.user, 'force_verify', `Manually verified identity for user ${user.username}`, user._id, adminDisplayName);
 
         res.json({ message: `Identity verified for user ${user.username}`, isVerified: true });
     } catch (error) {
@@ -563,6 +568,7 @@ router.get('/vitals', authenticateToken, isAdmin, async (req, res) => {
 // POST /api/admin/vitals/recalculate-scores — Maintenance Sync
 router.post('/vitals/recalculate-scores', authenticateToken, isAdmin, async (req, res) => {
     try {
+        const { adminDisplayName } = req.body;
         let userAdjustments = 0;
         let teamAdjustments = 0;
 
@@ -589,7 +595,7 @@ router.post('/vitals/recalculate-scores', authenticateToken, isAdmin, async (req
             }
         }
 
-        await logAction(req.user, 'SYSTEM_MAINTENANCE', `Manual Score Sync complete. Adjustments: ${userAdjustments} agents, ${teamAdjustments} teams.`);
+        await logAction(req.user, 'SYSTEM_MAINTENANCE', `Manual Score Sync complete. Adjustments: ${userAdjustments} agents, ${teamAdjustments} teams.`, null, adminDisplayName);
 
         res.json({
             message: "Data integrity restored.",

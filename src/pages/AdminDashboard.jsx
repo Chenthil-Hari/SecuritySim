@@ -34,6 +34,17 @@ export default function AdminDashboard() {
     const [banModal, setBanModal] = useState({ isOpen: false, userId: null, username: '', reason: '' });
     const [vitals, setVitals] = useState(null);
     const [syncing, setSyncing] = useState(false);
+    const [adminNameModal, setAdminNameModal] = useState({ isOpen: false, pendingAction: null, actionLabel: '' });
+    const [adminDisplayName, setAdminDisplayName] = useState(sessionStorage.getItem('adminDisplayName') || '');
+    const [maintenanceDuration, setMaintenanceDuration] = useState('custom');
+
+    const requireAdminName = (actionLabel, callback) => {
+        if (adminDisplayName) {
+            callback(adminDisplayName);
+        } else {
+            setAdminNameModal({ isOpen: true, pendingAction: callback, actionLabel });
+        }
+    };
 
     useEffect(() => {
         if (user?.role !== 'admin') {
@@ -175,52 +186,57 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleRecalculateScores = async () => {
-        if (!confirm("This will rebuild level/score parity across all agents and teams. Proceed with global synchronization?")) return;
-        setSyncing(true);
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl('/api/admin/vitals/recalculate-scores'), {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if (res.ok) {
-                alert(`Success: ${data.message}\nAgents Adjusted: ${data.results.usersAdjusted}\nTeams Adjusted: ${data.results.teamsAdjusted}`);
-                fetchLogs();
-            } else {
-                alert("Operation failed: " + data.message);
+    const handleRecalculateScores = () => {
+        requireAdminName('Sync Global Scores', async (adminName) => {
+            if (!confirm("This will rebuild level/score parity across all agents and teams. Proceed with global synchronization?")) return;
+            setSyncing(true);
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl('/api/admin/vitals/recalculate-scores'), {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminDisplayName: adminName })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(`Success: ${data.message}\nAgents Adjusted: ${data.results.usersAdjusted}\nTeams Adjusted: ${data.results.teamsAdjusted}`);
+                    fetchLogs();
+                } else {
+                    alert("Operation failed: " + data.message);
+                }
+            } catch (err) {
+                alert("Maintenance Error: " + err.message);
+            } finally {
+                setSyncing(false);
             }
-        } catch (err) {
-            alert("Maintenance Error: " + err.message);
-        } finally {
-            setSyncing(false);
-        }
+        });
     };
 
-    const handleBroadcast = async (e) => {
+    const handleBroadcast = (e) => {
         e.preventDefault();
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl('/api/admin/broadcast'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(broadcast)
-            });
-            if (res.ok) {
-                alert("Global Alert Deployed!");
-                setBroadcast({ ...broadcast, message: '' });
-                fetchLogs();
-            } else {
-                const data = await res.json().catch(() => ({}));
-                alert(`Broadcast Failed: ${data.message || 'Server error'}`);
+        requireAdminName('Deploy Global Alert', async (adminName) => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl('/api/admin/broadcast'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ ...broadcast, adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    alert("Global Alert Deployed!");
+                    setBroadcast({ ...broadcast, message: '' });
+                    fetchLogs();
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    alert(`Broadcast Failed: ${data.message || 'Server error'}`);
+                }
+            } catch (err) {
+                alert("Broadcast Error: " + err.message);
             }
-        } catch (err) {
-            alert("Broadcast Error: " + err.message);
-        }
+        });
     };
 
     const fetchFeatureToggles = async () => {
@@ -247,44 +263,48 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleToggleFeatureFlag = async (feature) => {
-        const newToggles = { ...featureToggles, [feature]: !featureToggles[feature] };
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl('/api/admin/settings/features'), {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ toggles: newToggles })
-            });
-            if (res.ok) setFeatureToggles(newToggles);
-        } catch (err) {
-            alert("Failed to update feature: " + err.message);
-        }
+    const handleToggleFeatureFlag = (feature) => {
+        requireAdminName(`Toggle Feature: ${feature}`, async (adminName) => {
+            const newToggles = { ...featureToggles, [feature]: !featureToggles[feature] };
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl('/api/admin/settings/features'), {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ toggles: newToggles, adminDisplayName: adminName })
+                });
+                if (res.ok) setFeatureToggles(newToggles);
+            } catch (err) {
+                alert("Failed to update feature: " + err.message);
+            }
+        });
     };
 
-    const handleCreateNews = async (e) => {
+    const handleCreateNews = (e) => {
         e.preventDefault();
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl('/api/admin/news'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(newNews)
-            });
-            if (res.ok) {
-                alert("News Item Published!");
-                setNewNews({ title: '', message: '', type: 'info', priority: 0, expiresAt: '' });
-                fetchNews();
+        requireAdminName('Publish News', async (adminName) => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl('/api/admin/news'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ ...newNews, adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    alert("News Item Published!");
+                    setNewNews({ title: '', message: '', type: 'info', priority: 0, expiresAt: '' });
+                    fetchNews();
+                }
+            } catch (err) {
+                alert("Error publishing news: " + err.message);
             }
-        } catch (err) {
-            alert("Error publishing news: " + err.message);
-        }
+        });
     };
 
     const handleToggleNews = async (id) => {
@@ -432,121 +452,138 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleFreeze = async (userId) => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl(`/api/users/admin/${userId}/freeze`), {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setUsers(users.map(u => u._id === userId ? { ...u, isFrozen: data.isFrozen } : u));
-                alert(data.message);
+    const handleFreeze = (userId) => {
+        requireAdminName('Toggle Terminal Lock', async (adminName) => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl(`/api/users/admin/${userId}/freeze`), {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setUsers(users.map(u => u._id === userId ? { ...u, isFrozen: data.isFrozen } : u));
+                    alert(data.message);
+                }
+            } catch (err) {
+                alert("Error updating user status: " + err.message);
             }
-        } catch (err) {
-            alert("Error updating user status: " + err.message);
-        }
+        });
     };
 
-    const handleVerifyUser = async (userId) => {
-        if (!confirm("Manually verify this investigator's identity? This will bypass OTP verification.")) return;
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl(`/api/admin/users/${userId}/verify`), {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                setUsers(users.map(u => u._id === userId ? { ...u, isVerified: true } : u));
-                alert("Agent identity manually verified.");
-                fetchLogs();
-            } else {
-                const data = await res.json();
-                alert("Verification failed: " + data.message);
+    const handleVerifyUser = (userId) => {
+        requireAdminName('Force Identity Verification', async (adminName) => {
+            if (!confirm("Manually verify this investigator's identity? This will bypass OTP verification.")) return;
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl(`/api/admin/users/${userId}/verify`), {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    setUsers(users.map(u => u._id === userId ? { ...u, isVerified: true } : u));
+                    alert("Agent identity manually verified.");
+                    fetchLogs();
+                } else {
+                    const data = await res.json();
+                    alert("Verification failed: " + data.message);
+                }
+            } catch (err) {
+                alert("Error verifying user: " + err.message);
             }
-        } catch (err) {
-            alert("Error verifying user: " + err.message);
-        }
+        });
     };
 
-    const handleBan = async () => {
+    const handleBan = () => {
         if (!banModal.reason) return alert("Please provide a reason for the enforcement action.");
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl(`/api/admin/users/${banModal.userId}/ban`), {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ reason: banModal.reason })
-            });
-            if (res.ok) {
-                setUsers(users.map(u => u._id === banModal.userId ? { ...u, isBanned: true, banReason: banModal.reason } : u));
-                setBanModal({ isOpen: false, userId: null, username: '', reason: '' });
-                alert("Agent permanently suspended.");
-                fetchLogs();
+        requireAdminName('Ban Agent', async (adminName) => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl(`/api/admin/users/${banModal.userId}/ban`), {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ reason: banModal.reason, adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    setUsers(users.map(u => u._id === banModal.userId ? { ...u, isBanned: true, banReason: banModal.reason } : u));
+                    setBanModal({ isOpen: false, userId: null, username: '', reason: '' });
+                    alert("Agent permanently suspended.");
+                    fetchLogs();
+                }
+            } catch (err) {
+                alert("Ban Error: " + err.message);
             }
-        } catch (err) {
-            alert("Ban Error: " + err.message);
-        }
+        });
     };
 
-    const handleUnban = async (userId) => {
-        if (!confirm("Lift the suspension for this agent?")) return;
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl(`/api/admin/users/${userId}/unban`), {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                setUsers(users.map(u => u._id === userId ? { ...u, isBanned: false } : u));
-                alert("Agent access restored.");
-                fetchLogs();
+    const handleUnban = (userId) => {
+        requireAdminName('Lift Agent Ban', async (adminName) => {
+            if (!confirm("Lift the suspension for this agent?")) return;
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl(`/api/admin/users/${userId}/unban`), {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    setUsers(users.map(u => u._id === userId ? { ...u, isBanned: false } : u));
+                    alert("Agent access restored.");
+                    fetchLogs();
+                }
+            } catch (err) {
+                alert("Unban Error: " + err.message);
             }
-        } catch (err) {
-            alert("Unban Error: " + err.message);
-        }
+        });
     };
 
-    const handleResetPassword = async (userId) => {
-        if (!confirm("Are you sure you want to reset this user's password? A temporary password will be generated.")) return;
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl(`/api/users/admin/${userId}/reset-password`), {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                alert(`Password Reset Successful!\nTemporary Password: ${data.tempPassword}\n\nPlease provide this to the user.`);
+    const handleResetPassword = (userId) => {
+        requireAdminName('Reset Password Payload', async (adminName) => {
+            if (!confirm("Are you sure you want to reset this user's password? A temporary password will be generated.")) return;
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl(`/api/users/admin/${userId}/reset-password`), {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    alert(`Password Reset Successful!\nTemporary Password: ${data.tempPassword}\n\nPlease provide this to the user.`);
+                }
+            } catch (err) {
+                alert("Error resetting password: " + err.message);
             }
-        } catch (err) {
-            alert("Error resetting password: " + err.message);
-        }
+        });
     };
 
-    const handleToggleLeaderboard = async (userId) => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl(`/api/users/admin/${userId}/leaderboard-toggle`), {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setUsers(users.map(u => u._id === userId ? { ...u, showInLeaderboard: data.showInLeaderboard } : u));
-                alert(data.message);
-                fetchLogs();
-            } else {
-                const data = await res.json();
-                alert("Operation failed: " + data.message);
+    const handleToggleLeaderboard = (userId) => {
+        requireAdminName('Toggle Leaderboard Visibility', async (adminName) => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl(`/api/users/admin/${userId}/leaderboard-toggle`), {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setUsers(users.map(u => u._id === userId ? { ...u, showInLeaderboard: data.showInLeaderboard } : u));
+                    alert(data.message);
+                    fetchLogs();
+                } else {
+                    const data = await res.json();
+                    alert("Operation failed: " + data.message);
+                }
+            } catch (err) {
+                alert("Error toggling leaderboard status: " + err.message);
             }
-        } catch (err) {
-            alert("Error toggling leaderboard status: " + err.message);
-        }
+        });
     };
 
     const handleDeleteLog = async (logId) => {
@@ -564,175 +601,204 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleClearLogs = async () => {
-        if (!confirm("CRITICAL ACTION: Are you sure you want to PERMANENTLY ERASE all audit logs? This cannot be undone.")) return;
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl('/api/admin/logs'), {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                fetchLogs();
-                alert("Audit logs cleared successfully.");
+    const handleClearLogs = () => {
+        requireAdminName('Erase Action Logs', async (adminName) => {
+            if (!confirm("CRITICAL ACTION: Are you sure you want to PERMANENTLY ERASE all audit logs? This cannot be undone.")) return;
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl('/api/admin/logs'), {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    fetchLogs();
+                    alert("Audit logs cleared successfully.");
+                }
+            } catch (err) {
+                alert("Error clearing logs: " + err.message);
             }
-        } catch (err) {
-            alert("Error clearing logs: " + err.message);
-        }
+        });
     };
 
-    const handleModerate = async (id, status) => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl(`/api/ugc-scenarios/${id}/moderate`), {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ status })
-            });
-            if (res.ok) {
-                setScenarios(scenarios.filter(s => s._id !== id));
-                setStats(prev => ({ ...prev, pending: prev.pending - 1 }));
-                setActiveScenario(null);
-                const action = status === 'approved' ? 'Approved' : 'Rejected';
-                alert(`Scenario ${action} and updated successfully.`);
+    const handleModerate = (id, status) => {
+        requireAdminName(status === 'approved' ? 'Approve Scenario' : 'Reject Scenario', async (adminName) => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl(`/api/ugc-scenarios/${id}/moderate`), {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status, adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    setScenarios(scenarios.filter(s => s._id !== id));
+                    setStats(prev => ({ ...prev, pending: prev.pending - 1 }));
+                    setActiveScenario(null);
+                    const action = status === 'approved' ? 'Approved' : 'Rejected';
+                    alert(`Scenario ${action} and updated successfully.`);
+                }
+            } catch (err) {
+                alert("Error moderating scenario: " + err.message);
             }
-        } catch (err) {
-            alert("Error moderating scenario: " + err.message);
-        }
+        });
     };
 
-    const handleToggleBounty = async (id) => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl(`/api/ugc-scenarios/admin/${id}/bounty`), {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setLiveScenarios(liveScenarios.map(s => s._id === id ? { ...s, isBountied: data.isBountied } : s));
+    const handleToggleBounty = (id) => {
+        requireAdminName('Toggle XP Bounty', async (adminName) => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl(`/api/ugc-scenarios/admin/${id}/bounty`), {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setLiveScenarios(liveScenarios.map(s => s._id === id ? { ...s, isBountied: data.isBountied } : s));
+                }
+            } catch (err) {
+                alert("Error toggling bounty: " + err.message);
             }
-        } catch (err) {
-            alert("Error toggling bounty: " + err.message);
-        }
+        });
     };
 
-    const handleCreateEvent = async (e) => {
+    const handleCreateEvent = (e) => {
         e.preventDefault();
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl('/api/admin/events'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(newEvent)
-            });
-            if (res.ok) {
-                alert("Global Operation Deployed!");
-                setNewEvent({ title: '', description: '', type: 'XP_BOOST', multiplier: 2.0, expiresAt: '' });
-                fetchEvents();
+        requireAdminName('Deploy Operation Event', async (adminName) => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl('/api/admin/events'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ ...newEvent, adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    alert("Global Operation Deployed!");
+                    setNewEvent({ title: '', description: '', type: 'XP_BOOST', multiplier: 2.0, expiresAt: '' });
+                    fetchEvents();
+                }
+            } catch (err) {
+                alert("Error creating event: " + err.message);
             }
-        } catch (err) {
-            alert("Error creating event: " + err.message);
-        }
+        });
     };
 
-    const handleCancelEvent = async (id) => {
-        if (!confirm("Are you sure you want to cancel this operation?")) return;
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl(`/api/admin/events/${id}`), {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                fetchEvents();
-                alert("Operation Terminated.");
+    const handleCancelEvent = (id) => {
+        requireAdminName('Cancel Operation', async (adminName) => {
+            if (!confirm("Are you sure you want to cancel this operation?")) return;
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl(`/api/admin/events/${id}`), {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    fetchEvents();
+                    alert("Operation Terminated.");
+                }
+            } catch (err) {
+                alert("Error canceling event: " + err.message);
             }
-        } catch (err) {
-            alert("Error canceling event: " + err.message);
-        }
+        });
     };
 
-    const handleToggleFeature = async (id) => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl(`/api/admin/scenarios/${id}/feature`), {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setLiveScenarios(liveScenarios.map(s => s._id === id ? { ...s, isFeatured: data.isFeatured } : s));
+    const handleToggleFeature = (id) => {
+        requireAdminName('Toggle Scenario Pin', async (adminName) => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl(`/api/admin/scenarios/${id}/feature`), {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminDisplayName: adminName })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setLiveScenarios(liveScenarios.map(s => s._id === id ? { ...s, isFeatured: data.isFeatured } : s));
+                }
+            } catch (err) {
+                alert("Error pinning scenario: " + err.message);
             }
-        } catch (err) {
-            alert("Error pinning scenario: " + err.message);
-        }
+        });
     };
 
-    const handleToggleMaintenance = async () => {
+    const handleToggleMaintenance = () => {
         const action = !isMaintenanceMode ? 'ACTIVATE' : 'DEACTIVATE';
-        if (!window.confirm(`Are you sure you want to ${action} Global Maintenance Mode? Non-admin users will be blocked.`)) {
-            return;
-        }
-        
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl('/api/admin/settings/maintenance'), {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ 
-                    isActive: !isMaintenanceMode,
-                    expectedReturn: expectedReturn 
-                })
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                setIsMaintenanceMode(data.isActive);
-                setExpectedReturn(data.expectedReturn || '');
-                window.alert(`Maintenance mode ${data.isActive ? 'ENABLED' : 'DISABLED'}`);
-                fetchLogs();
-            } else {
-                const errData = await res.json().catch(() => ({}));
-                window.alert(`Failed to toggle maintenance: ${errData.message || 'Server error'}`);
+        requireAdminName(`${action} System Lockdown`, async (adminName) => {
+            if (!window.confirm(`Are you sure you want to ${action} Global Maintenance Mode? Non-admin users will be blocked.`)) {
+                return;
             }
-        } catch (err) {
-            window.alert("Error toggling maintenance: " + err.message);
-        }
+            
+            try {
+                const token = localStorage.getItem('token');
+                
+                // Calculate expectedReturn if 'custom' is not selected but duration is
+                let returnTime = expectedReturn;
+                if (!isMaintenanceMode && maintenanceDuration !== 'custom') {
+                    const ms = parseInt(maintenanceDuration) * 60 * 1000;
+                    returnTime = new Date(Date.now() + ms).toISOString();
+                }
+
+                const res = await fetch(buildApiUrl('/api/admin/settings/maintenance'), {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        isActive: !isMaintenanceMode,
+                        expectedReturn: returnTime,
+                        adminDisplayName: adminName
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    setIsMaintenanceMode(data.isActive);
+                    setExpectedReturn(data.expectedReturn || '');
+                    window.alert(`Maintenance mode ${data.isActive ? 'ENABLED' : 'DISABLED'}`);
+                    fetchLogs();
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    window.alert(`Failed to toggle maintenance: ${errData.message || 'Server error'}`);
+                }
+            } catch (err) {
+                window.alert("Error toggling maintenance: " + err.message);
+            }
+        });
     };
 
-    const handleAssetTakedown = async (assetId, assetType) => {
-        if (!confirm("Are you sure you want to take down this specific image? This will permanently remove it.")) return;
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl('/api/admin/assets'), {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ id: assetId, type: assetType })
-            });
+    const handleAssetTakedown = (assetId, assetType) => {
+        requireAdminName('Takedown Asset', async (adminName) => {
+            if (!confirm("Are you sure you want to take down this specific image? This will permanently remove it.")) return;
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl('/api/admin/assets'), {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ id: assetId, type: assetType, adminDisplayName: adminName })
+                });
 
-            if (res.ok) {
-                setAssets(assets.filter(a => !(a._id === assetId && a.type === assetType)));
-                alert("Image successfully removed from platform.");
-            } else {
-                const data = await res.json();
-                alert(data.message || "Failed to remove image");
+                if (res.ok) {
+                    setAssets(assets.filter(a => !(a._id === assetId && a.type === assetType)));
+                    alert("Image successfully removed from platform.");
+                } else {
+                    const data = await res.json();
+                    alert(data.message || "Failed to remove image");
+                }
+            } catch (err) {
+                alert("Error removing asset: " + err.message);
             }
-        } catch (err) {
-            alert("Error removing asset: " + err.message);
-        }
+        });
     };
 
     const handleLogout = () => {
@@ -1093,6 +1159,34 @@ export default function AdminDashboard() {
                             {isMaintenanceMode ? 'SYSTEM LOCKED' : 'SYSTEM LIVE'}
                         </button>
                     </div>
+                    
+                    {!isMaintenanceMode && (
+                        <div className="maintenance-duration-picker" style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: '#8b949e' }}>Expected Duration</label>
+                            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                                {['30', '60', '120', 'custom'].map(val => (
+                                    <button 
+                                        key={val}
+                                        type="button"
+                                        className={`btn-filter ${maintenanceDuration === val ? 'active' : ''}`}
+                                        onClick={() => setMaintenanceDuration(val)}
+                                        style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem' }}
+                                    >
+                                        {val === 'custom' ? 'Custom' : `${val}m`}
+                                    </button>
+                                ))}
+                            </div>
+                            {maintenanceDuration === 'custom' && (
+                                <input 
+                                    type="datetime-local" 
+                                    value={expectedReturn} 
+                                    onChange={e => setExpectedReturn(e.target.value)} 
+                                    style={{ width: '100%', padding: '0.5rem', background: '#0d1117', border: '1px solid #30363d', color: 'white', borderRadius: '4px' }}
+                                />
+                            )}
+                        </div>
+                    )}
+
                     <div className="feature-grid" style={{ marginTop: '1.5rem' }}>
                         {Object.entries(featureToggles).map(([key, value]) => (
                             <div key={key} className="feature-toggle-item">
@@ -1110,12 +1204,24 @@ export default function AdminDashboard() {
                     <div className="audit-log-section">
                         <h4>Mission Logs</h4>
                         <div className="mini-log-list">
-                            {logs.slice(0, 15).map(log => (
-                                <div key={log._id} className="mini-log-entry">
-                                    <span className="log-time">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                                    <span className="log-text">{log.details}</span>
-                                </div>
-                            ))}
+                            {logs.slice(0, 15).map(log => {
+                                // Extract admin name if available (assuming it's prepended to details like "AdminName — Action")
+                                let logText = log.details;
+                                let adminName = '';
+                                if (log.adminName) {
+                                    adminName = log.adminName;
+                                }
+                                
+                                return (
+                                    <div key={log._id} className="mini-log-entry">
+                                        <span className="log-time">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                                        <span className="log-text">
+                                            {adminName && <strong style={{ color: 'var(--accent)', marginRight: '5px' }}>[{adminName}]</strong>}
+                                            {logText}
+                                        </span>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
@@ -1179,7 +1285,10 @@ export default function AdminDashboard() {
                     {logs.slice(0, 10).map(log => (
                         <div key={log._id} className="vitals-log-entry">
                             <span className="log-badge">{log.action}</span>
-                            <span className="log-msg">{log.details}</span>
+                            <span className="log-msg">
+                                {log.adminName && <strong style={{color: 'var(--accent)', marginRight: '5px'}}>({log.adminName})</strong>}
+                                {log.details}
+                            </span>
                         </div>
                     ))}
                 </div>
@@ -1219,6 +1328,50 @@ export default function AdminDashboard() {
                     )}
                 </div>
             </main>
+
+            {/* Admin Name Prompt Modal */}
+            {adminNameModal.isOpen && (
+                <div className="review-overlay" onClick={() => setAdminNameModal({ isOpen: false, pendingAction: null, actionLabel: '' })}>
+                    <div className="review-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+                        <div className="modal-header">
+                            <h2>Authentication Required</h2>
+                            <button className="close-btn" onClick={() => setAdminNameModal({ isOpen: false, pendingAction: null, actionLabel: '' })}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            <p style={{ marginBottom: '1rem', color: '#8b949e' }}>
+                                You are about to execute: <strong style={{ color: 'white' }}>{adminNameModal.actionLabel}</strong>.
+                                Provide your name for the official audit log.
+                            </p>
+                            <input 
+                                type="text" 
+                                placeholder="Your Name/Callsign..." 
+                                style={{ width: '100%', padding: '0.8rem', background: '#0d1117', border: '1px solid #30363d', color: 'white', borderRadius: '4px', fontSize: '1rem' }}
+                                value={adminDisplayName || ''}
+                                onChange={e => {
+                                    setAdminDisplayName(e.target.value);
+                                    sessionStorage.setItem('adminDisplayName', e.target.value);
+                                }}
+                                autoFocus
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && adminDisplayName.trim()) {
+                                        const action = adminNameModal.pendingAction;
+                                        setAdminNameModal({ isOpen: false, pendingAction: null, actionLabel: '' });
+                                        if (action) action(adminDisplayName.trim());
+                                    }
+                                }}
+                            />
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn-view" onClick={() => setAdminNameModal({ isOpen: false, pendingAction: null, actionLabel: '' })}>Abort</button>
+                            <button className="btn-approve" disabled={!adminDisplayName.trim()} onClick={() => {
+                                const action = adminNameModal.pendingAction;
+                                setAdminNameModal({ isOpen: false, pendingAction: null, actionLabel: '' });
+                                if (action) action(adminDisplayName.trim());
+                            }}>Authorize</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {activeScenario && (
                 <div className="review-overlay" onClick={() => setActiveScenario(null)}>

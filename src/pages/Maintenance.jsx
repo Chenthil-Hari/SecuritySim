@@ -1,4 +1,5 @@
-import { Shield, AlertTriangle, Clock } from 'lucide-react';
+import { AlertTriangle, Clock } from 'lucide-react';
+import maintenanceImg from '../assets/maintaince.png';
 import './Maintenance.css';
 
 export default function Maintenance({ expectedReturn }) {
@@ -21,9 +22,8 @@ export default function Maintenance({ expectedReturn }) {
     return (
         <div className="maintenance-page">
             <div className="maintenance-container">
-                <div className="maintenance-icon">
-                    <Shield size={64} className="shield-glow" />
-                    <AlertTriangle size={32} className="warning-overlay" />
+                <div className="maintenance-image-wrapper">
+                    <img src={maintenanceImg} alt="System Maintenance" className="maintenance-image" />
                 </div>
                 
                 <h1>System Lockdown Active</h1>
