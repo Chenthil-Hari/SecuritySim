@@ -39,6 +39,12 @@ export const AuthProvider = ({ children }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             });
+            
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new Error('Server returned an invalid response. This often happens if the Vercel backend crashed or environment variables are missing.');
+            }
+            
             const data = await response.json();
             if (!response.ok) {
                 const err = new Error(data.message || 'Login failed');
@@ -61,6 +67,12 @@ export const AuthProvider = ({ children }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             });
+            
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new Error('Server returned an invalid response. Check backend logs or Vercel configuration.');
+            }
+            
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'Administrative login failed');
 
@@ -80,6 +92,12 @@ export const AuthProvider = ({ children }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password, country }),
             });
+            
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new Error('Server returned an invalid response. Please check backend logs or Vercel configuration.');
+            }
+            
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'Signup failed');
             localStorage.setItem('token', data.token);
@@ -108,6 +126,11 @@ export const AuthProvider = ({ children }) => {
             }
 
             if (response.ok) {
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    console.error("Non-JSON response received for status check.");
+                    return;
+                }
                 const data = await response.json();
                 if (data.isFrozen !== user.isFrozen) {
                     const updatedUser = { ...user, isFrozen: data.isFrozen };
