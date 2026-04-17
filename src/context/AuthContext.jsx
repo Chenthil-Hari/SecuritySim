@@ -111,7 +111,7 @@ export const AuthProvider = ({ children }) => {
             checkFreezeStatus,
             register: signup // Alias for compatibility
         }}>
-            {(!isClerkLoaded || loading) ? <Loader /> : children}
+            {!isClerkLoaded ? <Loader /> : children}
         </AuthContext.Provider>
     );
 };
