@@ -73,6 +73,14 @@ const userSchema = new mongoose.Schema({
         type: [String],
         default: []
     },
+    weeklyXp: {
+        type: Number,
+        default: 0
+    },
+    weeklyScenarios: {
+        type: Number,
+        default: 0
+    },
     teamId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Team',

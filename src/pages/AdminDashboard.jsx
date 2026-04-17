@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, CheckCircle, XCircle, Eye, AlertCircle, Clock, Search, LogOut, ExternalLink, Lock, BarChart2, Radio, Star, X, Zap, Download, FileText, Activity, Database, RefreshCw, Server, Award } from 'lucide-react';
+import { Shield, CheckCircle, XCircle, Eye, AlertCircle, Clock, Search, LogOut, ExternalLink, Lock, BarChart2, Radio, Star, X, Zap, Download, FileText, Activity, Database, RefreshCw, Server, Award, Mail, Send } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useAuth } from '../context/AuthContext';
@@ -37,6 +37,8 @@ export default function AdminDashboard() {
     const [adminNameModal, setAdminNameModal] = useState({ isOpen: false, pendingAction: null, actionLabel: '' });
     const [adminDisplayName, setAdminDisplayName] = useState(sessionStorage.getItem('adminDisplayName') || '');
     const [maintenanceDuration, setMaintenanceDuration] = useState('custom');
+    const [emailBroadcast, setEmailBroadcast] = useState({ target: 'all', targetEmail: '', subject: '', messageBody: '', announcementType: 'custom' });
+    const [sendingEmail, setSendingEmail] = useState(false);
 
     const requireAdminName = (actionLabel, callback) => {
         if (adminDisplayName) {
@@ -1210,6 +1212,82 @@ export default function AdminDashboard() {
                     </div>
                 </div>
                 
+                <div className="ops-card">
+                    <h3><Mail size={18} /> Email Broadcast</h3>
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        requireAdminName('Send Email Broadcast', async (adminName) => {
+                            if (emailBroadcast.target === 'all' && !window.confirm(`You are about to email ALL active users. This cannot be undone. Continue?`)) return;
+                            setSendingEmail(true);
+                            try {
+                                const token = localStorage.getItem('token');
+                                const res = await fetch(buildApiUrl('/api/admin/email-broadcast'), {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${token}`
+                                    },
+                                    body: JSON.stringify({ ...emailBroadcast, adminDisplayName: adminName })
+                                });
+                                const data = await res.json();
+                                if (res.ok) {
+                                    alert(`Email Broadcast Complete!\n✅ Sent: ${data.emailsSent}\n❌ Failed: ${data.failedEmails}`);
+                                    setEmailBroadcast({ target: 'all', targetEmail: '', subject: '', messageBody: '', announcementType: 'custom' });
+                                    fetchLogs();
+                                } else {
+                                    alert('Broadcast failed: ' + (data.message || 'Server error'));
+                                }
+                            } catch (err) {
+                                alert('Error: ' + err.message);
+                            } finally {
+                                setSendingEmail(false);
+                            }
+                        });
+                    }} className="event-form">
+                        <div className="form-group">
+                            <label>Target</label>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button type="button" className={`btn-filter ${emailBroadcast.target === 'all' ? 'active' : ''}`}
+                                    onClick={() => setEmailBroadcast({ ...emailBroadcast, target: 'all', targetEmail: '' })}>
+                                    All Users
+                                </button>
+                                <button type="button" className={`btn-filter ${emailBroadcast.target === 'single' ? 'active' : ''}`}
+                                    onClick={() => setEmailBroadcast({ ...emailBroadcast, target: 'single' })}>
+                                    Specific User
+                                </button>
+                            </div>
+                        </div>
+                        {emailBroadcast.target === 'single' && (
+                            <div className="form-group">
+                                <label>Email or Username</label>
+                                <input type="text" placeholder="Enter email or username..." value={emailBroadcast.targetEmail} onChange={e => setEmailBroadcast({ ...emailBroadcast, targetEmail: e.target.value })} required />
+                            </div>
+                        )}
+                        <div className="form-group">
+                            <label>Announcement Type</label>
+                            <select value={emailBroadcast.announcementType} onChange={e => setEmailBroadcast({ ...emailBroadcast, announcementType: e.target.value })} style={{ width: '100%', padding: '0.6rem', background: '#0d1117', border: '1px solid #30363d', color: 'white', borderRadius: '4px' }}>
+                                <option value="xp_boost">⚡ XP Boost</option>
+                                <option value="new_feature">🚀 New Feature</option>
+                                <option value="event">🎯 Special Event</option>
+                                <option value="maintenance">🔧 Maintenance Notice</option>
+                                <option value="warning">⚠️ Security Advisory</option>
+                                <option value="custom">📢 Custom Announcement</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>Subject</label>
+                            <input type="text" placeholder="e.g., 2x XP Multiplier is LIVE!" value={emailBroadcast.subject} onChange={e => setEmailBroadcast({ ...emailBroadcast, subject: e.target.value })} required />
+                        </div>
+                        <div className="form-group">
+                            <label>Message Body</label>
+                            <textarea placeholder="Write your announcement..." rows="4" value={emailBroadcast.messageBody} onChange={e => setEmailBroadcast({ ...emailBroadcast, messageBody: e.target.value })} required />
+                        </div>
+                        <button type="submit" className="btn-deploy" disabled={sendingEmail} style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                            <Send size={16} /> {sendingEmail ? 'Broadcasting...' : 'Send Email Broadcast'}
+                        </button>
+                    </form>
+                </div>
+
                 <div className="ops-card large" style={{ gridColumn: 'span 2' }}>
                     <div className="audit-log-section">
                         <h4>Mission Logs</h4>

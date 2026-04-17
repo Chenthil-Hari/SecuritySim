@@ -613,4 +613,96 @@ router.post('/vitals/recalculate-scores', authenticateToken, isAdmin, async (req
     }
 });
 
+// GET /api/admin/cron/weekly-debrief — Send weekly emails and reset counters
+router.get('/cron/weekly-debrief', async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        // Basic security check (in production, use a secure CRON_SECRET env variable)
+        if (authHeader !== `Bearer ${process.env.CRON_SECRET || 'fallback_cron_secret'}`) {
+             return res.status(401).json({ message: 'Unauthorized cron request' });
+        }
+
+        const users = await User.find({ weeklyXp: { $gt: 0 } });
+        let emailsSent = 0;
+
+        const { sendEmail, emailTemplates } = await import('../utils/mail.js');
+
+        for (const user of users) {
+            if (user.email) {
+                await sendEmail(
+                    user.email,
+                    '📊 Weekly Agent Debriefing',
+                    emailTemplates.weeklyDebriefEmail(user.username, user.weeklyXp, user.weeklyScenarios)
+                ).catch(err => console.error('Failed to send weekly debrief to:', user.email, err));
+                emailsSent++;
+            }
+            
+            // Reset counters
+            user.weeklyXp = 0;
+            user.weeklyScenarios = 0;
+            await user.save();
+        }
+
+        res.json({ message: 'Weekly debriefs processed successfully', usersProcessed: users.length, emailsSent });
+    } catch (error) {
+        console.error('Weekly Debrief Cron Error:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// POST /api/admin/email-broadcast — Send targeted or mass emails
+router.post('/email-broadcast', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { target, targetEmail, subject, messageBody, announcementType, adminDisplayName } = req.body;
+        // target: 'all' | 'single'
+
+        if (!subject || !messageBody) {
+            return res.status(400).json({ message: 'Subject and message body are required' });
+        }
+
+        const { sendEmail, emailTemplates } = await import('../utils/mail.js');
+
+        // Build the HTML from the announcement template
+        const emailHtml = emailTemplates.adminBroadcastEmail(subject, messageBody, announcementType);
+
+        let emailsSent = 0;
+        let failedEmails = 0;
+
+        if (target === 'all') {
+            const allUsers = await User.find({ isBanned: { $ne: true } }).select('email username');
+            for (const u of allUsers) {
+                if (u.email) {
+                    const result = await sendEmail(u.email, subject, emailHtml).catch(() => ({ success: false }));
+                    if (result.success) emailsSent++;
+                    else failedEmails++;
+                }
+            }
+        } else if (target === 'single') {
+            if (!targetEmail) return res.status(400).json({ message: 'Target email or username is required' });
+
+            // Try finding by email first, then by username
+            let targetUser = await User.findOne({ email: targetEmail.toLowerCase() });
+            if (!targetUser) {
+                targetUser = await User.findOne({ username: { $regex: new RegExp(`^${targetEmail}$`, 'i') } });
+            }
+            if (!targetUser) {
+                return res.status(404).json({ message: `No user found with email/username: ${targetEmail}` });
+            }
+
+            const result = await sendEmail(targetUser.email, subject, emailHtml).catch(() => ({ success: false }));
+            if (result.success) emailsSent++;
+            else failedEmails++;
+        } else {
+            return res.status(400).json({ message: 'Invalid target. Use "all" or "single".' });
+        }
+
+        await logAction(req.user, 'email_broadcast', `Sent "${subject}" to ${target === 'all' ? 'ALL users' : targetEmail} (${emailsSent} sent, ${failedEmails} failed)`, null, adminDisplayName);
+
+        res.json({ message: 'Email broadcast completed', emailsSent, failedEmails });
+    } catch (error) {
+        console.error('Email Broadcast Error:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 export default router;

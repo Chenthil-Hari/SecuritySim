@@ -2,6 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import Event from '../models/Event.js';
+import { sendEmail, emailTemplates } from '../utils/mail.js';
 
 const router = express.Router();
 
@@ -144,8 +145,21 @@ router.put('/sync', authMiddleware, async (req, res) => {
             const newLevel = Math.floor(user.xp / 100) + 1;
             if (newLevel > user.level) {
                 user.skillPoints += (newLevel - user.level);
+                
+                // Trigger achievement email for major level milestones
+                if (newLevel > user.level && newLevel % 5 === 0) {
+                    sendEmail(
+                        user.email,
+                        '🏆 Milestone Reached: Level ' + newLevel,
+                        emailTemplates.achievementEmail(user.username, 'Level ' + newLevel + ' Reached', 'You have demonstrated exceptional skill and dedication in the field. Keep pushing the limits of your potential.')
+                    ).catch(err => console.error('Failed to send level achievement email:', err));
+                }
+
                 user.level = newLevel;
             }
+
+            // Update weekly XP counter
+            user.weeklyXp += finalIncrement;
         }
 
         // Handle path-based increments (xp, level if passed)
@@ -158,6 +172,16 @@ router.put('/sync', authMiddleware, async (req, res) => {
             const isFinished = user.completedScenarios.some(s => s.scenarioId === newCompletedScenario.scenarioId);
             if (!isFinished) {
                 user.completedScenarios.push(newCompletedScenario);
+                user.weeklyScenarios += 1; // Increment weekly scenarios
+
+                // Achievement email for first 5 scenarios
+                if (user.completedScenarios.length === 5) {
+                    sendEmail(
+                        user.email,
+                        '🏆 Achievement Unlocked: Novice Investigator',
+                        emailTemplates.achievementEmail(user.username, 'Novice Investigator', 'You have successfully completed 5 cyber scenarios. Your journey as an elite cybersecurity agent has officially begun.')
+                    ).catch(err => console.error('Failed to send scenario achievement email:', err));
+                }
             }
         }
 

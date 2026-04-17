@@ -143,5 +143,71 @@ export const emailTemplates = {
             <hr style="border: 0; border-top: 1px solid #30363d; margin: 20px 0;">
             <p style="font-size: 12px; color: #8b949e; text-align: center;">Sent from HQ Command Center | SecuritySim 2026</p>
         </div>
-    `
+    `,
+    achievementEmail: (username, achievementName, detailText) => `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3;">
+            <h2 style="color: #00ff88; text-align: center;">🏆 Achievement Unlocked!</h2>
+            <p>Agent <strong>${username}</strong>,</p>
+            <div style="background: rgba(0, 255, 136, 0.1); border: 1px solid #00ff88; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+                <p style="margin: 0; font-size: 16px; color: #00ff88;">New Milestone Reached</p>
+                <p style="margin: 10px 0 0; font-size: 22px; font-weight: 800; color: #ffffff;">${achievementName}</p>
+            </div>
+            <p>${detailText}</p>
+            <p style="font-size: 14px; color: #8b949e;">Head back to HQ to view your updated profile and tackle your next objective.</p>
+            <hr style="border: 0; border-top: 1px solid #30363d; margin: 20px 0;">
+            <p style="font-size: 12px; color: #8b949e; text-align: center;">Sent from HQ Command Center | SecuritySim 2026</p>
+        </div>
+    `,
+    weeklyDebriefEmail: (username, weeklyXp, weeklyScenarios) => `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3;">
+            <h2 style="color: #ffbd2e; text-align: center;">📊 Weekly Agent Debriefing</h2>
+            <p>Agent <strong>${username}</strong>,</p>
+            <p>Here is your intelligence report for the past 7 days of field operations:</p>
+            
+            <div style="background: rgba(255, 189, 46, 0.1); border: 1px solid #ffbd2e; border-radius: 8px; padding: 20px; margin: 20px 0; display: flex; justify-content: space-around;">
+                <div style="text-align: center;">
+                    <div style="font-size: 28px; font-weight: 800; color: #00ff88;">+${weeklyXp}</div>
+                    <div style="font-size: 12px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px;">XP Earned</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 28px; font-weight: 800; color: #90caf9;">${weeklyScenarios}</div>
+                    <div style="font-size: 12px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px;">Scenarios Thwarted</div>
+                </div>
+            </div>
+
+            <p style="font-size: 14px; color: #8b949e; text-align: center;">The threat landscape is constantly evolving. Keep your skills sharp for next week's challenges.</p>
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}" style="background: #30363d; color: white; padding: 10px 20px; border-radius: 4px; text-decoration: none; font-weight: 600;">Return to Base</a>
+            </div>
+            <hr style="border: 0; border-top: 1px solid #30363d; margin: 20px 0;">
+            <p style="font-size: 12px; color: #8b949e; text-align: center;">Sent from HQ Command Center | SecuritySim 2026</p>
+        </div>
+    `,
+    adminBroadcastEmail: (subject, messageBody, announcementType) => {
+        const typeConfig = {
+            xp_boost:    { icon: '⚡', color: '#00ff88', label: 'XP BOOST ACTIVE' },
+            new_feature: { icon: '🚀', color: '#00f0ff', label: 'NEW FEATURE' },
+            maintenance: { icon: '🔧', color: '#ffbd2e', label: 'MAINTENANCE NOTICE' },
+            warning:     { icon: '⚠️', color: '#ff4757', label: 'SECURITY ADVISORY' },
+            event:       { icon: '🎯', color: '#a855f7', label: 'SPECIAL EVENT' },
+            custom:      { icon: '📢', color: '#90caf9', label: 'HQ ANNOUNCEMENT' }
+        };
+        const config = typeConfig[announcementType] || typeConfig.custom;
+        return `
+            <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3;">
+                <div style="text-align: center; margin-bottom: 12px;">
+                    <span style="display: inline-block; background: ${config.color}22; color: ${config.color}; padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border: 1px solid ${config.color}44;">${config.icon} ${config.label}</span>
+                </div>
+                <h2 style="color: ${config.color}; text-align: center; margin: 8px 0 16px;">${subject}</h2>
+                <div style="background: rgba(48, 54, 61, 0.3); border-left: 4px solid ${config.color}; padding: 16px; margin: 20px 0; border-radius: 0 8px 8px 0; line-height: 1.7;">
+                    ${messageBody.replace(/\\n/g, '<br>')}
+                </div>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}" style="background: ${config.color}; color: #0d1117; padding: 10px 24px; border-radius: 4px; text-decoration: none; font-weight: 700; text-transform: uppercase; font-size: 13px;">Open SecuritySim</a>
+                </div>
+                <hr style="border: 0; border-top: 1px solid #30363d; margin: 20px 0;">
+                <p style="font-size: 12px; color: #8b949e; text-align: center;">Sent from HQ Command Center | SecuritySim 2026</p>
+            </div>
+        `;
+    }
 };
