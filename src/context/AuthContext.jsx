@@ -55,7 +55,12 @@ export const AuthProvider = ({ children }) => {
                         console.log("[Auth] Successfully synced with MongoDB profile.");
                     } else {
                         const errorData = await response.json().catch(() => ({}));
-                        console.error("Failed to sync user with backend:", errorData.message || response.statusText);
+                        const errorMsg = errorData.message || response.statusText;
+                        console.error("Failed to sync user with backend:", errorMsg);
+                        // Only alert on production to help debug
+                        if (window.location.hostname !== 'localhost') {
+                            alert("Critical Auth Sync Error: " + errorMsg + "\nCheck Vercel Logs for details.");
+                        }
                         setUser(null);
                     }
                 } catch (err) {
