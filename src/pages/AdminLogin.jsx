@@ -28,23 +28,6 @@ export default function AdminLogin() {
                     routing="path" 
                     path="/admin" 
                     forceRedirectUrl="/admin/dashboard"
-                    appearance={{
-                        elements: {
-                            rootBox: "clerk-theme-dark",
-                            card: { backgroundColor: '#0d1117', border: '1px solid #30363d' },
-                            headerTitle: { color: '#e6edf3' },
-                            headerSubtitle: { color: '#8b949e' },
-                            socialButtonsBlockButton: { color: '#e6edf3', border: '1px solid #30363d' },
-                            socialButtonsBlockButtonText: { color: '#e6edf3' },
-                            dividerLine: { background: '#30363d' },
-                            dividerText: { color: '#8b949e' },
-                            formFieldLabel: { color: '#c9d1d9' },
-                            formFieldInput: { backgroundColor: '#161b22', border: '1px solid #30363d', color: '#fff' },
-                            formButtonPrimary: { backgroundColor: '#00f0ff', color: '#0d1117' },
-                            footerActionText: { color: '#8b949e' },
-                            footerActionLink: { color: '#00f0ff' }
-                        }
-                    }}
                 />
             </div>
         </div>
