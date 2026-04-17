@@ -43,8 +43,10 @@ export const AuthProvider = ({ children }) => {
                         
                         setUser(mongoUser);
                         localStorage.setItem('token', token); // Store token for other API calls to use
+                        console.log("[Auth] Successfully synced with MongoDB profile.");
                     } else {
-                        console.error("Failed to sync user with backend");
+                        const errorData = await response.json().catch(() => ({}));
+                        console.error("Failed to sync user with backend:", errorData.message || response.statusText);
                         setUser(null);
                     }
                 } catch (err) {

@@ -348,6 +348,7 @@ router.post('/sync', async (req, res) => {
             if (user) {
                 // Link existing account to Clerk
                 user.clerkId = clerkId;
+                user.isVerified = true;
                 if (!user.profilePhoto && profilePhoto) user.profilePhoto = profilePhoto;
                 await user.save();
                 console.log(`[Auth] Migrated existing user ${user.username} to Clerk.`);
