@@ -51,6 +51,33 @@ export const sendEmail = async (to, subject, html) => {
 };
 
 /**
+ * Send an email with file attachments (used for certificate PDFs)
+ * @param {string} to - Recipient email
+ * @param {string} subject - Email subject
+ * @param {string} html - HTML content of the email
+ * @param {Array<{filename: string, content: Buffer, contentType: string}>} attachments - File attachments
+ */
+export const sendEmailWithAttachment = async (to, subject, html, attachments = []) => {
+    console.log(`📡 Attempting to send email with attachment [${subject}] to: ${to}...`);
+    try {
+        const mailOptions = {
+            from: `"SecuritySim Headquarters" <${process.env.EMAIL_USER || 'info@hari07.tech'}>`,
+            to,
+            subject,
+            html,
+            attachments
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`📧 Email with attachment sent to ${to}: ${info.messageId}`);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error('❌ Mail Service Error (attachment):', error);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
  * Templates for consistent branding
  */
 export const emailTemplates = {
@@ -102,5 +129,19 @@ export const emailTemplates = {
                 <p style="font-size: 12px; color: #8b949e; text-align: center;">Sent from HQ Command Center | SecuritySim 2026</p>
             </div>
         `;
-    }
+    },
+    certificateEmail: (username, scenarioTitle) => `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3;">
+            <h2 style="color: #00f0ff; text-align: center;">🎓 Mission Certification Issued</h2>
+            <p>Congratulations, Agent <strong>${username}</strong>!</p>
+            <div style="background: rgba(0, 240, 255, 0.1); border: 1px solid #00f0ff; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+                <p style="margin: 0; font-size: 16px; color: #00f0ff;">You have successfully completed</p>
+                <p style="margin: 10px 0 0; font-size: 22px; font-weight: 800; color: #ffffff;">${scenarioTitle}</p>
+            </div>
+            <p>Your Certificate of Completion is attached to this email as a PDF. You can download, print, or share it as proof of your cybersecurity expertise.</p>
+            <p style="font-size: 14px; color: #8b949e;">Keep honing your skills — the digital battlefield never sleeps.</p>
+            <hr style="border: 0; border-top: 1px solid #30363d; margin: 20px 0;">
+            <p style="font-size: 12px; color: #8b949e; text-align: center;">Sent from HQ Command Center | SecuritySim 2026</p>
+        </div>
+    `
 };

@@ -4,9 +4,11 @@ import {
     Folder, File, FileText, FileImage, FileCode, FileArchive,
     ArrowLeft, HardDrive, Clock, AlertTriangle, Shield, ShieldAlert,
     ChevronRight, RotateCcw, Zap, CheckCircle, XCircle, Skull,
-    Monitor, Search, Ban
+    Monitor, Search, Ban, Download, Mail
 } from 'lucide-react';
 import { useGame, useGameDispatch } from '../context/GameContext';
+import { useAuth } from '../context/AuthContext';
+import { downloadCertificate, emailCertificate } from '../utils/CertificateGenerator';
 import './ForensicsGame.css';
 
 /* ====================================================
@@ -282,7 +284,10 @@ export default function ForensicsGame() {
     const [scanAnimation, setScanAnimation] = useState(null);
     const [showHint, setShowHint] = useState(null);
     const [guidance, setGuidance] = useState(null); // Educational guidance for clean files
+    const [certStatus, setCertStatus] = useState(''); // '' | 'sending' | 'sent' | 'error'
+    const [downloadingCert, setDownloadingCert] = useState(false);
     const timerRef = useRef(null);
+    const { user } = useAuth();
 
     // Get current directory node
     const getCurrentNode = useCallback(() => {
@@ -326,6 +331,12 @@ export default function ForensicsGame() {
 
             // Scenario system and COMPLETE_SCENARIO dispatch have been removed.
             // Local state updates for XP would go here if converted to a standalone game.
+
+            // Send certificate email on success
+            setCertStatus('sending');
+            emailCertificate({ scenarioTitle: selectedMission.title })
+                .then(result => setCertStatus(result.success ? 'sent' : 'error'))
+                .catch(() => setCertStatus('error'));
         }
     }, [quarantined, gameState, selectedMission]);
 
@@ -338,6 +349,8 @@ export default function ForensicsGame() {
         setSelectedFile(null);
         setShowHint(null);
         setGuidance(null);
+        setCertStatus('');
+        setDownloadingCert(false);
         setGameState('playing');
     };
 
@@ -527,6 +540,33 @@ export default function ForensicsGame() {
                     </div>
 
                     <div className="result-actions">
+                        {isSuccess && (
+                            <button
+                                className="btn-primary"
+                                disabled={downloadingCert}
+                                onClick={async () => {
+                                    if (!user) return;
+                                    setDownloadingCert(true);
+                                    try {
+                                        const completionDate = new Date().toLocaleDateString('en-US', {
+                                            year: 'numeric', month: 'long', day: 'numeric'
+                                        });
+                                        await downloadCertificate({
+                                            userName: user.username,
+                                            scenarioTitle: selectedMission.title,
+                                            completionDate
+                                        });
+                                    } catch (err) {
+                                        console.error('Certificate download error:', err);
+                                    } finally {
+                                        setDownloadingCert(false);
+                                    }
+                                }}
+                                style={{ backgroundColor: 'rgba(201, 168, 76, 0.2)', border: '1px solid #c9a84c', color: '#c9a84c' }}
+                            >
+                                <Download size={14} /> {downloadingCert ? 'Generating...' : 'Download Certificate'}
+                            </button>
+                        )}
                         <button className="btn-primary" onClick={() => startMission(selectedMission)}>
                             <RotateCcw size={14} /> Try Again
                         </button>
@@ -534,6 +574,21 @@ export default function ForensicsGame() {
                             <ArrowLeft size={14} /> Back to Missions
                         </button>
                     </div>
+                    {isSuccess && certStatus && (
+                        <div style={{ textAlign: 'center', marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                            {certStatus === 'sending' && (
+                                <span style={{ color: '#90caf9' }}>
+                                    <Mail size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Sending certificate to your email...
+                                </span>
+                            )}
+                            {certStatus === 'sent' && (
+                                <span style={{ color: '#00ff88' }}>📧 Certificate sent to your email!</span>
+                            )}
+                            {certStatus === 'error' && (
+                                <span style={{ color: '#ff4757' }}>⚠️ Email failed. Download the certificate above.</span>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         );

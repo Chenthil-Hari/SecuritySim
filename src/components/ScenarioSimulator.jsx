@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Terminal, ShieldAlert, Cpu, Activity, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, Terminal, ShieldAlert, Cpu, Activity, RefreshCw, CheckCircle2, XCircle, Download, Mail } from 'lucide-react';
 import './ScenarioSimulator.css';
 import { buildApiUrl } from '../utils/api';
+import { downloadCertificate, emailCertificate } from '../utils/CertificateGenerator';
 
 import { useGameDispatch } from '../context/GameContext';
 import { useAuth } from '../context/AuthContext';
@@ -13,6 +14,8 @@ export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
   const [displayedText, setDisplayedText] = useState("");
   const [currentScore, setCurrentScore] = useState(0);
   const [scoreAwarded, setScoreAwarded] = useState(false);
+  const [certStatus, setCertStatus] = useState(''); // '' | 'sending' | 'sent' | 'error'
+  const [downloadingCert, setDownloadingCert] = useState(false);
   
   const bottomRef = useRef(null);
   const dispatch = useGameDispatch();
@@ -88,6 +91,16 @@ export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
           })
           .catch(err => console.warn('Backend sync failed:', err));
         }
+
+        // Send certificate email on successful completion
+        if (currentNode.isSuccess) {
+          setCertStatus('sending');
+          emailCertificate({ scenarioTitle: scenario.title })
+            .then(result => {
+              setCertStatus(result.success ? 'sent' : 'error');
+            })
+            .catch(() => setCertStatus('error'));
+        }
       }
       
       setScoreAwarded(true);
@@ -119,6 +132,27 @@ export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
     setDisplayedText("");
     setCurrentScore(0);
     setScoreAwarded(false);
+    setCertStatus('');
+    setDownloadingCert(false);
+  };
+
+  const handleDownloadCertificate = async () => {
+    if (!user) return;
+    setDownloadingCert(true);
+    try {
+      const completionDate = new Date().toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+      await downloadCertificate({
+        userName: user.username,
+        scenarioTitle: scenario.title,
+        completionDate
+      });
+    } catch (err) {
+      console.error('Certificate download error:', err);
+    } finally {
+      setDownloadingCert(false);
+    }
   };
 
   if (!currentNode) {
@@ -226,6 +260,32 @@ export default function ScenarioSimulator({ scenario, isReplay, onClose }) {
                  <strong>After Action Report:</strong><br/>
                  {currentNode.explanation}
                </div>
+
+               {/* Certificate actions — only on success & first-time */}
+               {currentNode.isSuccess && !isReplay && (
+                 <div style={{ width: '100%', marginBottom: '0.5rem' }}>
+                   <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                     <button onClick={handleDownloadCertificate} disabled={downloadingCert} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: 'rgba(201, 168, 76, 0.15)', border: '1px solid #c9a84c', color: '#c9a84c', borderRadius: '4px', cursor: downloadingCert ? 'wait' : 'pointer', fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '0.95rem' }}>
+                       <Download size={18} /> {downloadingCert ? 'Generating...' : 'Download Certificate'}
+                     </button>
+                   </div>
+                   {certStatus === 'sending' && (
+                     <p style={{ textAlign: 'center', color: '#90caf9', fontSize: '0.85rem', marginTop: '0.5rem', animation: 'pulse 1.5s infinite' }}>
+                       <Mail size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Sending certificate to your email...
+                     </p>
+                   )}
+                   {certStatus === 'sent' && (
+                     <p style={{ textAlign: 'center', color: '#00ff88', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+                       📧 Certificate sent to your email!
+                     </p>
+                   )}
+                   {certStatus === 'error' && (
+                     <p style={{ textAlign: 'center', color: '#ff4757', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+                       ⚠️ Could not send email. You can still download the certificate above.
+                     </p>
+                   )}
+                 </div>
+               )}
 
                <div className="wrap-up-actions" style={{ display: 'flex', gap: '1rem', width: '100%', justifyContent: 'center', marginTop: '1rem' }}>
                  <button className="back-catalog-btn" onClick={onClose} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: 'rgba(144, 202, 249, 0.1)', border: '1px solid #90caf9', color: '#90caf9', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Rajdhani, sans-serif', fontWeight: 600 }}>
