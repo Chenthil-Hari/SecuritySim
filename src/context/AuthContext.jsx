@@ -18,6 +18,15 @@ export const AuthProvider = ({ children }) => {
             if (!isClerkLoaded) return;
             
             if (isSignedIn && clerkUser) {
+                // Set a partial user immediately so the UI knows we are logged in
+                setUser(prev => prev || {
+                    id: clerkUser.id,
+                    username: clerkUser.username || clerkUser.primaryEmailAddress?.emailAddress.split('@')[0],
+                    email: clerkUser.primaryEmailAddress?.emailAddress,
+                    role: 'user', // Default until sync completes
+                    isVerified: true
+                });
+
                 try {
                     const token = await getToken();
                     // Sync the Clerk user with our MongoDB backend
