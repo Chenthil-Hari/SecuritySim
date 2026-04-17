@@ -6,6 +6,7 @@ import AuditLog from '../models/AuditLog.js';
 import SystemSetting from '../models/SystemSetting.js';
 import Event from '../models/Event.js';
 import NewsItem from '../models/NewsItem.js';
+import SupportTicket from '../models/SupportTicket.js';
 import { authenticateToken, isAdmin } from '../middleware/auth.js';
 import { logAction } from '../utils/logger.js';
 
@@ -701,6 +702,52 @@ router.post('/email-broadcast', authenticateToken, isAdmin, async (req, res) => 
         res.json({ message: 'Email broadcast completed', emailsSent, failedEmails });
     } catch (error) {
         console.error('Email Broadcast Error:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// GET /api/admin/messages — Get all support tickets
+router.get('/messages', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const tickets = await SupportTicket.find()
+            .populate('user', 'username email')
+            .sort({ createdAt: -1 });
+        res.json(tickets);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// POST /api/admin/messages/:id/reply — Reply to a support ticket
+router.post('/messages/:id/reply', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { reply, adminDisplayName } = req.body;
+        if (!reply) return res.status(400).json({ message: 'Reply message is required' });
+
+        const ticket = await SupportTicket.findById(req.params.id).populate('user', 'username email');
+        if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
+        
+        if (ticket.status === 'replied') {
+            return res.status(400).json({ message: 'Ticket has already been replied to' });
+        }
+
+        ticket.reply = reply;
+        ticket.status = 'replied';
+        ticket.repliedBy = adminDisplayName || req.user.username;
+        ticket.repliedAt = new Date();
+        await ticket.save();
+
+        // Send Email
+        if (ticket.user && ticket.user.email) {
+            const { sendEmail, emailTemplates } = await import('../utils/mail.js');
+            const emailHtml = emailTemplates.supportReplyEmail(ticket.user.username, ticket.message, reply, adminDisplayName);
+            await sendEmail(ticket.user.email, `RE: ${ticket.subject}`, emailHtml).catch(err => console.error("Support Email Send Error:", err));
+        }
+
+        await logAction(req.user, 'support_reply', `Replied to ticket from ${ticket.user?.username || 'Unknown'}`, ticket._id, adminDisplayName);
+
+        res.json({ message: 'Reply sent successfully', ticket });
+    } catch (error) {
         res.status(500).json({ message: error.message });
     }
 });

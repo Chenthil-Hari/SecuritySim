@@ -209,5 +209,25 @@ export const emailTemplates = {
                 <p style="font-size: 12px; color: #8b949e; text-align: center;">Sent from HQ Command Center | SecuritySim 2026</p>
             </div>
         `;
-    }
+    },
+    supportReplyEmail: (username, originalMessage, adminReply, adminName) => `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3;">
+            <h2 style="color: #00f0ff; text-align: center;">🛡️ HQ Support Response</h2>
+            <p>Agent <strong>${username}</strong>,</p>
+            <p>Headquarters has reviewed your recent inquiry. Please find the response below:</p>
+            
+            <div style="background: rgba(0, 240, 255, 0.05); border-left: 3px solid #00f0ff; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0;">
+                <p style="margin: 0; font-size: 12px; color: #8b949e; text-transform: uppercase;">Response from ${adminName || 'Admin'}</p>
+                <p style="margin: 10px 0 0; line-height: 1.6;">${adminReply.replace(/\n/g, '<br>')}</p>
+            </div>
+
+            <div style="margin-top: 30px; padding: 15px; background: #161b22; border: 1px solid #30363d; border-radius: 4px;">
+                <p style="margin: 0; font-size: 12px; color: #8b949e;">Your Original Message:</p>
+                <p style="margin: 10px 0 0; font-size: 13px; color: #c9d1d9; font-style: italic;">"${originalMessage}"</p>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #30363d; margin: 20px 0;">
+            <p style="font-size: 12px; color: #8b949e; text-align: center;">Sent from HQ Command Center | SecuritySim 2026</p>
+        </div>
+    `
 };

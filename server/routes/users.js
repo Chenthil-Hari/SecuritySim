@@ -1,6 +1,7 @@
 import express from 'express';
 import User from '../models/User.js';
 import Team from '../models/Team.js';
+import SupportTicket from '../models/SupportTicket.js';
 import { authenticateToken, isAdmin } from '../middleware/auth.js';
 import bcrypt from 'bcryptjs';
 import { logAction } from '../utils/logger.js';
@@ -121,6 +122,27 @@ router.patch('/admin/:id/leaderboard-toggle', authenticateToken, isAdmin, async 
             message: `User ${user.showInLeaderboard ? 'restored to' : 'removed from'} leaderboard successfully`, 
             showInLeaderboard: user.showInLeaderboard 
         });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Submit a support ticket (Authenticated Users)
+router.post('/contact', authenticateToken, async (req, res) => {
+    try {
+        const { subject, message } = req.body;
+        if (!subject || !message) {
+            return res.status(400).json({ message: 'Subject and message are required' });
+        }
+
+        const ticket = new SupportTicket({
+            user: req.user.id,
+            subject,
+            message
+        });
+
+        await ticket.save();
+        res.status(201).json({ message: 'Message sent successfully to HQ.' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

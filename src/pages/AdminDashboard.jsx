@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, CheckCircle, XCircle, Eye, AlertCircle, Clock, Search, LogOut, ExternalLink, Lock, BarChart2, Radio, Star, X, Zap, Download, FileText, Activity, Database, RefreshCw, Server, Award, Mail, Send } from 'lucide-react';
+import { Shield, CheckCircle, XCircle, Eye, AlertCircle, Clock, Search, LogOut, ExternalLink, Lock, BarChart2, Radio, Star, X, Zap, Download, FileText, Activity, Database, RefreshCw, Server, Award, Mail, Send, MessageSquare, Inbox } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useAuth } from '../context/AuthContext';
@@ -39,6 +39,8 @@ export default function AdminDashboard() {
     const [maintenanceDuration, setMaintenanceDuration] = useState('custom');
     const [emailBroadcast, setEmailBroadcast] = useState({ target: 'all', targetEmail: '', subject: '', messageBody: '', announcementType: 'custom' });
     const [sendingEmail, setSendingEmail] = useState(false);
+    const [supportMessages, setSupportMessages] = useState([]);
+    const [replyModal, setReplyModal] = useState({ isOpen: false, ticketId: null, replyText: '', originalMessage: '', userEmail: '' });
 
     const requireAdminName = (actionLabel, callback) => {
         if (adminDisplayName) {
@@ -107,6 +109,49 @@ export default function AdminDashboard() {
         }
     };
 
+    const fetchVitals = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/system/vitals'), { headers: { 'Authorization': `Bearer ${token}` } });
+            if (res.ok) setVitals(await res.json());
+        } catch (err) { console.error("Failed to fetch vitals", err); }
+    };
+
+    const fetchSupportMessages = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(buildApiUrl('/api/admin/messages'), { headers: { 'Authorization': `Bearer ${token}` } });
+            if (res.ok) {
+                const data = await res.json();
+                setSupportMessages(data);
+            }
+        } catch (err) { console.error("Failed to fetch support messages", err); }
+    };
+
+    const handleReplyToMessage = async (ticketId, replyText) => {
+        requireAdminName('Send Support Reply', async (adminName) => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(buildApiUrl(`/api/admin/messages/${ticketId}/reply`), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ reply: replyText, adminDisplayName: adminName })
+                });
+                
+                if (res.ok) {
+                    alert('Reply sent successfully!');
+                    setReplyModal({ isOpen: false, ticketId: null, replyText: '', originalMessage: '', userEmail: '' });
+                    fetchSupportMessages();
+                } else {
+                    const data = await res.json();
+                    alert(data.message || 'Failed to send reply');
+                }
+            } catch (err) {
+                alert('Error sending reply: ' + err.message);
+            }
+        });
+    };
+
     const fetchAnalytics = async () => {
         setLoading(true);
         try {
@@ -168,21 +213,6 @@ export default function AdminDashboard() {
         } catch (err) {
             console.error("Log Error:", err);
             setError("Mission Log link offline.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchVitals = async () => {
-        setLoading(true);
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(buildApiUrl('/api/admin/vitals'), {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) setVitals(await res.json());
-        } catch (err) {
-            console.error("Vitals Error:", err);
         } finally {
             setLoading(false);
         }
@@ -888,6 +918,7 @@ export default function AdminDashboard() {
                     {activeTab === 'operations' && 'Mission Operations'}
                     {activeTab === 'evidence' && 'Evidence Locker'}
                     {activeTab === 'vitals' && 'System Health Control'}
+                    {activeTab === 'support' && 'Support Inbox'}
                 </h1>
                 <p>
                     {activeTab === 'moderation' && `Total pending scenarios: ${stats.pending} | Live: ${liveScenarios.length}`}
@@ -896,6 +927,7 @@ export default function AdminDashboard() {
                     {activeTab === 'operations' && 'Manage global XP boosts and time-limited operations.'}
                     {activeTab === 'evidence' && 'Review uploaded visual assets from users and scenarios.'}
                     {activeTab === 'vitals' && 'Monitor core infrastructure and maintain data integrity.'}
+                    {activeTab === 'support' && `Total active tickets: ${supportMessages.length}`}
                 </p>
             </div>
             {activeTab === 'users' && (
@@ -916,6 +948,7 @@ export default function AdminDashboard() {
                 else if (activeTab === 'operations') fetchLogs();
                 else if (activeTab === 'evidence') fetchAssets();
                 else if (activeTab === 'vitals') fetchVitals();
+                else if (activeTab === 'support') fetchSupportMessages();
             }}>Refresh</button>
         </header>
     );
@@ -1384,6 +1417,92 @@ export default function AdminDashboard() {
         </div>
     );
 
+    const renderSupportInbox = () => (
+        <div className="admin-support animate-fade-in">
+            <div className="support-header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3><Inbox size={18} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} /> User Inquiries</h3>
+                <span className="badge" style={{ background: 'rgba(0, 240, 255, 0.1)', color: '#00f0ff', padding: '4px 12px', borderRadius: '20px', fontSize: '0.85rem' }}>
+                    {supportMessages.filter(m => m.status === 'open').length} Open Tickets
+                </span>
+            </div>
+
+            {supportMessages.length === 0 ? (
+                <div className="queue-empty" style={{ textAlign: 'center', padding: '3rem', background: '#0d1117', borderRadius: '8px', border: '1px solid #30363d' }}>
+                    <CheckCircle size={48} className="text-muted" style={{ margin: '0 auto 1rem' }} />
+                    <h2 style={{ color: '#8b949e' }}>Inbox is clear</h2>
+                </div>
+            ) : (
+                <div className="support-list" style={{ display: 'grid', gap: '1rem' }}>
+                    {supportMessages.map(msg => (
+                        <div key={msg._id} className="support-card" style={{ background: '#0d1117', border: '1px solid #30363d', borderRadius: '8px', padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+                            {msg.status === 'open' && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#ffbd2e' }} />}
+                            {msg.status === 'replied' && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#00ff88' }} />}
+                            
+                            <div className="support-card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                <div>
+                                    <h4 style={{ margin: '0 0 0.25rem', color: '#c9d1d9' }}>{msg.subject}</h4>
+                                    <span style={{ fontSize: '0.85rem', color: '#8b949e' }}>From: <strong>{msg.user?.username || 'Unknown'}</strong> ({msg.user?.email || 'No email'})</span>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                    <span style={{ fontSize: '0.8rem', color: '#8b949e', display: 'block' }}>{new Date(msg.createdAt).toLocaleString()}</span>
+                                    <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '12px', textTransform: 'uppercase', background: msg.status === 'open' ? 'rgba(255, 189, 46, 0.1)' : 'rgba(0, 255, 136, 0.1)', color: msg.status === 'open' ? '#ffbd2e' : '#00ff88' }}>
+                                        {msg.status}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div className="support-card-body" style={{ background: '#161b22', padding: '1rem', borderRadius: '4px', border: '1px solid #30363d', marginBottom: '1rem', fontSize: '0.95rem', color: '#e6edf3', whiteSpace: 'pre-wrap' }}>
+                                {msg.message}
+                            </div>
+
+                            {msg.status === 'replied' && (
+                                <div className="support-reply" style={{ background: 'rgba(0, 240, 255, 0.05)', padding: '1rem', borderRadius: '4px', borderLeft: '3px solid #00f0ff', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                                    <strong style={{ color: '#00f0ff', display: 'block', marginBottom: '0.5rem' }}>Replied by {msg.repliedBy} at {new Date(msg.repliedAt).toLocaleString()}:</strong>
+                                    {msg.reply}
+                                </div>
+                            )}
+
+                            <div className="support-card-footer" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                {msg.status === 'open' ? (
+                                    <button className="btn-primary" onClick={() => setReplyModal({ isOpen: true, ticketId: msg._id, replyText: '', originalMessage: msg.message, userEmail: msg.user?.email })} style={{ background: '#00f0ff', color: '#0d1117', padding: '0.5rem 1rem', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <MessageSquare size={16} /> Reply to User
+                                    </button>
+                                ) : null}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {replyModal.isOpen && (
+                <div className="review-overlay" onClick={() => setReplyModal({ ...replyModal, isOpen: false })}>
+                    <div className="review-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', width: '100%' }}>
+                        <div className="modal-header">
+                            <h2>Reply to Inquiry</h2>
+                            <button className="close-btn" onClick={() => setReplyModal({ ...replyModal, isOpen: false })}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            <div style={{ padding: '1rem', background: '#161b22', borderLeft: '3px solid #30363d', marginBottom: '1rem', fontSize: '0.9rem', color: '#8b949e', fontStyle: 'italic', maxHeight: '150px', overflowY: 'auto' }}>
+                                "{replyModal.originalMessage}"
+                            </div>
+                            <textarea 
+                                placeholder={`Write reply to ${replyModal.userEmail}...`} 
+                                value={replyModal.replyText} 
+                                onChange={e => setReplyModal({ ...replyModal, replyText: e.target.value })} 
+                                style={{ width: '100%', height: '150px', padding: '1rem', background: '#0d1117', border: '1px solid #30363d', color: 'white', borderRadius: '4px', resize: 'vertical' }} 
+                            />
+                            <p style={{ fontSize: '0.8rem', color: '#ffbd2e', marginTop: '0.5rem' }}>Note: This reply will be emailed directly to the user's inbox.</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn-view" onClick={() => setReplyModal({ ...replyModal, isOpen: false })}>Cancel</button>
+                            <button className="btn-approve" onClick={() => handleReplyToMessage(replyModal.ticketId, replyModal.replyText)} disabled={!replyModal.replyText.trim()}>Send Reply</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <div className="admin-dashboard-page">
             <aside className="admin-sidebar">
@@ -1394,6 +1513,7 @@ export default function AdminDashboard() {
                     <button className={`nav-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}><Shield size={18} /> User Directory</button>
                     <button className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}><BarChart2 size={18} /> Analytics</button>
                     <button className={`nav-item ${activeTab === 'operations' ? 'active' : ''}`} onClick={() => setActiveTab('operations')}><Zap size={18} /> Global Operations</button>
+                    <button className={`nav-item ${activeTab === 'support' ? 'active' : ''}`} onClick={() => setActiveTab('support')}><MessageSquare size={18} /> Support Inbox</button>
                     <button className={`nav-item ${activeTab === 'vitals' ? 'active' : ''}`} onClick={() => setActiveTab('vitals')}><Activity size={18} /> System Health</button>
                 </nav>
                 <div className="sidebar-footer">
@@ -1411,6 +1531,7 @@ export default function AdminDashboard() {
                             {activeTab === 'users' && renderUsers()}
                             {activeTab === 'analytics' && renderAnalytics()}
                             {activeTab === 'operations' && renderOperations()}
+                            {activeTab === 'support' && renderSupportInbox()}
                             {activeTab === 'vitals' && renderVitals()}
                         </>
                     )}
