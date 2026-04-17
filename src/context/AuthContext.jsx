@@ -59,8 +59,10 @@ export const AuthProvider = ({ children }) => {
                         setUser(null);
                     }
                 } catch (err) {
-                    console.error("Error during Clerk -> MongoDB sync", err);
-                    setUser(null);
+                    console.error("[Auth] Error during Clerk -> MongoDB sync:", err);
+                    // Don't clear the partial user if we already have one, 
+                    // maybe it's just a temporary network issue
+                    if (!user) setUser(null);
                 }
             } else {
                 setUser(null);
