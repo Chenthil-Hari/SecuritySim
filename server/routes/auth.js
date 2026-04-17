@@ -327,4 +327,66 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
+// --- Clerk Synchronization Endpoint ---
+
+// POST /api/auth/sync
+router.post('/sync', async (req, res) => {
+    try {
+        const { clerkId, email, username, profilePhoto } = req.body;
+        
+        if (!clerkId || !email) {
+            return res.status(400).json({ message: 'Missing Clerk data' });
+        }
+
+        // 1. Try to find user by clerkId
+        let user = await User.findOne({ clerkId });
+
+        if (!user) {
+            // 2. If not found by clerkId, try to find by email (MIGRATION PATH)
+            user = await User.findOne({ email });
+            
+            if (user) {
+                // Link existing account to Clerk
+                user.clerkId = clerkId;
+                if (!user.profilePhoto && profilePhoto) user.profilePhoto = profilePhoto;
+                await user.save();
+                console.log(`[Auth] Migrated existing user ${user.username} to Clerk.`);
+            } else {
+                // 3. Completely new user
+                const baseUsername = username || email.split('@')[0];
+                let finalUsername = baseUsername;
+                
+                // Ensure unique username
+                let counter = 1;
+                while (await User.findOne({ username: finalUsername })) {
+                    finalUsername = `${baseUsername}${counter}`;
+                    counter++;
+                }
+
+                user = new User({
+                    username: finalUsername,
+                    email,
+                    clerkId,
+                    profilePhoto: profilePhoto || '',
+                    isVerified: true, // Clerk handles verification
+                    country: 'Global'
+                });
+                await user.save();
+                console.log(`[Auth] Created new user ${user.username} via Clerk.`);
+            }
+        } else {
+            // Optional: Update profile photo if it changed
+            if (profilePhoto && user.profilePhoto !== profilePhoto) {
+                user.profilePhoto = profilePhoto;
+                await user.save();
+            }
+        }
+
+        res.json({ message: 'User synchronized successfully', user });
+    } catch (error) {
+        console.error('Sync error:', error);
+        res.status(500).json({ message: 'Error synchronizing user', error: error.message });
+    }
+});
+
 export default router;

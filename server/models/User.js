@@ -8,6 +8,11 @@ const userSchema = new mongoose.Schema({
         trim: true,
         minlength: 3
     },
+    clerkId: {
+        type: String,
+        unique: true,
+        sparse: true // Allows multiple users without clerkId initially during migration
+    },
     email: {
         type: String,
         required: true,
@@ -18,8 +23,7 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
-        minlength: 6
+        required: false // Optional now because Clerk handles passwords
     },
     country: {
         type: String,

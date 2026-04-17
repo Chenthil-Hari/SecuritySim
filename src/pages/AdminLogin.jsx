@@ -1,88 +1,51 @@
-import { useState } from 'react';
+import { useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Lock, ArrowRight, AlertOctagon } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { SignIn } from '@clerk/clerk-react';
+import { Shield, Lock, ArrowLeft } from 'lucide-react';
 import './AdminLogin.css';
 
 export default function AdminLogin() {
     const navigate = useNavigate();
-    const { adminLogin } = useAuth();
-    const [credentials, setCredentials] = useState({ email: '', password: '' });
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-        setLoading(true);
-
-        const result = await adminLogin(credentials.email, credentials.password);
-        
-        if (result.success) {
-            navigate('/admin/dashboard');
-        } else {
-            setError(result.error || 'Login failed');
-            setLoading(false);
-        }
-    };
 
     return (
         <div className="admin-login-page">
-            <div className="admin-login-container animate-fade-in">
-                <div className="admin-logo">
-                    <div className="shield-icon">
-                        <Shield size={40} />
-                        <Lock size={18} className="lock-overlay" />
+            <button className="back-btn" onClick={() => navigate('/')} style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 10, background: 'none', border: 'none', color: '#8b949e', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ArrowLeft size={18} /> Back to Site
+            </button>
+            
+            <div className="admin-login-container animate-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
+                <div className="admin-logo" style={{ textAlign: 'center' }}>
+                    <div className="shield-icon" style={{ margin: '0 auto 1rem' }}>
+                        <Shield size={60} color="#00f0ff" />
+                        <Lock size={24} className="lock-overlay" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#0d1117' }} />
                     </div>
-                    <h1>SecuritySim<span>Admin</span></h1>
+                    <h1 style={{ fontSize: '2rem', color: '#e6edf3' }}>SecuritySim<span style={{ color: '#00f0ff' }}>Admin</span></h1>
+                    <p style={{ color: '#8b949e', marginTop: '0.5rem' }}>Authorized Personnel Only</p>
                 </div>
 
-                <div className="admin-card">
-                    <div className="card-header">
-                        <h2>Authorized Personnel Only</h2>
-                        <p>Accessing this terminal without permission is a violation of security protocols.</p>
-                    </div>
-
-                    <form onSubmit={handleSubmit}>
-                        {error && (
-                            <div className="admin-error">
-                                <AlertOctagon size={16} />
-                                <span>{error}</span>
-                            </div>
-                        )}
-
-                        <div className="admin-input-group">
-                            <label>Admin Email</label>
-                            <input 
-                                type="email" 
-                                required
-                                value={credentials.email}
-                                onChange={(e) => setCredentials({...credentials, email: e.target.value})}
-                                placeholder="name@securitysim.com"
-                            />
-                        </div>
-
-                        <div className="admin-input-group">
-                            <label>Secure Key</label>
-                            <input 
-                                type="password" 
-                                required
-                                value={credentials.password}
-                                onChange={(e) => setCredentials({...credentials, password: e.target.value})}
-                                placeholder="••••••••••••"
-                            />
-                        </div>
-
-                        <button type="submit" className="admin-submit-btn" disabled={loading}>
-                            {loading ? 'Verifying...' : <>Initialize Admin Session <ArrowRight size={18} /></>}
-                        </button>
-                    </form>
-                </div>
-
-                <div className="admin-footer">
-                    <button onClick={() => navigate('/')}>Return to Main Site</button>
-                    <span>System v2.4.0-moderation</span>
-                </div>
+                <SignIn 
+                    routing="path" 
+                    path="/admin" 
+                    forceRedirectUrl="/admin/dashboard"
+                    appearance={{
+                        elements: {
+                            rootBox: "clerk-theme-dark",
+                            card: { backgroundColor: '#0d1117', border: '1px solid #30363d' },
+                            headerTitle: { color: '#e6edf3' },
+                            headerSubtitle: { color: '#8b949e' },
+                            socialButtonsBlockButton: { color: '#e6edf3', border: '1px solid #30363d' },
+                            socialButtonsBlockButtonText: { color: '#e6edf3' },
+                            dividerLine: { background: '#30363d' },
+                            dividerText: { color: '#8b949e' },
+                            formFieldLabel: { color: '#c9d1d9' },
+                            formFieldInput: { backgroundColor: '#161b22', border: '1px solid #30363d', color: '#fff' },
+                            formButtonPrimary: { backgroundColor: '#00f0ff', color: '#0d1117' },
+                            footerActionText: { color: '#8b949e' },
+                            footerActionLink: { color: '#00f0ff' }
+                        }
+                    }}
+                />
             </div>
         </div>
     );

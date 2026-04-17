@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { clerkMiddleware } from '@clerk/express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import authRoutes from '../server/routes/auth.js';
@@ -41,6 +42,7 @@ app.set('userSockets', userSockets);
 // Make io accessible to routes
 app.set('io', io);
 
+app.use(clerkMiddleware());
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
