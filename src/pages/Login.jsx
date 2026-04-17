@@ -16,19 +16,16 @@ const localFadeUp = {
 
 const Login = () => {
     const navigate = useNavigate();
-    const videoRef = useRef(null);
-
-    useEffect(() => {
-        if (videoRef.current) {
-            videoRef.current.playbackRate = 1.0;
-        }
-    }, []);
 
     return (
-        <div className="auth-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', position: 'relative' }}>
-            <video ref={videoRef} autoPlay loop muted playsInline className="auth-video-bg">
-                <source src="/background.mp4" type="video/mp4" />
-            </video>
+        <div className="auth-container" style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            minHeight: '100vh', 
+            position: 'relative',
+            background: 'radial-gradient(circle at center, #1a1f2e 0%, #0d1117 100%)'
+        }}>
             <button className="back-btn auth-back-btn" onClick={() => navigate('/')} style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 10 }}>
                 <ArrowLeft size={18} /> Back to Home
             </button>
